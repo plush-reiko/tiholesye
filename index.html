@@ -1,4 +1,4 @@
-<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#0b0822"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Тихолесье"><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icon-180.png"><link rel="icon" type="image/png" sizes="192x192" href="icon-192.png"><style>:root{color-scheme:dark;background:#0b0822;padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style></head><body>
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"><meta name="theme-color" content="#0b0822"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Тихолесье"><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icon-180.png"><link rel="icon" type="image/png" sizes="192x192" href="icon-192.png"><style>:root{color-scheme:dark;background:#0b0822;padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style></head><body>
 <title>Тихолесье</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <style>
@@ -61,7 +61,7 @@ h1, h2, h3, p, dl, dd, ul { margin: 0; }
 .links { display: flex; justify-content: space-around; }
 .iconbtn { width: 44px; height: 44px; margin-left: -11px; display: grid; place-items: center; padding: 0; border: 0; background: none; color: var(--ink); font-size: 22px; }
 .iconbtn:active { opacity: .6; }
-button:focus-visible, .tog input:focus-visible, .field:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+button:focus-visible, .tog input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .coins { display: inline-flex; align-items: center; gap: 5px; font-weight: 700; font-size: 16px; font-variant-numeric: tabular-nums; }
 .coins .ic { color: var(--firefly); font-size: 15px; }
 .note { font-size: 13px; color: var(--dim); text-align: center; text-wrap: balance; }
@@ -120,7 +120,7 @@ button:focus-visible, .tog input:focus-visible, .field:focus-visible { outline: 
 
 /* ---------- поверх сцены: итог, пауза, второе дыхание ---------- */
 .veil { justify-content: center; background: rgba(11, 8, 34, .92); }
-.center { display: grid; gap: 18px; width: 100%; max-width: 340px; max-height: 100%; margin-inline: auto; overflow-y: auto; touch-action: pan-y; animation: rise .3s ease-out both; }
+.center { display: grid; gap: 18px; width: 100%; max-width: 352px; max-height: 100%; margin-inline: auto; padding-inline: 6px; overflow-y: auto; touch-action: pan-y; animation: rise .3s ease-out both; }   /* поля по 6px — место для обводки фокуса: overflow обрезает всё, что за краем */
 .center h2 { font-weight: 700; font-size: 22px; text-align: center; }
 .bigh { display: flex; justify-content: center; align-items: baseline; gap: 6px; margin-top: -8px; }
 .bigh b { font-size: 84px; font-weight: 300; line-height: 1; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
@@ -166,7 +166,7 @@ button:focus-visible, .tog input:focus-visible, .field:focus-visible { outline: 
 .sheet { gap: 14px; background: var(--night); animation: sheetIn .2s ease-out both; }
 .shead { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; align-items: center; min-height: 44px; }
 .shead h2 { font-weight: 700; font-size: 20px; }
-.scroll { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; touch-action: pan-y; display: grid; gap: 14px; align-content: start; padding-bottom: 8px; }
+.scroll { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; touch-action: pan-y; display: grid; gap: 14px; align-content: start; padding-bottom: 8px; margin-inline: -6px; padding-inline: 6px; }   /* место для обводки фокуса у элементов во всю ширину */
 .scroll h3 { margin-top: 14px; font-size: 11px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: var(--dim); }
 .scroll .note { text-align: left; }
 .scroll .tabs { justify-content: flex-start; }
@@ -200,9 +200,11 @@ button:focus-visible, .tog input:focus-visible, .field:focus-visible { outline: 
 .lrow .lic { justify-self: center; color: var(--accent); font-size: 22px; }
 .lrow strong { display: block; font-weight: 700; font-size: 15px; }
 .lrow span { font-size: 13px; color: var(--dim); }
-.field { width: 100%; min-width: 0; padding: 10px 0; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; background: none; color: var(--ink); font: 500 14px/1.3 var(--body); user-select: text; -webkit-user-select: text; resize: none; }
+/* поля ввода: шрифт не меньше 16px, иначе iOS увеличивает страницу при фокусе и обратно не возвращает */
+.field { width: 100%; min-width: 0; padding: 10px 0; border: 0; border-bottom: 2px solid var(--line); border-radius: 0; background: none; color: var(--ink); font: 500 17px/1.3 var(--body); user-select: text; -webkit-user-select: text; resize: none; }
+.field:focus-visible { outline: none; border-bottom-color: var(--accent); }      /* фокус — цветная нижняя линия, а не рамка */
 .field::placeholder { color: var(--dim); }
-textarea.field { font-size: 12px; word-break: break-all; }
+textarea.field { word-break: break-all; }
 .inrow { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 12px; }
 .rank { display: grid; gap: 8px; }
 .rank .eyebrow, .rank .note { text-align: left; }
@@ -416,7 +418,7 @@ textarea.field { font-size: 12px; word-break: break-all; }
         <button id="bExport" class="link left" type="button">Скопировать код сохранения</button>
         <textarea id="saveCode" class="field" rows="3" readonly hidden aria-label="Код сохранения"></textarea>
         <div class="inrow">
-          <input id="saveIn" class="field" type="text" placeholder="Вставь код сюда" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Код сохранения для загрузки">
+          <input id="saveIn" class="field" type="text" placeholder="Вставь код сюда" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="done" aria-label="Код сохранения для загрузки">
           <button id="bImport" class="btn small" type="button">Загрузить</button>
         </div>
         <button id="bReset" class="link left danger" type="button">Сбросить прогресс</button>
@@ -2249,7 +2251,10 @@ const UI = (() => {
     const text = $('saveIn').value;
     if (!text.trim()) { toast('Сначала вставь код в поле'); return; }
     if (!importCode(text)) { Snd.play('nope'); toast('Код не подошёл. Проверь, что он скопирован целиком.'); return; }
-    Snd.setOn(save.set.music, save.set.sfx); fillMissions(); persist(); resize(); Snd.play('buy'); toast('Сохранение загружено'); base = 'menu'; showMenu();
+    // сначала убрать клавиатуру, потом прятать лист: иначе поле исчезает из-под неё и окно остаётся сжатым.
+    // Размер пересчитает afterKeyboard(), когда клавиатура уйдёт (в сохранении может быть другая графика)
+    $('saveIn').blur();
+    Snd.setOn(save.set.music, save.set.sfx); fillMissions(); persist(); Snd.play('buy'); toast('Сохранение загружено'); base = 'menu'; showMenu(); afterKeyboard();
   }
   function setControl(mode) {
     if (mode !== 'tilt') { save.set.control = mode; Snd.play('click'); persist(); renderSettings(); return; }
@@ -2275,6 +2280,7 @@ const UI = (() => {
     if (name === 'shop') { shopSel = null; renderShop(); $('shopBody').scrollTop = 0; } else if (name === 'quests') renderQuests(); else if (name === 'help') renderHelp(); else renderSettings();
   }
   function closeSheet() {
+    if (typing()) document.activeElement.blur();                    // лист с полем в фокусе: сначала убрать клавиатуру
     if (sheet === 'help') { openSheet('settings'); return; }       // памятка открывается из настроек и возвращает туда же
     sheet = null; Snd.play('click'); persist(); if (base === 'over') only('over'); else showMenu();
   }
@@ -2297,8 +2303,10 @@ const UI = (() => {
     on('fxSeg', (e) => { const b = e.target.closest('button'); if (!b) return; save.set.fx = b.dataset.fx; Snd.play('click'); persist(); resize(); renderSettings(); });
     on('bReset', () => {
       if (!resetArm) { resetArm = 1; $('bReset').textContent = 'Точно сбросить? Нажми ещё раз'; return; }
+      if (typing()) document.activeElement.blur();
       const set = save.set, day = save.gift; save = freshSave(); save.set = set; save.gift = day; fillMissions(); persist(); toast('Прогресс сброшен'); base = 'menu'; showMenu();
     });
+    $('saveIn').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); importSave(); } });
     on('bPause', pauseGame); on('bResume', resumeGame);
     on('bRestart', () => { settleRun(); fillMissions(); persist(); game.zen = save.zen; startRun(true); });
     on('bQuit', () => endRun());
@@ -2321,7 +2329,25 @@ function featureOk(name) {
 }
 function tiltListen() { if (tiltOn || !featureOk('accelerometer') || !featureOk('gyroscope')) return tiltOn; tiltOn = true; window.addEventListener('deviceorientation', onTilt); return true; }
 
+/* ---------- экранная клавиатура (поле кода сохранения) ----------
+   Пока она открыта, окно сжато: игра в это время размер не меняет. После неё iOS иногда оставляет окно
+   веб-приложения сжатым до перезапуска — тогда вёрстку «встряхиваем» и пересчитываем размер. */
+let vhMax = window.innerHeight;                    // высота окна без клавиатуры
+function typing() { const a = document.activeElement; return !!(a && a.classList && a.classList.contains('field')); }
+function healViewport() {
+  window.scrollTo(0, 0);
+  if (vhMax - window.innerHeight > 4) {            // окно застряло сжатым: встряхнуть вёрстку
+    const sc = document.querySelector('.sheet:not([hidden]) .scroll'), top = sc ? sc.scrollTop : 0;
+    stageEl.style.display = 'none'; void stageEl.offsetHeight; stageEl.style.display = '';
+    if (sc) sc.scrollTop = top;
+  }
+  resize();
+}
+function afterKeyboard() { for (const ms of [60, 160, 400, 800]) setTimeout(() => { if (!typing()) healViewport(); }, ms); }
+
 function resize() {
+  if (typing()) return;                            // печатают: не перекладываемся под клавиатуру и не просим повернуть телефон
+  vhMax = Math.max(vhMax, window.innerHeight);
   const W = stageEl.clientWidth, Hh = stageEl.clientHeight;
   if (!W || !Hh) return;
   const pfW = Math.max(1, Math.min(W, Math.round(Hh * 0.62))), oldH = view.H;   // вертикальное поле по центру
@@ -2443,7 +2469,8 @@ function start(data) {
   window.addEventListener('keyup', (e) => onKey(e, false));
   if (save.set.control === 'tilt') tiltListen();
   window.addEventListener('resize', resize);
-  window.addEventListener('orientationchange', () => setTimeout(resize, 250));
+  window.addEventListener('orientationchange', () => setTimeout(() => { vhMax = window.innerHeight; resize(); }, 250));
+  document.addEventListener('focusout', (e) => { if (e.target.classList && e.target.classList.contains('field')) afterKeyboard(); });
   if (window.ResizeObserver) new ResizeObserver(resize).observe(stageEl);
   window.addEventListener('blur', () => { if (game.state === 'play') pauseGame(); });
   window.addEventListener('pagehide', persist);
