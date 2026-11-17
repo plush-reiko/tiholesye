@@ -137,12 +137,25 @@ button:focus-visible, .tog input:focus-visible { outline: 2px solid var(--accent
 .hscore b i { display: inline-block; width: .64em; text-align: center; font-style: normal; }   /* у Underdog цифры разной ширины: каждая в своей ячейке */
 .hscore b i.gap { width: .22em; }                                                             /* разделитель тысяч */
 .hscore span { font-size: 17px; color: var(--dim); }
-#hMult { margin-right: 4px; color: var(--accent); font-weight: 700; }
+#hMult { display: inline-block; margin-right: 2px; color: var(--firefly); font-weight: 700; }      /* множитель — того же тёплого цвета, что светлячки: умножает именно их */
+#hMult.pop { animation: pop .45s ease-out; }
+.hbest { margin-top: 2px; text-align: center; font-size: 14px; color: var(--dim); }
+.hbest.rec { color: var(--accent); font-weight: 700; }
+.hbest.pop { animation: pop .6s ease-out; }
 .hrow { display: flex; justify-content: center; align-items: center; gap: 14px; min-height: 18px; margin-top: 6px; }
-.wings { display: inline-flex; gap: 4px; font-size: 16px; }
+.wings { display: inline-flex; gap: 5px; font-size: 17px; }
 .wings.nope { animation: shake .3s ease; }
+/* взмах крыльями: полный значок — готов; перезаряжающийся наполняется снизу вверх; готовый вздрагивает */
+.wg { position: relative; display: block; width: 1em; height: 1em; }
+.wg .ic { position: absolute; inset: 0; }
+.wg .ic:first-child { opacity: .28; }
+.wg .ic:last-child { color: var(--accent); clip-path: inset(calc((1 - var(--f, 1)) * 100%) 0 0 0); }
+.wg.full .ic:last-child { color: var(--ink); }
+.wg.pop { animation: pop .45s ease-out; }
 .stat { display: inline-flex; align-items: center; gap: 6px; font-size: 15px; }
 .stat .bar { width: 36px; background: #454c9c; }
+#pMag .ic { color: var(--firefly); }
+#pMag .bar > span { background: var(--firefly); }
 #zonecard { position: absolute; left: 0; right: 0; top: 34%; padding-inline: 24px; text-align: center; font: 400 34px/1.1 var(--title); text-shadow: 0 3px 0 var(--shade); text-wrap: balance; pointer-events: none; }
 #zonecard.in { animation: zc 3s ease both; }
 #hHint {
@@ -189,10 +202,20 @@ button:focus-visible, .tog input:focus-visible { outline: 2px solid var(--accent
 .center .btn.primary { margin-top: 6px; }
 /* флажок вместо переключателя: тот же checkbox, нарисованный клочком бумаги */
 .tog { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 50px; border-bottom: 1px solid var(--line); font-weight: 700; }
-.tog input { -webkit-appearance: none; appearance: none; flex: none; position: relative; width: 26px; height: 26px; margin: 0; border: 0; border-radius: 0; background: none; cursor: pointer; }
-.tog input::before { content: ""; position: absolute; inset: 0; background: var(--well); clip-path: polygon(4% 8%, 94% 2%, 98% 92%, 8% 98%); }
-.tog input:checked::before { background: var(--paper); }
-.tog input:checked::after {
+.tog.snd label { flex: none; min-width: 72px; cursor: pointer; }
+.tog input[type="checkbox"] { -webkit-appearance: none; appearance: none; flex: none; position: relative; width: 26px; height: 26px; margin: 0; border: 0; border-radius: 0; background: none; cursor: pointer; }
+.tog input[type="checkbox"]::before { content: ""; position: absolute; inset: 0; background: var(--well); clip-path: polygon(4% 8%, 94% 2%, 98% 92%, 8% 98%); }
+.tog input[type="checkbox"]:checked::before { background: var(--paper); }
+/* громкость: дорожка как полоска прогресса, ползунок — клочок светлой бумаги с жёсткой тенью */
+.vol { -webkit-appearance: none; appearance: none; flex: 1; min-width: 60px; height: 34px; margin: 0; padding: 0; border: 0; background: none; cursor: pointer; --v: 100%; }
+.vol::-webkit-slider-runnable-track { height: 3px; background: linear-gradient(90deg, var(--accent) var(--v), var(--line) var(--v)); }
+.vol::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 24px; margin-top: -10.5px; border: 0; border-radius: 0; background: var(--paper); box-shadow: 0 3px 0 var(--shade); }
+.vol::-moz-range-track { height: 3px; background: var(--line); }
+.vol::-moz-range-progress { height: 3px; background: var(--accent); }
+.vol::-moz-range-thumb { width: 16px; height: 24px; border: 0; border-radius: 0; background: var(--paper); box-shadow: 0 3px 0 var(--shade); }
+.vol:active::-webkit-slider-thumb { transform: translateY(2px); box-shadow: 0 1px 0 var(--shade); }
+.group { display: contents; }
+.tog input[type="checkbox"]:checked::after {
   content: ""; position: absolute; inset: 4px;
   background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M4.5 12.5l5 5L20 6.5' fill='none' stroke='%2314163f' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
 }
@@ -218,7 +241,7 @@ button:focus-visible, .tog input:focus-visible { outline: 2px solid var(--accent
 .ranks .rq { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
 .ranks li.past { color: var(--ink); }
 .ranks li.past .rq { color: var(--dim); }
-.ranks li.past .rq .ic { color: var(--accent); font-size: 14px; }
+.ranks .rq .ic { color: var(--accent); font-size: 14px; }
 .ranks li.cur { color: var(--accent); }
 
 /* ---------- листы: лавка, задания, настройки, памятка ---------- */
@@ -262,7 +285,7 @@ button:focus-visible, .tog input:focus-visible { outline: 2px solid var(--accent
 .field { width: 100%; min-width: 0; padding: 10px 0; border: 0; border-bottom: 2px solid var(--line); border-radius: 0; background: none; color: var(--ink); font: 500 17px/1.3 var(--body); user-select: text; -webkit-user-select: text; resize: none; }
 .field:focus-visible { outline: none; border-bottom-color: var(--accent); }      /* фокус — цветная нижняя линия, а не рамка */
 .field::placeholder { color: var(--dim); }
-textarea.field { word-break: break-all; }
+textarea.field { word-break: break-all; font-size: 16px; line-height: 1.25; }      /* показывается, только если буфер обмена недоступен */
 .inrow { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 12px; }
 .rank { display: grid; gap: 8px; }
 .rank strong { font-family: var(--title); font-weight: 400; font-size: 30px; line-height: 1.05; }
@@ -289,8 +312,9 @@ textarea.field { word-break: break-all; }
 @keyframes toastIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
 @keyframes toastOut { to { opacity: 0; } }
 @keyframes shake { 0%, 100% { transform: none; } 25% { transform: translateX(-3px); } 75% { transform: translateX(3px); } }
+@keyframes pop { 0% { transform: scale(1); } 35% { transform: scale(1.45); } 100% { transform: scale(1); } }
 @media (prefers-reduced-motion: reduce) {
-  .center, .sheet, .toast, #hHint.in, #zonecard.in, .wings.nope { animation-duration: .01ms; }
+  .center, .sheet, .toast, #hHint.in, #zonecard.in, .wings.nope, .wg.pop, #hMult.pop, .hbest.pop { animation-duration: .01ms; }
   .btn, .btn::before, .btn::after { transition: none; }
 }
 </style>
@@ -347,6 +371,7 @@ textarea.field { word-break: break-all; }
         <div class="hscore"><b id="hScore">0</b><span>м</span></div>
         <span class="coins" aria-label="Светлячки за забег"><b id="hMult" hidden></b><svg class="ic"><use href="#i-fly"/></svg><span id="hCoins">0</span></span>
       </div>
+      <div id="hBest" class="hbest" hidden></div>
       <div class="hrow">
         <div id="hWings" class="wings" aria-label="Взмахи крыльев"></div>
         <div id="pFly" class="stat" hidden><svg class="ic" id="pFlyIc"><use href="#i-dand"/></svg><span class="bar"><span id="pFlyBar"></span></span></div>
@@ -364,7 +389,7 @@ textarea.field { word-break: break-all; }
         <div class="bigh"><b id="oH">0</b><span>м</span></div>
         <p id="oBest" class="note"></p>
         <p class="earned"><svg class="ic"><use href="#i-fly"/></svg><span id="oCoins">+0</span><span id="oBonus" class="note" hidden></span></p>
-        <ul id="oQuests" class="qlist"></ul>
+        <ul id="oQuests" class="qlist full"></ul>
         <p id="oNew" class="note" hidden>Вместо выполненных уже ждут новые задания</p>
         <button id="bAgain" class="btn primary" type="button">Ещё раз</button>
         <nav class="links" aria-label="Разделы">
@@ -384,11 +409,12 @@ textarea.field { word-break: break-all; }
           <p id="pQuestsNote" class="note" hidden></p>
         </div>
         <div>
-          <label class="tog" for="pMusic">Музыка<input type="checkbox" id="pMusic"></label>
-          <label class="tog" for="pSfx">Звуки<input type="checkbox" id="pSfx"></label>
+          <div class="tog snd"><label for="pMusic">Музыка</label><input type="range" id="pMusicVol" class="vol" min="0" max="100" step="5" aria-label="Громкость музыки"><input type="checkbox" id="pMusic"></div>
+          <div class="tog snd"><label for="pSfx">Звуки</label><input type="range" id="pSfxVol" class="vol" min="0" max="100" step="5" aria-label="Громкость звуков"><input type="checkbox" id="pSfx"></div>
         </div>
         <button id="bResume" class="btn primary" type="button">Продолжить</button>
         <nav class="links" aria-label="Забег">
+          <button id="pSet" class="link" type="button">Настройки</button>
           <button id="bRestart" class="link" type="button">Начать заново</button>
           <button id="bQuit" class="link" type="button">Закончить</button>
         </nav>
@@ -456,8 +482,8 @@ textarea.field { word-break: break-all; }
       <div class="scroll">
         <div>
           <button id="bHelp" class="rowlink" type="button">Памятка: что есть что в лесу<svg class="ic"><use href="#i-next"/></svg></button>
-          <label class="tog" for="setMusic">Музыка<input type="checkbox" id="setMusic"></label>
-          <label class="tog" for="setSfx">Звуки<input type="checkbox" id="setSfx"></label>
+          <div class="tog snd"><label for="setMusic">Музыка</label><input type="range" id="setMusicVol" class="vol" min="0" max="100" step="5" aria-label="Громкость музыки"><input type="checkbox" id="setMusic"></div>
+          <div class="tog snd"><label for="setSfx">Звуки</label><input type="range" id="setSfxVol" class="vol" min="0" max="100" step="5" aria-label="Громкость звуков"><input type="checkbox" id="setSfx"></div>
         </div>
         <h3>Управление</h3>
         <div id="ctlSeg" class="tabs" role="group" aria-label="Способ управления">
@@ -472,15 +498,17 @@ textarea.field { word-break: break-all; }
           <button type="button" data-fx="low">Экономно</button>
         </div>
         <p class="note">«Экономно» убирает свечение и снижает чёткость. Батарея живёт дольше.</p>
-        <h3>Прогресс</h3>
-        <p class="note">Сохранение хранится на этом устройстве. Код переносит его в другую копию игры.</p>
-        <button id="bExport" class="link left" type="button">Скопировать код сохранения</button>
-        <textarea id="saveCode" class="field" rows="3" readonly hidden aria-label="Код сохранения"></textarea>
-        <div class="inrow">
-          <input id="saveIn" class="field" type="text" placeholder="Вставь код сюда" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="done" aria-label="Код сохранения для загрузки">
-          <button id="bImport" class="btn small" type="button">Загрузить</button>
+        <div id="setProgress" class="group">
+          <h3>Прогресс</h3>
+          <p class="note">Сохранение хранится на этом устройстве. Код переносит его в другую копию игры.</p>
+          <button id="bExport" class="link left" type="button">Скопировать код сохранения</button>
+          <textarea id="saveCode" class="field" rows="7" readonly hidden aria-label="Код сохранения"></textarea>
+          <div class="inrow">
+            <input id="saveIn" class="field" type="text" placeholder="Вставь код сюда" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="done" aria-label="Код сохранения для загрузки">
+            <button id="bImport" class="btn small" type="button">Загрузить</button>
+          </div>
+          <button id="bReset" class="link left danger" type="button">Сбросить прогресс</button>
         </div>
-        <button id="bReset" class="link left danger" type="button">Сбросить прогресс</button>
       </div>
     </section>
 
@@ -649,20 +677,24 @@ const UP = {
 };
 
 /* ---------- Задания ---------- */
+// w — вес награды: насколько задание трудное и сколько усилий просит. Те, что выполняются сами по ходу игры
+// (сыграть забеги, набрать общую высоту), стоят меньше; те, что требуют мастерства (высота, без крыльев, ворчуны), — больше
 const MDEF = {
-  height:   { kind: 'run', tiers: [300, 600, 1000, 1500, 2200, 3000, 4000, 5000, 6500, 8000], text: (n) => `Поднимись на ${fmt(n)} м за один забег` },
-  coinsRun: { kind: 'run', tiers: [20, 40, 70, 110, 160, 220, 300], text: (n) => `Собери ${n} светлячков за один забег` },
-  coinsAll: { kind: 'sum', tiers: [150, 400, 800, 1500, 2500, 4000], text: (n) => `Собери ${fmt(n)} светлячков` },
-  bouncy:   { kind: 'run', tiers: [5, 8, 12, 18, 25], text: (n) => `Прыгни на ${n} грибов-батутов за забег` },
-  wings:    { kind: 'run', tiers: [5, 10, 18, 28], text: (n) => `Сделай ${n} взмахов крыльями за забег` },
-  flow:     { kind: 'run', tiers: [2, 3, 4, 5], cap: true, text: (n) => `Разгони множитель до ×${n}` },
-  puffs:    { kind: 'sum', tiers: [10, 25, 50, 100], need: 400, text: (n) => `Лопни ${n} дождевиков` },
-  stomps:   { kind: 'sum', tiers: [5, 10, 15, 30], need: 1000, text: (n) => `Приземлись сверху на ${n} ворчунов` },
-  flights:  { kind: 'sum', tiers: [5, 10, 15, 30], text: (n) => `Полетай на одуванчике ${n} раз` },
-  runs:     { kind: 'sum', tiers: [5, 10, 15, 25, 40], text: (n) => `Сыграй ${n} забегов` },
-  climb:    { kind: 'sum', tiers: [2000, 5000, 10000, 20000, 40000, 80000], text: (n) => `Набери ${fmt(n)} м высоты за все забеги` },
-  noWings:  { kind: 'run', tiers: [300, 600, 1000, 1600], text: (n) => `Поднимись на ${fmt(n)} м без взмахов крыльями` },
+  height:   { kind: 'run', w: 1.3, tiers: [300, 500, 800, 1200, 1600, 2200, 3000, 4000, 5000, 6500, 8000], text: (n) => `Поднимись на ${fmt(n)} м за один забег` },
+  coinsRun: { kind: 'run', w: 0.9, tiers: [20, 40, 70, 110, 160, 220, 300], text: (n) => `Собери ${n} светлячков за один забег` },
+  coinsAll: { kind: 'sum', w: 0.7, tiers: [150, 400, 800, 1500, 2500, 4000], text: (n) => `Собери ${fmt(n)} светлячков` },
+  bouncy:   { kind: 'run', w: 1, tiers: [5, 8, 12, 18, 25], text: (n) => `Прыгни на ${n} грибов-батутов за забег` },
+  wings:    { kind: 'run', w: 0.9, tiers: [5, 10, 18, 28], text: (n) => `Сделай ${n} взмахов крыльями за забег` },
+  flow:     { kind: 'run', w: 1.1, tiers: [2, 3, 4, 5], cap: true, text: (n) => `Разгони множитель до ×${n}` },
+  puffs:    { kind: 'sum', w: 0.8, tiers: [10, 25, 50, 100], need: 400, text: (n) => `Лопни ${n} дождевиков` },
+  stomps:   { kind: 'sum', w: 1.2, tiers: [5, 10, 15, 30], need: 1000, text: (n) => `Приземлись сверху на ${n} ворчунов` },
+  flights:  { kind: 'sum', w: 0.8, tiers: [5, 10, 15, 30], text: (n) => `Полетай на одуванчике ${n} раз` },
+  runs:     { kind: 'sum', w: 0.6, tiers: [5, 10, 15, 25, 40], text: (n) => `Сыграй ${n} забегов` },
+  climb:    { kind: 'sum', w: 0.8, tiers: [2000, 5000, 10000, 20000, 40000, 80000], text: (n) => `Набери ${fmt(n)} м высоты за все забеги` },
+  noWings:  { kind: 'run', w: 1.4, tiers: [200, 400, 700, 1000, 1500], text: (n) => `Поднимись на ${fmt(n)} м без взмахов крыльями` },
 };
+/* награда: лестница по ступени задания (40, 70, 100…) × вес вида, округлено до 5, не больше 500 */
+const missionReward = (type, tier) => Math.min(500, 5 * Math.round((40 + 30 * Math.min(tier, 12)) * ((MDEF[type] && MDEF[type].w) || 1) / 5));
 const RANKS = [[0, 'Росток'], [3, 'Грибник'], [7, 'Следопыт'], [12, 'Травник'], [18, 'Лесной дух'], [26, 'Хранитель леса'], [36, 'Легенда Тихолесья']];
 function rankInfo(done) {
   let i = 0; for (let k = 0; k < RANKS.length; k++) if (done >= RANKS[k][0]) i = k;
@@ -679,8 +711,9 @@ function freshSave() {
     up: { wings: 0, dandelion: 0, comet: 0, magnet: 0, luck: 0, bubble: 0 },
     missions: [], mTier: {}, mDone: 0,
     stats: { stomps: 0, bouncy: 0, puffs: 0, flights: 0, wings: 0, maxMult: 1 },
-    set: { music: true, sfx: true, control: 'swipe', fx: 'high' },
+    set: { music: true, sfx: true, control: 'swipe', fx: 'high', musicVol: 1, sfxVol: 1 },
     tut: false, zen: false, gift: '',
+    recent: [], playTime: 0,          // высоты последних 10 забегов (не дзен) и время в забегах, с — для статистики
   };
 }
 let save = freshSave();
@@ -704,11 +737,14 @@ function applySave(data) {       // любые данные (хранилище,
   if (!save.skins.includes(save.skin)) save.skin = 'svetik';
   if (!save.trails.includes(save.trail)) save.trail = 'none';
   for (const u of UPS) save.up[u.id] = clamp(num(save.up[u.id], 0) | 0, 0, u.cost.length);
-  for (const k of ['coins', 'best', 'bestZen', 'runs', 'totalCoins', 'totalHeight', 'mDone']) save[k] = Math.max(0, Math.floor(num(save[k], 0)));
+  for (const k of ['coins', 'best', 'bestZen', 'runs', 'totalCoins', 'totalHeight', 'mDone', 'playTime']) save[k] = Math.max(0, Math.floor(num(save[k], 0)));
+  save.recent = (Array.isArray(save.recent) ? save.recent : []).filter((h) => typeof h === 'number' && isFinite(h) && h >= 0).map(Math.floor).slice(-10);
   const st = freshSave().stats; for (const k of Object.keys(st)) st[k] = Math.max(st[k], Math.floor(num(save.stats[k], 0))); save.stats = st;
   const tiers = {}; for (const k of Object.keys(MDEF)) { const v = Math.floor(num(save.mTier[k], 0)); if (v > 0) tiers[k] = Math.min(v, 60); } save.mTier = tiers;
+  const vol = (v) => Math.round(clamp(num(v, 1), 0, 1) * 100) / 100;
   save.set = { music: save.set.music !== false, sfx: save.set.sfx !== false,
-    control: ['swipe', 'sides', 'tilt'].includes(save.set.control) ? save.set.control : 'swipe', fx: save.set.fx === 'low' ? 'low' : 'high' };
+    control: ['swipe', 'sides', 'tilt'].includes(save.set.control) ? save.set.control : 'swipe', fx: save.set.fx === 'low' ? 'low' : 'high',
+    musicVol: vol(save.set.musicVol), sfxVol: vol(save.set.sfxVol) };
   save.missions = (Array.isArray(save.missions) ? save.missions : []).filter((m) => m && MDEF[m.type] && num(m.n, 0) > 0).slice(0, 3)
     .map((m) => ({ type: m.type, n: m.n, rw: clamp(Math.floor(num(m.rw, 40)), 0, 1000), p: Math.max(0, num(m.p, 0)), done: m.done === true }));
   save.gift = typeof save.gift === 'string' ? save.gift.slice(0, 12) : '';
@@ -736,7 +772,8 @@ function persist() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(save));
 const Snd = (() => {
   let ac = null, master, sfxOut, musOut, noiseBuf = null;
   let padVoices = [], padZone = -1, twinkleT = 3, flight = null, coinK = 0, coinAt = 0;
-  const on = { music: true, sfx: true };
+  const on = { music: true, sfx: true }, vol = { music: 1, sfx: 1 };
+  const gainOf = (k) => (on[k] ? vol[k] * vol[k] : 0);          // громкость на слух: квадрат положения ползунка
   // до-мажорная пентатоника: любые ноты из неё звучат вместе мягко
   const PENTA = [261.63, 293.66, 329.63, 392.0, 440.0];
   const note = (i) => PENTA[mod(i, 5)] * Math.pow(2, Math.floor(i / 5));
@@ -771,10 +808,10 @@ const Snd = (() => {
     master.connect(comp); comp.connect(ac.destination);
     const rev = ac.createConvolver(); rev.buffer = makeIR(2.6);
     const revOut = ac.createGain(); revOut.gain.value = 0.6; rev.connect(revOut); revOut.connect(master);
-    sfxOut = ac.createGain(); sfxOut.gain.value = on.sfx ? 1 : 0;
+    sfxOut = ac.createGain(); sfxOut.gain.value = gainOf('sfx');
     const sfxSend = ac.createGain(); sfxSend.gain.value = 0.32;
     sfxOut.connect(master); sfxOut.connect(sfxSend); sfxSend.connect(rev);
-    musOut = ac.createGain(); musOut.gain.value = on.music ? 1 : 0;
+    musOut = ac.createGain(); musOut.gain.value = gainOf('music');
     const musSend = ac.createGain(); musSend.gain.value = 0.7;
     musOut.connect(master); musOut.connect(musSend); musSend.connect(rev);
     noiseBuf = ac.createBuffer(1, ac.sampleRate, ac.sampleRate);
@@ -842,12 +879,14 @@ const Snd = (() => {
       if (Math.random() < 0.35) tone({ f: note(i + 2), g: 0.025, a: 0.01, d: 1.6, t0: 0.28, out: musOut });
     }
   }
-  function setOn(music, sfx) {
+  function setOn(music, sfx, musicVol, sfxVol) {
     on.music = music; on.sfx = sfx;
+    if (musicVol !== undefined) vol.music = clamp(musicVol, 0, 1);
+    if (sfxVol !== undefined) vol.sfx = clamp(sfxVol, 0, 1);
     if (!ac) return;
     const now = ac.currentTime;
-    musOut.gain.setTargetAtTime(music ? 1 : 0, now, 0.15);
-    sfxOut.gain.setTargetAtTime(sfx ? 1 : 0, now, 0.03);
+    musOut.gain.setTargetAtTime(gainOf('music'), now, 0.15);
+    sfxOut.gain.setTargetAtTime(gainOf('sfx'), now, 0.03);
   }
   function hush(quiet) {   // пауза: плавно убираем звук, не останавливая синтезатор
     if (!ac) return;
@@ -879,6 +918,7 @@ const Snd = (() => {
     },
     power() { [5, 7, 9, 10].forEach((n, i) => tone({ f: note(n), g: 0.11, a: 0.004, d: 0.5, t0: i * 0.065 })); },
     wing() { hiss({ type: 'bandpass', f: 500, to: 2600, g: 0.16, d: 0.24, q: 1.2 }); tone({ f: note(7), to: note(9), toT: 0.12, g: 0.09, d: 0.3 }); },
+    ready() { tone({ f: note(12), g: 0.05, a: 0.004, d: 0.22 }); tone({ f: note(14), g: 0.045, a: 0.004, d: 0.32, t0: 0.07 }); },      // взмах снова готов: тихий двойной звон
     empty() { tone({ f: 180, g: 0.05, d: 0.08, type: 'triangle' }); },
     stomp() { tone({ f: 520, to: 140, toT: 0.12, g: 0.18, d: 0.2 }); hiss({ f: 2400, to: 500, g: 0.1, d: 0.12 }); tone({ f: note(9), g: 0.09, d: 0.4, t0: 0.04 }); },
     hit() { tone({ f: 330, to: 196, toT: 0.2, g: 0.14, d: 0.3, type: 'triangle' }); hiss({ f: 500, to: 150, g: 0.1, d: 0.2 }); },
@@ -1613,7 +1653,7 @@ function burst(k, x, y, n, cols, sp, o) {
       size: (o.size || 6) * rnd(0.6, 1.2), col: cols[(Math.random() * cols.length) | 0], grav: o.grav || 0, drag: o.drag === undefined ? 2 : o.drag, rot: rnd(TAU), vr: rnd(-6, 6) });
   }
 }
-function popText(x, y, txt, col) { part({ k: 'txt', x, y, vx: 0, vy: 46, life: 0.9, size: 15, col: col || '#ffe6a3', txt, grav: 0, drag: 1.5 }); }
+function popText(x, y, txt, size) { part({ k: 'txt', x, y, vx: 0, vy: 46, life: 0.9, size: size || 15, col: '#ffe6a3', txt, grav: 0, drag: 1.5 }); }
 
 /* ---------- деньги и задания ---------- */
 function addCoins(n) {
@@ -1636,7 +1676,7 @@ function newMission() {
   if (!pool.length) return null;
   let tp = pool[(Math.random() * pool.length) | 0];
   if (save.mDone + save.missions.length < 3) { const first = ['height', 'coinsRun', 'wings'].filter((t) => pool.includes(t)); if (first.length) tp = first[0]; }
-  return { type: tp, n: missionTarget(tp), rw: 40 + 30 * Math.min(save.mTier[tp] || 0, 12), p: 0, done: false };
+  return { type: tp, n: missionTarget(tp), rw: missionReward(tp, save.mTier[tp] || 0), p: 0, done: false };
 }
 function fillMissions() {
   save.missions = save.missions.filter((m) => !m.done);
@@ -1682,8 +1722,14 @@ function checkMissions(quiet) {
 
 /* ---------- действия игрока ---------- */
 function setMult() {
-  const p = P; p.mult = flowMult(p.flow);
+  const p = P, was = p.mult; p.mult = flowMult(p.flow);
   if (p.mult > run.maxMult) { run.maxMult = p.mult; if (p.mult > save.stats.maxMult && !game.zen) save.stats.maxMult = p.mult; }
+  if (p.mult > was && game.state === 'play') UI.multUp();          // множитель вырос: счётчик светлячков вздрагивает
+}
+function wingsReady(all) {      // взмах снова доступен: видно на крыльях героя и в счётчике
+  const p = P;
+  UI.wingReady(all); Snd.play('ready');
+  burst('dot', p.x, p.y + 24, 7, ['#d6f6ff', '#b9c1ff', '#ffffff'], 95, { life: 0.55, size: 5, spread: 16, spreadY: 8 });
 }
 function land(pl) {
   const p = P, playing = game.state === 'play';
@@ -1745,7 +1791,7 @@ function takeItem(type, x, y) {
     case 'comet': startFly('comet', UP.comet()); break;
     case 'bubble': p.shield = true; break;
     case 'lantern': p.magnet = UP.magnet(); break;
-    case 'feather': p.charges = UP.wingMax(); p.chargeT = 0; if (p.vy < 500) { p.vy = 560; p.flap = 1; } break;
+    case 'feather': p.charges = UP.wingMax(); p.chargeT = 0; wingsReady(true); break;      // перо только заряжает крылья, само не подбрасывает
   }
 }
 function rescue(free) {       // пузырь ловит и поднимает обратно
@@ -1779,8 +1825,12 @@ function settleRun() {     // записать забег в историю (б�
   Snd.flightStop();
   save.runs++; save.totalHeight += run.h;
   run.record = run.best0 > 0 && run.h > run.best0;
+  save.playTime += Math.round(run.t);
   if (game.zen) save.bestZen = Math.max(save.bestZen, run.h);
-  else { save.best = Math.max(save.best, run.h); addSum('runs', 1); }      // высота «за все забеги» копится на ходу, в stepWorld
+  else {
+    save.best = Math.max(save.best, run.h); addSum('runs', 1);       // высота «за все забеги» копится на ходу, в stepWorld
+    save.recent.push(run.h); if (save.recent.length > 10) save.recent.splice(0, save.recent.length - 10);
+  }
   checkMissions(true); checkUnlocks(0);
   save.tut = true;
 }
@@ -1831,7 +1881,7 @@ function stepWorld(dt) {
   if (p.inv > 0) p.inv -= dt;
   if (p.magnet > 0) p.magnet -= dt;
   const maxC = UP.wingMax();
-  if (p.charges < maxC) { p.chargeT -= dt; if (p.chargeT <= 0) { p.charges++; p.chargeT = p.charges < maxC ? UP.wingCd() : 0; } }
+  if (p.charges < maxC) { p.chargeT -= dt; if (p.chargeT <= 0) { p.charges++; p.chargeT = p.charges < maxC ? UP.wingCd() : 0; wingsReady(false); } }
 
   /* светлячки */
   const pulling = p.magnet > 0 || !!p.fly, R = p.fly ? 130 : UP.magnetR(), bx = p.x, by = p.y + 20;
@@ -1846,7 +1896,7 @@ function stepWorld(dt) {
       const val = (c.big ? 10 : 1) * p.mult * (game.zen ? 0.5 : 1);
       addCoins(val); Snd.play('coin', c.big);
       burst('g', c.x, c.y, c.big ? 7 : 2, ['#ffe3a0'], c.big ? 140 : 70, { life: 0.4, size: c.big ? 7 : 5 });
-      if (c.big) popText(c.x, c.y + 10, '+' + fmt1(val));
+      if (c.big || p.mult > 1) popText(c.x, c.y + 10, '+' + fmt1(val), c.big ? 15 : 12);      // с множителем видно, что он умножает именно светлячков
     }
   }
   /* находки на кочках */
@@ -2318,6 +2368,20 @@ function drawGround() {
   }
 }
 
+/* ---------- отметка рекорда: пунктир поперёк леса на высоте лучшего забега ---------- */
+function drawRecord() {
+  const b0 = run.best0 || 0;
+  if (!b0 || (game.state !== 'play' && game.state !== 'pause')) return;
+  const y = Y(game.startY + b0 * M); if (y < -20 || y > H + 20) return;
+  c.globalAlpha = run.h > b0 ? 0.25 : 0.55; c.strokeStyle = '#b9c1ff'; c.lineWidth = 1.5; c.lineCap = 'round';
+  c.beginPath();
+  for (let x = 10, i = 0; x < WW - 60; x += 15, i++) { const j = hash2(i, 7) - 0.5; c.moveTo(x, y + j); c.lineTo(x + 8 + j * 3, y - j * 0.6); }     // неровные штрихи, как от руки
+  c.stroke();
+  c.fillStyle = '#b9c1ff'; c.font = "700 12px 'Alegreya Sans', system-ui, sans-serif"; c.textAlign = 'right'; c.textBaseline = 'middle';
+  c.fillText('рекорд', WW - 12, y); c.textBaseline = 'alphabetic';
+  c.globalAlpha = 1;
+}
+
 /* ---------- платформы, находки, существа ---------- */
 const platAlpha = (pl) => pl.alpha * (pl.id === game.homeId ? 1 : game.reveal);      // в меню видна только вершина пня
 function drawPlats() {
@@ -2384,6 +2448,12 @@ function drawPlayerAt(px) {
     c.strokeStyle = '#a6f0d2'; c.lineWidth = 1.6; c.lineCap = 'round'; c.beginPath(); c.moveTo(px, py - 38); c.quadraticCurveTo(px + sw * 0.3, py - 62, px + sw, py - 84); c.stroke();
     c.save(); c.translate(px + sw, py - 92); c.scale(2.2, 2.2); c.translate(0, 4); Art.item(c, 'dandelion', T * 2); c.restore();
   }
+  if (p.magnet > 0 && game.state !== 'menu') {        // фонарик работает: он висит у плеча героя и светит; под конец мигает
+    const lx = px + 32, ly = py - 62 + Math.sin(T * 2.4) * 2.5, end = p.magnet < 2 ? 0.55 + 0.45 * Math.sin(T * 14) : 1;
+    c.globalAlpha = end; Art.halo(c, lx, ly, 34, '#ffe3a0', 0.26);
+    c.save(); c.translate(lx, ly); c.rotate(Math.sin(T * 1.8) * 0.12); Art.item(c, 'lantern', T); c.restore();
+    c.globalAlpha = 1;
+  }
   const cd = UP.wingCd(), wing = game.state !== 'play' || p.charges > 0 ? 1 : clamp(1 - p.chargeT / cd, 0, 1) * 0.55;
   const st = clamp(p.vy / 2600, -0.14, 0.2), k = p.sq + st;
   c.save(); c.translate(px, py);
@@ -2446,7 +2516,7 @@ function initGrain() {
   try { $('grain').style.backgroundImage = `url(${cv.toDataURL('image/png')})`; } catch (e) { /* без зерна кадр тоже цельный */ }
 }
 const STAGES = [
-  ['backdrop', drawBackdrop], ['near', drawNear], ['motes', drawMotes], ['ground', drawGround],
+  ['backdrop', drawBackdrop], ['near', drawNear], ['motes', drawMotes], ['ground', drawGround], ['record', drawRecord],
   ['plats', drawPlats], ['coins', drawCoins], ['grumps', drawGrumps],
   ['ribbon', () => { if (save.trail === 'aurora' && game.state === 'play') drawRibbon(); }],
   ['parts', () => drawParts(false)], ['player', drawPlayer],
@@ -2470,7 +2540,7 @@ const UI = (() => {
   const SCREENS = ['menu', 'hud', 'over', 'pause', 'revive', 'shop', 'quests', 'settings', 'help'];
   let base = 'menu', sheet = null, shopTab = 'skins', shopSel = null, resetArm = 0;
   let rvTimer = 0, hintTimer = 0, zcTimer = 0, headTimer = 0, tutTimers = [];
-  const hs = { h: -1, c: -1, mult: -1, wings: '', fly: null, mag: null, sh: null };   // что сейчас показано на экране забега
+  const hs = { h: -1, c: -1, mult: -1, wings: '', fly: null, mag: null, sh: null, rec: '' };   // что сейчас показано на экране забега
   const dayKey = () => { const d = new Date(); return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`; };
   function only(...ids) { for (const s of SCREENS) $(s).hidden = !ids.includes(s); }
   function replay(el, cls) { el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); }
@@ -2508,7 +2578,7 @@ const UI = (() => {
   }
   function onRunStart() {
     base = 'hud'; sheet = null; only('hud');
-    hs.h = hs.c = hs.mult = -1; hs.wings = ''; hs.fly = hs.mag = hs.sh = null;
+    hs.h = hs.c = hs.mult = -1; hs.wings = ''; hs.fly = hs.mag = hs.sh = null; hs.rec = '';
     $('hHint').hidden = true; clearTimeout(hintTimer); tutTimers.forEach(clearTimeout); tutTimers = [];
     const canHead = !game.zen && save.best >= 400 && save.coins >= 60;
     $('bHead').hidden = !canHead; clearTimeout(headTimer);
@@ -2530,13 +2600,25 @@ const UI = (() => {
     if (game.state !== 'play') return;
     const p = P;
     if (run.h !== hs.h) { hs.h = run.h; setDigits($('hScore'), fmt(run.h)); }
+    // рекорд под высотой; когда он побит — «Новый рекорд»
+    const b0 = run.best0 || 0, rec = !b0 ? 'none' : run.h > b0 ? 'new' : 'old';
+    if (rec !== hs.rec) {
+      const el = $('hBest'), was = hs.rec; hs.rec = rec;
+      el.hidden = rec === 'none'; el.classList.toggle('rec', rec === 'new');
+      el.textContent = rec === 'new' ? 'Новый рекорд' : `Рекорд ${fmt(b0)} м`;
+      if (rec === 'new' && was === 'old') replay(el, 'pop');
+    }
     const cn = Math.floor(run.coins); if (cn !== hs.c) { hs.c = cn; $('hCoins').textContent = fmt(cn); }
     if (p.mult !== hs.mult) { hs.mult = p.mult; $('hMult').textContent = '×' + p.mult; $('hMult').hidden = p.mult < 2; }
-    const maxC = UP.wingMax(), prog = p.charges < maxC ? clamp(1 - p.chargeT / UP.wingCd(), 0, 1) : 1, key = maxC + ':' + p.charges + ':' + Math.round(prog * 12);
+    // крылья: заряженный взмах — полный значок, перезаряжающийся наполняется снизу вверх
+    const maxC = UP.wingMax(), prog = p.charges < maxC ? clamp(1 - p.chargeT / UP.wingCd(), 0, 1) : 1, key = maxC + ':' + p.charges + ':' + Math.round(prog * 24);
     if (key !== hs.wings) {
       hs.wings = key; const w = $('hWings');
-      if (w.children.length !== maxC) w.innerHTML = ic('i-wing').repeat(maxC);
-      for (let i = 0; i < maxC; i++) w.children[i].style.opacity = i < p.charges ? 0.95 : i === p.charges ? 0.18 + 0.4 * prog : 0.18;
+      if (w.children.length !== maxC) w.innerHTML = `<span class="wg">${ic('i-wing')}${ic('i-wing')}</span>`.repeat(maxC);
+      for (let i = 0; i < maxC; i++) {
+        const f = i < p.charges ? 1 : i === p.charges ? prog : 0;
+        w.children[i].style.setProperty('--f', f.toFixed(3)); w.children[i].classList.toggle('full', f >= 1);
+      }
     }
     const fly = p.fly ? p.fly.kind : '';
     if (fly !== hs.fly) { hs.fly = fly; $('pFly').hidden = !fly; if (fly) $('pFlyIc').firstElementChild.setAttribute('href', fly === 'comet' ? '#i-comet' : '#i-dand'); }
@@ -2547,6 +2629,11 @@ const UI = (() => {
     if (p.shield !== hs.sh) { hs.sh = p.shield; $('pShield').hidden = !p.shield; }
   }
   function wingsNope() { replay($('hWings'), 'nope'); }
+  function wingReady(all) {       // взмах снова готов: значок вздрагивает (перо заряжает все сразу)
+    hud(); const w = $('hWings'), n = P.charges;
+    for (let i = 0; i < w.children.length; i++) if (all ? i < n : i === n - 1) replay(w.children[i], 'pop');
+  }
+  function multUp() { hud(); replay($('hMult'), 'pop'); }
   function toast(text, coins, kind) {
     const box = $('toasts'), el = document.createElement('div'); el.className = 'toast' + (kind ? ' ' + kind : '');
     if (kind === 'quest') el.insertAdjacentHTML('beforeend', ic('i-check'));
@@ -2565,14 +2652,14 @@ const UI = (() => {
     return done >= list.length ? 'Все выполнены. Новые появятся после забега' : 'Выполненные сменятся новыми после забега';
   }
   function showPause() {
-    only('pause'); $('pMusic').checked = save.set.music; $('pSfx').checked = save.set.sfx;
+    sheet = null; only('pause'); syncSound();
     $('toasts').innerHTML = '';          // то же самое уже видно в списке ниже, а строки сверху наехали бы на заголовок
     const ql = $('pQuests'), note = $('pQuestsNote'); ql.innerHTML = '';
     if (game.zen) { note.textContent = 'В дзене задания не идут'; note.hidden = false; return; }
     for (const m of save.missions) ql.append(questRow(m, true));
     note.textContent = questNote(save.missions); note.hidden = !note.textContent;
   }
-  function onResume() { only('hud'); }
+  function onResume() { if (typing()) document.activeElement.blur(); sheet = null; only('hud'); }
   function showRevive(cost) {
     only('revive'); $('rvCost').textContent = cost;
     const bar = $('rvBar'); bar.style.transition = 'none'; bar.style.transform = 'scaleX(1)'; void bar.offsetWidth;
@@ -2706,11 +2793,21 @@ const UI = (() => {
       const state = i < r.i ? 'past' : i === r.i ? 'cur' : '';
       const gift = SKINS.filter((s) => s.unlock && s.unlock.type === 'missions' && s.unlock.n === need).map((s) => `<small>Облик «${s.name}»</small>`).join('');
       const req = need ? nTasks(need) : 'старт';
-      return `<li class="${state}"><span class="rn">${name}${gift}</span><span class="rq">${i < r.i ? ic('i-check') : ''}${req}</span></li>`;
+      return `<li class="${state}"><span class="rn">${name}${gift}</span><span class="rq">${i <= r.i ? ic('i-check') : ''}${req}</span></li>`;     // галочка у всех достигнутых, включая текущий
     }).join('');
-    const st = [['Рекорд', fmt(save.best) + ' м'], ['Рекорд в дзене', fmt(save.bestZen) + ' м'], ['Забегов', fmt(save.runs)], ['Собрано светлячков', fmt(save.totalCoins)],
-      ['Высота за все забеги', fmt(save.totalHeight) + ' м'], ['Лучший множитель', '×' + save.stats.maxMult], ['Выполнено заданий', fmt(save.mDone)]];
+    // статистика: то, что говорит о пути и о форме, а не служебные числа
+    const n = save.recent.length, avg = n ? Math.round(save.recent.reduce((a, b) => a + b, 0) / n) : 0;
+    const st = [['Рекорд', fmt(save.best) + ' м'], ['Дальше всего', save.best ? ZONES[zoneIndexAt(save.best)].name : '—']];
+    if (n) st.push([n === 1 ? 'Последний забег' : `В среднем за последние ${n} ${plural(n, ['забег', 'забега', 'забегов'])}`, fmt(avg) + ' м']);
+    if (save.bestZen) st.push(['Рекорд в дзене', fmt(save.bestZen) + ' м']);
+    st.push(['Забегов', fmt(save.runs)], ['Время в лесу', fmtTime(save.playTime)], ['Высота за все забеги', fmt(save.totalHeight) + ' м'], ['Собрано светлячков', fmt(save.totalCoins)],
+      ['Сбито ворчунов', fmt(save.stats.stomps)], ['Выполнено заданий', fmt(save.mDone)]);
     $('qStats').innerHTML = st.map((s) => `<div><dt>${s[0]}</dt><dd>${s[1]}</dd></div>`).join('');
+  }
+  function fmtTime(sec) {         // «40 с», «12 мин», «2 ч 05 мин»
+    const m = Math.floor(sec / 60), h = Math.floor(m / 60);
+    if (sec < 60) return `${Math.floor(sec)} с`;
+    return h ? `${h} ч ${String(m % 60).padStart(2, '0')} мин` : `${m} мин`;
   }
   const CTL_NOTE = {
     swipe: 'Веди пальцем по экрану: герой повторяет движение. Короткий тап — взмах крыльев.',
@@ -2718,7 +2815,8 @@ const UI = (() => {
     tilt: 'Наклоняй телефон влево и вправо. Тап — взмах крыльев.',
   };
   function renderSettings() {
-    $('setMusic').checked = save.set.music; $('setSfx').checked = save.set.sfx;
+    syncSound();
+    $('setProgress').hidden = game.state === 'pause';          // во время забега перенос и сброс прогресса не показываем
     for (const b of $('ctlSeg').children) b.classList.toggle('on', b.dataset.ctl === save.set.control);
     for (const b of $('fxSeg').children) b.classList.toggle('on', b.dataset.fx === save.set.fx);
     $('ctlNote').textContent = CTL_NOTE[save.set.control];
@@ -2771,10 +2869,10 @@ const UI = (() => {
       b.textContent = it.t; sp.textContent = it.d; tx.append(b, sp); row.append(tx); body.append(row);
     }
   }
-  function exportSave() {
+  function exportSave() {        // код уходит в буфер обмена; поле с ним показываем, только если буфер недоступен
     const code = exportCode(), box = $('saveCode');
-    box.hidden = false; box.value = code;
-    const manual = () => { box.focus(); box.select(); toast('Код ниже: выдели и скопируй его'); };
+    box.value = code; box.hidden = true;
+    const manual = () => { box.hidden = false; box.focus(); box.select(); toast('Буфер обмена недоступен: выдели код ниже и скопируй'); };
     try { navigator.clipboard.writeText(code).then(() => toast('Код сохранения скопирован'), manual); } catch (e) { manual(); }
   }
   function importSave() {
@@ -2784,7 +2882,7 @@ const UI = (() => {
     // сначала убрать клавиатуру, потом прятать лист: иначе поле исчезает из-под неё и окно остаётся сжатым.
     // Размер пересчитает afterKeyboard(), когда клавиатура уйдёт (в сохранении может быть другая графика)
     $('saveIn').blur();
-    Snd.setOn(save.set.music, save.set.sfx); fillMissions(); persist(); Snd.play('buy'); toast('Сохранение загружено'); base = 'menu'; showMenu(); afterKeyboard();
+    applySound(); fillMissions(); persist(); Snd.play('buy'); toast('Сохранение загружено'); base = 'menu'; showMenu(); afterKeyboard();
   }
   function setControl(mode) {
     if (mode !== 'tilt') { save.set.control = mode; Snd.play('click'); persist(); renderSettings(); return; }
@@ -2812,9 +2910,23 @@ const UI = (() => {
   function closeSheet() {
     if (typing()) document.activeElement.blur();                    // лист с полем в фокусе: сначала убрать клавиатуру
     if (sheet === 'help') { openSheet('settings'); return; }       // памятка открывается из настроек и возвращает туда же
-    sheet = null; Snd.play('click'); persist(); if (base === 'over') only('over'); else showMenu();
+    sheet = null; Snd.play('click'); persist();
+    if (game.state === 'pause') showPause(); else if (base === 'over') only('over'); else showMenu();     // настройки, открытые с паузы, возвращают на паузу
   }
-  function setSound(music, sfx) { save.set.music = music; save.set.sfx = sfx; Snd.setOn(music, sfx); persist(); }
+  /* ---------- звук: включено ли и громкость; одни и те же значения в настройках и на паузе ---------- */
+  const applySound = () => Snd.setOn(save.set.music, save.set.sfx, save.set.musicVol, save.set.sfxVol);
+  function setSound(music, sfx) { save.set.music = music; save.set.sfx = sfx; applySound(); syncSound(); persist(); }
+  function syncSound() {
+    for (const [chk, k] of [['setMusic', 'music'], ['pMusic', 'music'], ['setSfx', 'sfx'], ['pSfx', 'sfx']]) $(chk).checked = save.set[k];
+    for (const [id, k] of [['setMusicVol', 'musicVol'], ['pMusicVol', 'musicVol'], ['setSfxVol', 'sfxVol'], ['pSfxVol', 'sfxVol']]) {
+      const el = $(id), v = Math.round(save.set[k] * 100); el.value = v; el.style.setProperty('--v', v + '%');
+    }
+  }
+  function setVolume(k, el) {     // ползунок: громкость 0…100; сдвинуть ползунок выключенного звука — значит включить его
+    const v = clamp(+el.value || 0, 0, 100);
+    save.set[k + 'Vol'] = v / 100; if (v > 0 && !save.set[k]) save.set[k] = true;
+    applySound(); syncSound();
+  }
 
   function init() {
     const on = (id, fn) => $(id).addEventListener('click', fn);
@@ -2829,6 +2941,11 @@ const UI = (() => {
     $('setSfx').addEventListener('change', (e) => { setSound(save.set.music, e.target.checked); Snd.play('click'); });
     $('pMusic').addEventListener('change', (e) => setSound(e.target.checked, save.set.sfx));
     $('pSfx').addEventListener('change', (e) => setSound(save.set.music, e.target.checked));
+    for (const [id, k] of [['setMusicVol', 'music'], ['pMusicVol', 'music'], ['setSfxVol', 'sfx'], ['pSfxVol', 'sfx']]) {
+      $(id).addEventListener('input', (e) => setVolume(k, e.target));
+      $(id).addEventListener('change', () => { persist(); if (k === 'sfx') Snd.play('click'); });
+    }
+    on('pSet', () => openSheet('settings'));                 // настройки прямо с паузы
     on('ctlSeg', (e) => { const b = e.target.closest('button'); if (b) setControl(b.dataset.ctl); });
     on('fxSeg', (e) => { const b = e.target.closest('button'); if (!b) return; save.set.fx = b.dataset.fx; Snd.play('click'); persist(); resize(); renderSettings(); });
     on('bReset', () => {
@@ -2846,7 +2963,7 @@ const UI = (() => {
     on('oMenu', () => { Snd.play('click'); toMenu(); });
     on('bHead', () => { if (headstart()) { $('bHead').hidden = true; clearTimeout(headTimer); } });
   }
-  return { init, showMenu, syncMenu, onRunStart, hud, hint, toast, questDone, zoneCard, wingsNope, showPause, onResume, showRevive, onRevived, showOver, covered: () => !!sheet };
+  return { init, showMenu, syncMenu, onRunStart, hud, hint, toast, questDone, zoneCard, wingsNope, wingReady, multUp, showPause, onResume, showRevive, onRevived, showOver, covered: () => !!sheet };
 })();
 
 /* ===== Тихолесье · запуск: размер экрана, ввод, главный цикл ===== */
@@ -2997,7 +3114,7 @@ function frame(now) {
 function start(data) {
   if (booted) return;
   view.cv = $('cv'); view.ctx = view.cv.getContext('2d', { alpha: false });
-  loadSave(data && data.save); Snd.setOn(save.set.music, save.set.sfx); fillMissions();
+  loadSave(data && data.save); Snd.setOn(save.set.music, save.set.sfx, save.set.musicVol, save.set.sfxVol); fillMissions();
   initMotes(); initGrain(); UI.init();
   game.state = 'menu'; resize(); resetWorld(); booted = true; UI.showMenu();
 
