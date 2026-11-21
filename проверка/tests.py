@@ -402,7 +402,56 @@ async def t_skins(b):
     await ctx.close()
 
 
-TESTS = [('gift', t_gift), ('coins', t_coins), ('ghost', t_ghost), ('leaf', t_leaf), ('beasts', t_beasts), ('migration', t_migration), ('skins', t_skins)]
+
+TEXTS_SRC = [      # строки раздела 12, которые видны только в забеге (подсказки) или после миграции
+    '×2 — теперь каждый пойманный светлячок считается за двух. Новые кочки подряд разгонят множитель до ×5',
+    'Прыгай на новые кочки подряд — растёт множитель светлячков, до ×5. Снова на ту же кочку — он падает',
+    'Облики обновились: вернули светлячков за прежние облики и следы',
+]
+TEXTS_HELP = [     # памятка: название и описание
+    ('Сухой лист', 'Лёгкий и ломкий. Выдержит один прыжок, потом сорвётся и улетит'),
+    ('Призрачная кочка', 'Пунктирная капсула — только видимость. Не держит и тает от касания'),
+    ('Репейник', 'Качается из стороны в сторону. Прыгни сверху — рассыплется. Сбоку и снизу столкнёт вниз'),
+    ('Паук', 'Висит на нитке и ходит вверх-вниз. Прыжок сверху рвёт нитку'),
+    ('Жук-сторож', 'Охраняет свою кочку и ходит по ней от края до края. Сверху можно, сбоку боднёт'),
+    ('Сыч', 'Сидит у края. Глаза вспыхнули — сейчас спикирует через экран. Уклонись или прыгни на него сверху'),
+    ('Звёздная медуза', 'Прыгни на колокол — подбросит очень высоко. Щупальца жалят'),
+    ('Крылья', 'Запасной прыжок в воздухе. Заряд восстанавливается сам. У каждого облика свой взмах'),
+    ('Множитель светлячков', 'Новые кочки подряд разгоняют его до ×5 — он горит рядом со счётчиком светлячков. Каждый пойманный светлячок считается за столько. На высоту не влияет. Прыжок на ту же кочку снижает множитель, удар ворчуна сбрасывает'),
+]
+OLD_WORDS = ['Следы', 'ветк', 'стайк', 'Светик', 'Грибок', 'Капля', 'Лягух', 'Лунный кот', 'Дух-лис', 'Зайка-призрак', 'Желейка', 'Мотылёк', 'Кристаллик', 'Звездочёт', 'Хранитель']
+
+
+async def t_texts(b):
+    print('Тексты (раздел 12)')
+    ctx, pg = await page(b)
+    src = await pg.evaluate('() => fetch(location.href).then((r) => r.text())')
+    flat = ' '.join(src.split())
+    for s in TEXTS_SRC: check(f'строка «{s[:46]}…»', s in flat)
+    gift = await pg.evaluate('''() => { const b = document.getElementById('bGift'); return { t: b.textContent.replace(/\\s+/g, ' ').trim(), ic: !!b.querySelector('use[href="#i-fly"]') }; }''')
+    check('кнопка меню: «Подарок леса» + значок светлячка + «100»', gift['t'].startswith('Подарок леса') and gift['t'].endswith('100') and gift['ic'], str(gift))
+    pl = await pg.evaluate('() => [1, 3, 5, 10, 21, 24, 25].map((n) => window.__tl.MDEF.puffs.text(n))')
+    want = ['Сорви 1 сухой лист', 'Сорви 3 сухих листа', 'Сорви 5 сухих листьев', 'Сорви 10 сухих листьев', 'Сорви 21 сухой лист', 'Сорви 24 сухих листа', 'Сорви 25 сухих листьев']
+    check('задание «Сорви N сухих листьев» с правильными окончаниями', pl == want, str(pl))
+    other = await pg.evaluate('() => [window.__tl.MDEF.stomps.text(5)]')
+    check('задание про ворчунов без изменений', other == ['Приземлись сверху на 5 ворчунов'], str(other))
+    await pg.evaluate('() => document.getElementById("bSet").click()'); await pg.wait_for_timeout(150)
+    await pg.evaluate('() => document.getElementById("bHelp").click()'); await pg.wait_for_timeout(300)
+    help_txt = ' '.join((await pg.evaluate('() => document.getElementById("helpBody").innerText')).split())
+    for name, d in TEXTS_HELP: check(f'памятка: {name}', name in help_txt and d in help_txt, '')
+    i1, i2, i3 = help_txt.find('Находки'), help_txt.find('Ворчуны'), help_txt.find('Остальное')
+    check('памятка: раздел «Ворчуны» между «Находками» и «Остальным»', 0 <= i1 < i2 < i3, f'{i1} {i2} {i3}')
+    await pg.evaluate('() => { document.getElementById("help").hidden = true; document.getElementById("settings").hidden = true; document.getElementById("bShop").click(); }'); await pg.wait_for_timeout(200)
+    shop_txt = ' '.join((await pg.evaluate('() => document.getElementById("shop").innerText')).split())
+    seen = [w for w in OLD_WORDS if w in help_txt or w in shop_txt]
+    check('в лавке и памятке нет старых слов (следы отдельно, ветка, стайки, прежние облики)', not seen, str(seen))
+    names = await pg.evaluate('() => window.__tl.SKINS.map((s) => s.name)')
+    check('в лавке все 12 новых имён', all(n in shop_txt for n in names), str([n for n in names if n not in shop_txt]))
+    check('ошибок в консоли нет', not pg.errors, '; '.join(pg.errors[:3]))
+    await ctx.close()
+
+
+TESTS = [('gift', t_gift), ('coins', t_coins), ('ghost', t_ghost), ('leaf', t_leaf), ('beasts', t_beasts), ('migration', t_migration), ('skins', t_skins), ('texts', t_texts)]
 
 
 async def main():
