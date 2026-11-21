@@ -255,7 +255,154 @@ async def t_beasts(b):
     await ctx.close()
 
 
-TESTS = [('gift', t_gift), ('coins', t_coins), ('ghost', t_ghost), ('leaf', t_leaf), ('beasts', t_beasts)]
+# Код переноса из версии до 21.11 (index.html из git, коммит 23571e5): облики svetik, gribok, kot, zvezda, надет kot;
+# следы none, sparks, aurora; 1 000 светлячков, рекорд 500 м, 5 заданий, музыка выключена, управление «края», крылья 2.
+# Сделан самой старой игрой: save → 'TL1.' + base64(JSON). Возврат за него: kot 750 + zvezda 3 900 + sparks 100 + aurora 1 800 = 6 550.
+OLD_CODE = "TL1.eyJ2IjoxLCJjb2lucyI6MTAwMCwiYmVzdCI6NTAwLCJiZXN0WmVuIjowLCJydW5zIjo3LCJ0b3RhbENvaW5zIjoyNDAwLCJ0b3RhbEhlaWdodCI6MCwic2tpbiI6ImtvdCIsInRyYWlsIjoiYXVyb3JhIiwic2tpbnMiOlsic3ZldGlrIiwiZ3JpYm9rIiwia290IiwienZlemRhIl0sInRyYWlscyI6WyJub25lIiwic3BhcmtzIiwiYXVyb3JhIl0sInVwIjp7IndpbmdzIjoyLCJkYW5kZWxpb24iOjAsImNvbWV0IjowLCJtYWduZXQiOjAsImx1Y2siOjAsImJ1YmJsZSI6MH0sIm1pc3Npb25zIjpbeyJ0eXBlIjoiaGVpZ2h0IiwibiI6MzAwLCJydyI6NTAsInAiOjAsImRvbmUiOmZhbHNlfSx7InR5cGUiOiJjb2luc1J1biIsIm4iOjIwLCJydyI6MzUsInAiOjAsImRvbmUiOmZhbHNlfSx7InR5cGUiOiJ3aW5ncyIsIm4iOjUsInJ3IjozNSwicCI6MCwiZG9uZSI6ZmFsc2V9XSwibVRpZXIiOnt9LCJtRG9uZSI6NSwic3RhdHMiOnsic3RvbXBzIjowLCJib3VuY3kiOjAsInB1ZmZzIjowLCJmbGlnaHRzIjowLCJ3aW5ncyI6MCwibWF4TXVsdCI6MX0sInNldCI6eyJtdXNpYyI6ZmFsc2UsInNmeCI6dHJ1ZSwiY29udHJvbCI6InNpZGVzIiwiZngiOiJoaWdoIiwibXVzaWNWb2wiOjEsInNmeFZvbCI6MX0sInR1dCI6ZmFsc2UsInplbiI6ZmFsc2UsImdpZnQiOiIyMDI2LTExLTIxIiwibXVsdFRpcCI6ZmFsc2UsInJlY2VudCI6W10sInBsYXlUaW1lIjowfQ=="
+OLD_JSON = "{\"v\":1,\"coins\":1000,\"best\":500,\"bestZen\":0,\"runs\":7,\"totalCoins\":2400,\"totalHeight\":0,\"skin\":\"kot\",\"trail\":\"aurora\",\"skins\":[\"svetik\",\"gribok\",\"kot\",\"zvezda\"],\"trails\":[\"none\",\"sparks\",\"aurora\"],\"up\":{\"wings\":2,\"dandelion\":0,\"comet\":0,\"magnet\":0,\"luck\":0,\"bubble\":0},\"missions\":[{\"type\":\"height\",\"n\":300,\"rw\":50,\"p\":0,\"done\":false},{\"type\":\"coinsRun\",\"n\":20,\"rw\":35,\"p\":0,\"done\":false},{\"type\":\"wings\",\"n\":5,\"rw\":35,\"p\":0,\"done\":false}],\"mTier\":{},\"mDone\":5,\"stats\":{\"stomps\":0,\"bouncy\":0,\"puffs\":0,\"flights\":0,\"wings\":0,\"maxMult\":1},\"set\":{\"music\":false,\"sfx\":true,\"control\":\"sides\",\"fx\":\"high\",\"musicVol\":1,\"sfxVol\":1},\"tut\":false,\"zen\":false,\"gift\":\"2026-11-21\",\"multTip\":false,\"recent\":[],\"playTime\":0}"
+OLD_REFUND = 6550
+
+
+async def menu(pg):
+    await pg.wait_for_function('window.__tl && window.__tl.game.state === "menu"'); await pg.wait_for_timeout(300)
+
+
+async def toasts(pg):
+    return await pg.evaluate('() => [...document.querySelectorAll("#toasts .toast")].map((t) => t.textContent.replace(/\\s+/g, " ")).join(" | ")')
+
+
+def digits(s):
+    return ''.join(ch for ch in s if ch.isdigit())
+
+
+async def t_migration(b):
+    print('Миграция сохранений v1 → v2')
+    old = json.loads(OLD_JSON)
+    # 1. старое сохранение в хранилище
+    ctx, pg = await page(b, storage=OLD_JSON)
+    s = await pg.evaluate('() => window.__tl.save')
+    tt = await toasts(pg)
+    check('после загрузки: облики ezhik и mukhomor, надет ezhik', s['skins'] == ['ezhik', 'mukhomor'] and s['skin'] == 'ezhik', f"{s['skins']} / {s['skin']}")
+    check('светлячков больше на 6 550', s['coins'] == old['coins'] + OLD_REFUND, f"было {old['coins']}, стало {s['coins']}")
+    check('тост о возврате с суммой', 'Облики обновились' in tt and '6550' in digits(tt), tt)
+    check('схема v2, без следов, refund обнулён, прочее на месте', s['v'] == 2 and 'trail' not in s and 'trails' not in s and s['refund'] == 0
+          and s['best'] == old['best'] and s['mDone'] == old['mDone'] and s['up']['wings'] == 2 and s['set']['music'] is False and s['set']['control'] == 'sides',
+          json.dumps({k: s.get(k) for k in ['v', 'refund', 'best', 'mDone']}))
+    stored = await pg.evaluate('() => JSON.parse(localStorage.getItem("tiholesye.save.v1"))')
+    check('в хранилище уже v2 с refund 0', stored['v'] == 2 and stored['refund'] == 0 and stored['coins'] == s['coins'])
+    await pg.reload(); await menu(pg)
+    s2 = await pg.evaluate('() => window.__tl.save'); tt2 = await toasts(pg)
+    check('повторная загрузка не начисляет и не показывает тост', s2['coins'] == s['coins'] and 'Облики обновились' not in tt2, f"{s2['coins']} {tt2}")
+    errs = list(pg.errors); await ctx.close()
+    # 2. код переноса из старой версии — в новую, через поле в настройках
+    ctx, pg = await page(b)
+    await pg.evaluate('() => document.getElementById("bSet").click()'); await pg.wait_for_timeout(150)
+    await pg.evaluate('(code) => { document.getElementById("saveIn").value = code; }', OLD_CODE)
+    await pg.evaluate('() => document.getElementById("bImport").click()'); await pg.wait_for_timeout(400)
+    s3 = await pg.evaluate('() => window.__tl.save'); tt3 = await toasts(pg)
+    check('код TL1. старой версии загружается: облики, светлячки с возвратом, тост', s3['skins'] == ['ezhik', 'mukhomor'] and s3['coins'] == old['coins'] + OLD_REFUND and 'Облики обновились' in tt3,
+          f"{s3['skins']} {s3['coins']} | {tt3}")
+    code2 = await pg.evaluate('() => window.__tl.exportCode()')
+    data2 = await pg.evaluate('(c) => JSON.parse(decodeURIComponent(escape(atob(c.slice(4)))))', code2)
+    check('новый код: префикс TL1. и v 2', code2.startswith('TL1.') and data2['v'] == 2)
+    ok = await pg.evaluate('(c) => window.__tl.importCode(c)', code2)
+    s4 = await pg.evaluate('() => window.__tl.save')
+    check('код v2 загружается обратно без второго возврата', ok and s4['coins'] == s3['coins'] and s4['skins'] == s3['skins'], f"{s4['coins']}")
+    errs += pg.errors; await ctx.close()
+    # 3. рекорд 3 200 м и 12 заданий: рысь и светлячок сразу после загрузки
+    rich = dict(old, best=3200, mDone=12)
+    ctx, pg = await page(b, storage=json.dumps(rich))
+    s5 = await pg.evaluate('() => window.__tl.save'); tt5 = await toasts(pg)
+    check('рекорд 3 200 м: рысь сразу; 12 заданий: светлячок сразу', 'rys' in s5['skins'] and 'svetlyachok' in s5['skins'] and 'Рысь' in tt5, f"{s5['skins']} | {tt5}")
+    # 4. сброс прогресса: чистое v2, настройки и отметка подарка остаются
+    await pg.evaluate('() => { const s = window.__tl.save; s.gift = "2026-11-21"; s.set.sfx = false; window.__tl.persist(); }')
+    await pg.evaluate('() => document.getElementById("bSet").click()'); await pg.wait_for_timeout(150)
+    await pg.evaluate('() => { const b = document.getElementById("bReset"); b.click(); b.click(); }'); await pg.wait_for_timeout(300)
+    s6 = await pg.evaluate('() => window.__tl.save')
+    check('«Сбросить прогресс»: v2, только ёжик, 0 светлячков; настройки и подарок на месте', s6['v'] == 2 and s6['skins'] == ['ezhik'] and s6['coins'] == 0
+          and s6['set']['sfx'] is False and s6['set']['music'] is False and s6['gift'] == '2026-11-21', json.dumps({k: s6.get(k) for k in ['v', 'skins', 'coins', 'gift']}))
+    errs += pg.errors; await ctx.close()
+    # 5. если раздаётся старая версия (TL_OLD_URL): свежий код прямо из неё
+    if OLD_URL:
+        ctx = await b.new_context(viewport={'width': 440, 'height': 956}, device_scale_factor=3, is_mobile=True, has_touch=True)
+        po = await ctx.new_page(); await po.goto(OLD_URL); await po.wait_for_function('window.__tl && window.__tl.game.state === "menu"')
+        code_old = await po.evaluate('''() => { const s = window.__tl.save; s.coins = 77; s.skins = ['svetik', 'lis', 'sova', 'kaplya', 'kometa']; s.skin = 'sova'; s.trails = ['none', 'notes']; s.trail = 'notes';
+          return 'TL1.' + btoa(unescape(encodeURIComponent(JSON.stringify(s)))); }''')
+        await ctx.close()
+        ctx, pg = await page(b)
+        ok = await pg.evaluate('(c) => window.__tl.importCode(c)', code_old)
+        await pg.evaluate('() => window.__tl.afterLoad()')
+        s7 = await pg.evaluate('() => window.__tl.save')
+        check('свежий код из старой версии: лис и совёнок остались, капля → 300, ноты → 800, за комету 0',
+              ok and s7['skins'] == ['ezhik', 'lis', 'sova'] and s7['skin'] == 'sova' and s7['coins'] == 77 + 300 + 800, f"{s7['skins']} {s7['skin']} {s7['coins']}")
+        errs += pg.errors; await ctx.close()
+    check('ошибок в консоли нет', not errs, '; '.join(errs[:3]))
+
+
+async def t_skins(b):
+    print('Облики, взмахи, следы, лавка')
+    ctx, pg = await page(b)
+    sh = await pg.evaluate('''() => { document.getElementById('bShop').click();
+      const tabs = [...document.querySelectorAll('#shopTabs button')].map((x) => x.textContent.trim());
+      const cards = document.querySelectorAll('#shopBody .card').length, trail = document.getElementById('bbTrail').textContent;
+      return { tabs, cards, trail, cur: window.__tl.save.skin }; }''')
+    check('пустое сохранение: надет Ёжик; в лавке вкладки «Облики» и «Усиления», 12 карточек, «След: листики»',
+          sh['cur'] == 'ezhik' and sh['tabs'] == ['Облики', 'Усиления'] and sh['cards'] == 12 and sh['trail'] == 'След: листики', str(sh))
+    # каждый покупается (или открывается) и надевается через лавку
+    bought = await pg.evaluate('''() => { const T = window.__tl, s = T.save, out = [];
+      s.coins = 99999;
+      for (const sk of T.SKINS) {
+        if (sk.unlock) { if (sk.unlock.type === 'height') s.best = Math.max(s.best, sk.unlock.n); else s.mDone = Math.max(s.mDone, sk.unlock.n); T.checkUnlocks(0); }
+        const i = T.SKINS.indexOf(sk);
+        document.querySelectorAll('#shopBody .card')[i].click();
+        const btn = document.getElementById('bbBtn'); if (!btn.hidden && !btn.disabled) btn.click();
+        if (s.skin !== sk.id) document.querySelectorAll('#shopBody .card')[i].click();
+        out.push([sk.id, s.skins.includes(sk.id), s.skin === sk.id, document.getElementById('bbTrail').textContent, sk.trailName]);
+      }
+      return out; }''')
+    bad = [x for x in bought if not (x[1] and x[2] and x[3] == 'След: ' + x[4])]
+    check('каждый облик покупается/открывается и надевается, у каждого строка «След: …»', not bad, str(bad or [x[3] for x in bought]))
+    spent = await pg.evaluate('() => 99999 - window.__tl.save.coins')
+    check('потрачено ровно по ценам таблицы 10.3', spent == 150 + 400 + 700 + 1000 + 1300 + 1700 + 2100 + 2600 + 3200, str(spent))
+    # 10 с забега на каждом: взмахи, след не больше 40 частиц
+    r = await pg.evaluate('''() => { const T = window.__tl, g = T.game, P = T.P, s = T.save, out = {};
+      document.getElementById('shop').hidden = true;
+      for (const sk of T.SKINS) {
+        s.skin = sk.id; g.zen = true; T.startRun(true);
+        let maxTrail = 0, flapSeen = 0, emitted = 0; const seen = new Set();
+        for (let i = 0; i < 600; i++) {
+          if (P.vy < -150 && P.y < T.run.maxY - 60) P.vy = 850;                // бот-пружина: не даём упасть
+          if (i % 90 === 10) { s.up.wings = 3; P.wing = 1; T.flap(); }
+          T.update(1 / 60); if (i % 2 === 0) T.render();
+          let n = 0; for (const q of g.parts) if (q.trail) { n++; if (!seen.has(q)) { seen.add(q); emitted++; } }
+          maxTrail = Math.max(maxTrail, n); if (P.flap > 0) flapSeen++;
+        }
+        out[sk.id] = { maxTrail, flapSeen, emitted, dash: sk.trail.k === 'dash' ? P.hist.length : -1 };
+      }
+      return out; }''')
+    over = {k: v for k, v in r.items() if v['maxTrail'] > 40}
+    check('10 с забега на каждом облике без ошибок', not pg.errors, '; '.join(pg.errors[:3]))
+    check('след вылетает у каждого (у Светлячка — путь для пунктира)', all((v['emitted'] > 5) if v['dash'] < 0 else v['dash'] > 10 for v in r.values()),
+          str({k: (v['emitted'], v['dash']) for k, v in r.items()}))
+    check('живых частиц следа не больше 40', not over, str(over or {k: v['maxTrail'] for k, v in r.items()}))
+    check('взмах проигрывается у каждого', all(v['flapSeen'] > 4 for v in r.values()), str({k: v['flapSeen'] for k, v in r.items()}))
+    # нагрузка: выпуск следа без пауз упирается в 40
+    st = await pg.evaluate('''() => { const T = window.__tl, g = T.game; T.save.skin = 'mukhomor'; T.startRun(true); g.parts.length = 0;
+      for (let i = 0; i < 200; i++) T.emitTrail(0.5); return g.parts.filter((q) => q.trail).length; }''')
+    check('при сплошном выпуске частиц следа не больше 40', st <= 40, str(st))
+    fk = await pg.evaluate('() => window.__tl.SKINS.map((s) => s.flapK)')
+    check('длительность взмаха задана у каждого облика и не одна на всех', all(isinstance(x, (int, float)) and x > 0 for x in fk) and len(set(fk)) >= 6, str(fk))
+    # разворот: смена направления за ~0,1 с
+    fc = await pg.evaluate('''() => { const T = window.__tl, g = T.game, P = T.P, c = T.ctl; T.save.skin = 'lis'; g.zen = true; T.startRun(true);
+      const f = []; c.keyL = true; for (let i = 0; i < 12; i++) { if (P.vy < -150) P.vy = 850; T.update(1 / 60); f.push(+P.face.toFixed(2)); }
+      c.keyL = false; c.keyR = true; for (let i = 0; i < 12; i++) { if (P.vy < -150) P.vy = 850; T.update(1 / 60); f.push(+P.face.toFixed(2)); }
+      c.keyR = false; return f; }''')
+    check('при смене направления облик разворачивается за ~0,1 с', min(fc[:12]) <= -0.99 and fc[23] >= 0.99, str(fc))
+    check('ошибок в консоли нет', not pg.errors, '; '.join(pg.errors[:3]))
+    await ctx.close()
+
+
+TESTS = [('gift', t_gift), ('coins', t_coins), ('ghost', t_ghost), ('leaf', t_leaf), ('beasts', t_beasts), ('migration', t_migration), ('skins', t_skins)]
 
 
 async def main():
