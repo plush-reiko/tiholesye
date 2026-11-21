@@ -345,7 +345,7 @@ textarea.field { word-break: break-all; font-size: 16px; line-height: 1.25; }   
     <symbol id="i-fly" viewBox="0 0 24 24"><circle cx="12" cy="15" r="4.6"/><path d="M11 11C7.5 10 5 7.5 5.5 4 9 4.3 11 7 11 11zM13 11c3.500-1 6-3.500 5.500-7C15 4.300 13 7 13 11z" opacity=".65"/></symbol>
     <symbol id="i-wing" viewBox="0 0 24 24"><path d="M2.500 14C3.500 7.500 10 3.500 21.500 5c-1 3-3 5-6 6 2 0 3.300.4 4.300 1.200C17.500 15 14 16 11 15.500 8.500 17.500 5 17.300 2.500 14z"/></symbol>
     <symbol id="i-dand" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.600" stroke-linecap="round"><path d="M12 22c-.8-3-.8-6 0-9"/><path d="M12 10V3.500M12 10l4.600-4.600M12 10 7.400 5.400M12 10h6.500M12 10H5.500M12 10l4.500 3.500M12 10l-4.500 3.500"/></g><circle cx="12" cy="10" r="2"/></symbol>
-    <symbol id="i-comet" viewBox="0 0 24 24"><path d="M15 2.500l1.650 4.230 4.530.26-3.520 2.880 1.160 4.390L15 11.800l-3.820 2.460 1.160-4.390-3.520-2.880 4.530-.26z"/><path d="M9.500 13.500l-6 6M12.500 16.500l-4 4M7 10.500l-4 4" fill="none" stroke="currentColor" stroke-width="1.800" stroke-linecap="round"/></symbol>
+    <symbol id="i-comet" viewBox="0 0 24 24"><path d="M14.600 2.600l2.600 1.300 1.400-1.300 2.700 3.300-.4 4.300-3.300 2.700-3.700-.7-2-3.200.5-3.900z"/><path d="M12.200 8.300C8.500 10.300 5.300 14.400 2.400 21.500c4.300-3.300 8.100-5.900 12-8.700z" opacity=".55"/><path d="M14.100 12.700c-2.300 2.300-3.900 4.900-4.900 8.600 2.400-2.400 4.700-4.700 7.900-7.800z" opacity=".8"/><path d="M12.300 6.200C9.200 6.300 6.400 7.700 3.900 10.200c3.200-.9 6.100-1.100 8.700-.9z" opacity=".7"/></symbol>
     <symbol id="i-lamp" viewBox="0 0 24 24"><path d="M9 6.500a3 3 0 0 1 6 0" fill="none" stroke="currentColor" stroke-width="1.600" stroke-linecap="round"/><rect x="6.500" y="6.500" width="11" height="2.200" rx="1.100"/><path d="M7.500 9.500h9l-.8 9.200a1.500 1.500 0 0 1-1.500 1.300H9.800a1.500 1.500 0 0 1-1.500-1.300z" opacity=".5"/><circle cx="12" cy="14.500" r="2.400"/></symbol>
     <symbol id="i-clover" viewBox="0 0 24 24"><circle cx="8.700" cy="7.700" r="3.700"/><circle cx="15.300" cy="7.700" r="3.700"/><circle cx="8.700" cy="13.800" r="3.700"/><circle cx="15.300" cy="13.800" r="3.700"/><path d="M12 12.500c0 4 1 6.500 3.500 8.500" fill="none" stroke="currentColor" stroke-width="1.800" stroke-linecap="round"/></symbol>
     <symbol id="i-bubble" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.500" fill="none" stroke="currentColor" stroke-width="1.800"/><path d="M7.800 10.500a4.600 4.600 0 0 1 3-3.200" fill="none" stroke="currentColor" stroke-width="1.800" stroke-linecap="round"/></symbol>
@@ -1037,11 +1037,6 @@ const Art = (() => {
     c.beginPath(); c.moveTo(x + r, y); c.lineTo(x + w - r, y); c.quadraticCurveTo(x + w, y, x + w, y + r); c.lineTo(x + w, y + h - r);
     c.quadraticCurveTo(x + w, y + h, x + w - r, y + h); c.lineTo(x + r, y + h); c.quadraticCurveTo(x, y + h, x, y + h - r); c.lineTo(x, y + r); c.quadraticCurveTo(x, y, x + r, y); c.closePath();
   }
-  function star5(c, x, y, R, r, rot) {
-    c.beginPath();
-    for (let i = 0; i < 10; i++) { const a = rot + i * Math.PI / 5 - Math.PI / 2, q = i % 2 ? r : R; c.lineTo(x + Math.cos(a) * q, y + Math.sin(a) * q); }
-    c.closePath();
-  }
   function firefly(c, x, y) {          // большой светлячок: круглое тельце и два крылышка сверху, как значок в интерфейсе
     c.fillStyle = '#ffe3a0';
     for (const s of [-1, 1]) { c.save(); c.translate(x + s * 1.6, y - 2.4); c.rotate(s * 0.7); c.beginPath(); c.ellipse(s * 1.4, -2.6, 1.9, 3.4, 0, 0, TAU); c.fill(); c.restore(); }
@@ -1151,20 +1146,26 @@ const Art = (() => {
       x.fillStyle = SPORE; dot(x, sx + ln, -h - 1.6, 1.3);
     }
   }
-  function pad(x, w, r) {          // плавучая кочка: плоская линза мха без камня, под ней штрихи «на плаву»
+  function pad(x, w, r) {          // плавучая кочка: плоская линза мха без камня; край мха неровный, как у кочек, снизу свисают 2–3 пряди
     const hw = w / 2, P = TYPE.pad;
-    blob(x, [[-hw - 2, 3.4], [-hw + 5, 0.2], [-hw * 0.45, -1.3 + r() * 0.5], [(r() - 0.5) * 8, -0.3 - r() * 0.5], [hw * 0.45, -1.4 + r() * 0.5], [hw - 5, 0.2], [hw + 2, 3.4],
-      [hw - 9, 8.2 + r() * 0.8], [hw * (0.25 + r() * 0.2), 10.4 + r()], [-hw * (0.2 + r() * 0.2), 10.6 + r()], [-hw + 9, 8.4 + r() * 0.8]]);
-    x.fillStyle = P.base; x.fill();
-    x.save(); x.clip();
-    poly(x, [[-hw - 6, -8], [hw + 6, -8], [hw + 6, 2.2], [hw * 0.3, 3 + r() * 0.6], [-hw * 0.4, 2.5 + r() * 0.6], [-hw - 6, 3]]); x.fillStyle = P.light; x.fill();
-    x.fillStyle = P.dark; x.fillRect(-hw - 6, 7.4 + r() * 0.5, w + 12, 12);
-    x.restore();
-    x.strokeStyle = hexA(P.light, 0.5); x.lineCap = 'round'; x.lineWidth = 1.2;
-    for (const [fx, dy] of [[-0.42, 16], [0.16, 18.5], [0.5, 15.5]]) {
-      const x0 = fx * hw + (r() - 0.5) * 6, len = 7 + r() * 8;
-      x.beginPath(); x.moveTo(x0, dy + (r() - 0.5)); x.lineTo(x0 + len, dy + (r() - 0.5)); x.stroke();
+    x.fillStyle = P.dark;
+    for (let i = 0, n = 2 + (r() < 0.5 ? 1 : 0); i < n; i++) {                       // пряди: разной длины, чуть изогнуты
+      const x0 = (-0.5 + (i + 0.3 + r() * 0.4) / n) * w * 0.74, len = 5 + r() * 7, b = (r() - 0.5) * 4, wob = 1 + r() * 0.8;
+      taper(x, [[x0, 8.2], [x0 + wob, 8.2 + len * 0.3], [x0 - wob * 0.6 + b * 0.5, 8.2 + len * 0.62], [x0 + b, 8.2 + len]], 2.6, 0.9);
     }
+    const top = [[-hw - 2, 3.4], [-hw + 2.6, 0.6]];
+    for (let u = -hw + 6 + r() * 2; u < hw - 5; u += 3.6 + r() * 4.4) top.push([u, -0.9 - r() * 1.2 + Math.sin(u * 0.13) * 0.35]);
+    top.push([hw - 2.6, 0.6], [hw + 2, 3.4], [hw - 9, 8.2 + r() * 0.8], [hw * (0.25 + r() * 0.2), 10.4 + r()], [-hw * (0.2 + r() * 0.2), 10.6 + r()], [-hw + 9, 8.4 + r() * 0.8]);
+    blob(x, top); x.fillStyle = P.base; x.fill();
+    x.save(); x.clip();
+    const hl = [[-hw - 6, -8], [hw + 6, -8], [hw + 6, 2.4]];                          // светлый мох сверху: нижний край неровный, короткие языки
+    for (let u = hw + 1; u > -hw - 1; u -= 2.6 + r() * 3.6) hl.push([u, 2.3 + r() * 1.4], [u - 1.2, 3.6 + r() * 1.6]);
+    hl.push([-hw - 6, 3]);
+    poly(x, hl); x.fillStyle = P.light; x.fill();
+    const dl = [[-hw - 6, 22], [hw + 6, 22], [hw + 6, 7.8]];
+    for (let u = hw; u > -hw; u -= 3.5 + r() * 5) dl.push([u, 7.1 + r() * 1.4]);
+    dl.push([-hw - 6, 7.8]); poly(x, dl); x.fillStyle = P.dark; x.fill();
+    x.restore();
   }
   function bouncer(x, w, r) {      // гриб-батут: низкая широкая шляпка в крапинку на короткой ножке; верх плоский
     const hw = w / 2, P = TYPE.cap, lean = (r() - 0.5) * 1.6;
@@ -1288,14 +1289,30 @@ const Art = (() => {
     for (let i = 0, n = 2 + (r() < 0.5 ? 1 : 0); i < n; i++) { x.globalAlpha = 0.45 + r() * 0.3; dot(x, (r() - 0.5) * (w - 24), cy + (r() - 0.5) * 6, 0.5 + r() * 0.3); }
     x.globalAlpha = 1;
   }
-  function crystal(x, w, r) {      // кристалл: гранёная пластина с острыми концами, шип вверх слева и шип вниз справа
-    const hw = w / 2, P = TYPE.crystal, a = 0.44 + (r() - 0.5) * 0.16, b = 0.36 + (r() - 0.5) * 0.16, ha = 6 + r() * 1.5, hb = 5 + r() * 1.5;
-    poly(x, [[-hw * (a + 0.08), 0], [-hw * a, -ha], [-hw * (a - 0.1), 0]]); x.fillStyle = P.light; x.fill();
-    poly(x, [[hw * (b - 0.08), 10], [hw * b, 10 + hb], [hw * (b + 0.1), 10]]); x.fillStyle = P.dark; x.fill();
-    const ml = 4.6 + r() * 1.2, mr = 4.4 + r() * 1.2;
-    poly(x, [[-hw, ml], [-hw + 7, 0], [hw - 7, 0], [hw, mr], [hw - 7, 10], [-hw + 7, 10]]); x.fillStyle = P.base; x.fill();
-    poly(x, [[-hw + 7, 0], [hw - 7, 0], [hw - 12, 3.7], [-hw + 12, 3.7]]); x.fillStyle = P.light; x.fill();
-    poly(x, [[-hw + 12, 6.6], [hw - 12, 6.6], [hw - 7, 10], [-hw + 7, 10]]); x.fillStyle = P.dark; x.fill();
+  function crystal(x, w, r) {      // кристалл: гранёная плита — торцы разные, верхняя грань разбита надвое, сколы и трещина; 2–3 разных отростка (свой набор у каждого v)
+    const hw = w / 2, P = TYPE.crystal, mid = mixh(P.base, P.light, 0.4), deep = mixh(P.base, P.dark, 0.5);
+    const sprout = (bx, by, ang, len, wd, lit) => {               // отросток: две грани разного тона, кончик чуть скошен
+      const ca = Math.cos(ang), sa = Math.sin(ang), nx = -sa * wd, ny = ca * wd, k = 0.62 + r() * 0.16;
+      const tip = [bx + ca * len + nx * 0.25, by + sa * len + ny * 0.25], sh = [bx + ca * len * k + nx * 0.7, by + sa * len * k + ny * 0.7];
+      poly(x, [[bx + nx, by + ny], sh, tip, [bx - nx, by - ny]]); x.fillStyle = lit ? P.light : P.base; x.fill();
+      poly(x, [[bx - nx * 0.1, by - ny * 0.1], sh, tip, [bx - nx, by - ny]]); x.fillStyle = lit ? mid : P.dark; x.fill();
+    };
+    const side = r() < 0.5 ? -1 : 1;                              // где растёт сросток
+    sprout(side * hw * (0.38 + r() * 0.1), 1.2, -Math.PI / 2 + side * (0.42 + r() * 0.3), 5.5 + r() * 2.5, 2.3, true);   // крупный вверх-вбок, у края
+    if (r() < 0.7) sprout(side * hw * (0.26 + r() * 0.08), 1.2, -Math.PI / 2 + side * (0.95 + r() * 0.25), 3.5 + r() * 2, 1.4, true);   // маленький рядом
+    sprout(-side * hw * (0.15 + r() * 0.25), 9.4, Math.PI / 2 - side * (0.15 + r() * 0.4), 6 + r() * 5, 2.4, false);   // вниз
+    const ml = 5.4 + r() * 1.8, ch = hw * (r() * 0.4 - 0.05), cb = -hw * (0.1 + r() * 0.35), split = hw * (r() * 0.5 - 0.3);
+    const body = [[-hw, ml], [-hw + 4.5 + r() * 1.5, 0.3], [ch, 0], [ch + 1.3, 1.3], [ch + 3.2, 0.1], [hw - 3.2, 0.4], [hw, 3.4 + r()], [hw - 0.6, 6.8], [hw - 2.6, 7.4], [hw - 2.2, 10],   // правый торец тупой, со сколом
+      [cb + 3.6, 10.3], [cb + 1.8, 8.9], [cb, 10.4], [-hw + 8.5, 10]];                                                                                       // скол снизу
+    poly(x, body); x.fillStyle = P.base; x.fill();
+    x.save(); x.clip();
+    poly(x, [[-hw + 2, -1], [split, -1], [split - 2.4, 4.1], [-hw + 9.5, 3.8]]); x.fillStyle = P.light; x.fill();                 // верхняя грань: светлая часть
+    poly(x, [[split, -1], [hw, -1], [hw - 6.4, 3.6], [split - 2.4, 4.1]]); x.fillStyle = mid; x.fill();                            // и чуть темнее
+    poly(x, [[-hw + 9, 6.8], [hw - 8.5, 6.3], [hw - 1, 11], [-hw + 7, 11]]); x.fillStyle = P.dark; x.fill();                       // нижняя грань
+    poly(x, [[-hw - 1, ml - 1], [-hw + 4.5, 0], [-hw + 9.5, 6.8], [-hw + 8.5, 10.6], [-hw - 1, 10.6]]); x.fillStyle = deep; x.fill(); // левый торец
+    x.restore();
+    x.strokeStyle = deep; x.lineWidth = 0.6; x.lineCap = 'round';                                                                    // трещина от скола
+    x.beginPath(); x.moveTo(cb + 1.8, 8.9); x.lineTo(cb + 3.2, 6.6); x.lineTo(cb + 2.6, 5.2); x.stroke();
   }
   const PLAT = {
     static: (x, w, z, r) => kochka(x, w, z, r, false), home: (x, w, z, r) => kochka(x, w, z, r, true),
@@ -1388,15 +1405,18 @@ const Art = (() => {
     return at;
   }
   /* папоротник в цвету: пять лепестков двух тонов и светлая сердцевина; светится — ореол рисует сцена */
+  // цветок папоротника: пять лепестков разной длины и ширины, расставлены неровно, один подогнут; серединка — неровное пятнышко.
+  // Не звезда: без симметрии и белого кружка
+  const FERN_PETALS = [[0, 1, 0.4, 0.08], [1.36, 0.82, 0.34, -0.16], [2.4, 1.1, 0.46, 0.04], [3.78, 0.74, 0.32, 0.3], [5.02, 0.94, 0.4, -0.1]];   // угол, длина, ширина, изгиб
   function fernFlower(c, x, y, R, t, ph) {
-    for (let i = 0; i < 5; i++) {
-      const a = ph + i / 5 * TAU + Math.sin(t * 1.3 + i) * 0.05;
+    for (const [a0, len, wd, bend] of FERN_PETALS) {
+      const a = ph + a0 + Math.sin(t * 1.3 + a0) * 0.05, L = R * 1.08 * len, W = R * wd, B = bend * R;
       c.save(); c.translate(x, y); c.rotate(a);
-      c.fillStyle = '#9ff0ff'; c.beginPath(); c.moveTo(0, 0); c.quadraticCurveTo(R * 0.62, -R * 0.42, R * 1.05, 0); c.quadraticCurveTo(R * 0.62, R * 0.42, 0, 0); c.fill();
-      c.fillStyle = '#e8fdff'; c.beginPath(); c.moveTo(0, 0); c.quadraticCurveTo(R * 0.62, -R * 0.42, R * 1.05, 0); c.lineTo(R * 0.3, 0.2); c.closePath(); c.fill();
+      c.fillStyle = '#9ff0ff'; c.beginPath(); c.moveTo(0, 0); c.quadraticCurveTo(L * 0.55, -W + B, L, B * 0.7); c.quadraticCurveTo(L * 0.62, W * 0.9 + B * 0.4, 0, 0); c.fill();
+      c.fillStyle = '#e8fdff'; c.beginPath(); c.moveTo(0, 0); c.quadraticCurveTo(L * 0.55, -W + B, L, B * 0.7); c.lineTo(L * 0.3, B * 0.25 + 0.2); c.closePath(); c.fill();
       c.restore();
     }
-    c.fillStyle = '#ffffff'; dot(c, x, y, R * 0.3);
+    c.fillStyle = '#ffffff'; poly(c, [[x - R * 0.24, y - R * 0.06], [x + R * 0.04, y - R * 0.26], [x + R * 0.27, y - R * 0.04], [x + R * 0.1, y + R * 0.22], [x - R * 0.18, y + R * 0.17]]); c.fill();
   }
   /* улитка папоротника: стебель от ствола, на конце тугая спираль; на самом кончике — светлая капля */
   function curl(c, x, y, dir, h, col) {
@@ -1408,39 +1428,140 @@ const Art = (() => {
     c.stroke();
     return [cx, cy];
   }
-  /* парящий островок: плоский верх с мхом, снизу неровный клин камня со светлой гранью, корешки */
+  /* парящий островок: плоский верх с мхом; низ — лестница из полок разной глубины с отвесами между ними (глубже к середине),
+     на одной полке висит каменный зуб, из-под него — пучок корней. Число полок, их ширина и место зуба у каждого свои */
   function islet(c, x, y, w, col, colL, moss, r) {
-    const hw = w / 2, d = w * (0.55 + r() * 0.3), pts = [[x - hw, y + 1]];
-    for (let i = 1; i < 6; i++) pts.push([x - hw + i / 6 * w, y - 1.2 - r() * 1.6]);
-    pts.push([x + hw, y + 1], [x + hw * 0.72, y + d * 0.32], [x + hw * 0.3, y + d * (0.66 + r() * 0.12)], [x + (r() - 0.4) * hw * 0.3, y + d], [x - hw * 0.36, y + d * 0.58], [x - hw * 0.8, y + d * 0.26]);
-    c.strokeStyle = col; c.lineWidth = Math.max(0.8, w * 0.025); c.lineCap = 'round';
-    for (let i = 0; i < 3; i++) { const sx = x + (r() - 0.5) * w * 0.5, sy = y + d * (0.3 + r() * 0.3), ln = 8 + r() * w * 0.3; c.beginPath(); c.moveTo(sx, sy); c.quadraticCurveTo(sx + (r() - 0.5) * 6, sy + ln * 0.6, sx + (r() - 0.5) * 8, sy + ln); c.stroke(); }
-    poly(c, pts); c.fillStyle = col; c.fill();
+    const hw = w / 2, d = w * (0.5 + r() * 0.4), n = 4 + ((r() * 3) | 0), knots = [0];
+    for (let k = 1; k < n; k++) knots.push(k / n + (r() - 0.5) * 0.45 / n);
+    knots.push(1);
+    const top = [[x - hw, y + 1]];
+    for (let i = 1; i < 6; i++) top.push([x - hw + i / 6 * w, y - 1.2 - r() * 1.6]);
+    top.push([x + hw, y + 1]);
+    const under = [], tooth = 1 + ((r() * (n - 2)) | 0);
+    let root = [x, y + d];
+    const f = (t) => d * (0.12 + 0.72 * Math.pow(Math.sin(Math.PI * t), 0.85));        // глубже к середине
+    for (let k = 0; k < n; k++) {                                  // справа налево: грани с наклоном, на стыках — ступени вверх или вниз
+      const t0 = knots[k], t1 = knots[k + 1], j = k ? (r() - 0.5) * 0.3 : -0.1;
+      const xa = x + hw - t0 * w - (k ? 0 : 1.2), xb = x + hw - t1 * w + (k === n - 1 ? 1.2 : 0), da = y + f(t0) * (1 + j), db = y + f(t1) * (1 + j);
+      under.push([xa, da]);
+      if (k === tooth) {                                           // каменный зуб посреди грани
+        const m1 = lerp(xa, xb, 0.3 + r() * 0.1), m2 = lerp(xa, xb, 0.62 + r() * 0.1), y1 = lerp(da, db, 0.35), y2 = lerp(da, db, 0.67), td = d * (0.2 + r() * 0.14);
+        under.push([m1, y1], [m1 - (m1 - m2) * 0.2, y1 + td], [m2 + (m1 - m2) * 0.25, y2 + td * 0.84], [m2, y2]);
+        root = [(m1 + m2) / 2, (y1 + y2) / 2 + td * 0.9];
+      }
+      under.push([xb, db]);
+    }
+    // пучок корней из-под зуба: 3–5 тонких, разной длины, все из одного места
+    c.fillStyle = col;
+    for (let i = 0, nr = 3 + ((r() * 3) | 0); i < nr; i++) {
+      const len = 5 + r() * (6 + w * 0.22), b = (i - nr / 2) * 2.2 + (r() - 0.5) * 2;
+      taper(c, [[root[0] + (i - nr / 2) * 0.8, root[1] - 1], [root[0] + b * 0.5, root[1] + len * 0.55], [root[0] + b, root[1] + len]], Math.max(0.9, w * 0.028), 0.25);
+    }
+    poly(c, [...top, ...under]); c.fillStyle = col; c.fill();
     c.save(); c.clip();
-    poly(c, [[x - hw - 2, y - 4], [x - hw * 0.25, y - 4], [x - hw * 0.45, y + d * 0.5], [x - hw - 2, y + d * 0.4]]); c.fillStyle = colL; c.fill();
+    poly(c, [[x - hw - 2, y - 4], [x - hw * 0.32, y - 4], [x - hw * 0.46, y + d * 1.4], [x - hw - 2, y + d * 1.4]]); c.fillStyle = colL; c.fill();        // светлые грани слева
+    poly(c, [[x + hw * 0.36, y + 2], [x + hw + 2, y + 2], [x + hw + 2, y + d * 1.4], [x + hw * 0.18, y + d * 1.4]]); c.fillStyle = 'rgba(8,6,26,.3)'; c.fill();   // правые — в тени
     c.fillStyle = moss; c.beginPath(); c.moveTo(x - hw - 2, y - 6); c.lineTo(x + hw + 2, y - 6); c.lineTo(x + hw + 2, y + 2.6);
     for (let u = hw; u > -hw; u -= 4 + r() * 4) c.lineTo(x + u, y + 2.2 + r() * 2.8);
     c.lineTo(x - hw - 2, y + 2.6); c.closePath(); c.fill();
     c.restore();
   }
-  function moon(c, x, y, R) {      // луна: плоский диск, три пятна и два плоских кольца вместо свечения
+  /* луна: бумажный круг с тремя едва заметными срезами ножницами по краю; «моря» — четыре неровных пятна разного размера,
+     как на карте луны; ореол — одно бледное неровное пятно. Контуры строятся один раз на радиус */
+  const MOON_SEAS = [         // как на настоящей карте: большое тёмное слева сверху вниз, цепочка морей правее середины, маленькое у правого края
+    [[-0.62, -0.62], [-0.3, -0.66], [-0.12, -0.46], [-0.2, -0.26], [-0.08, -0.06], [-0.2, 0.16], [-0.16, 0.36], [-0.34, 0.52], [-0.58, 0.48], [-0.74, 0.22], [-0.86, -0.12], [-0.8, -0.4]],
+    [[0.06, -0.5], [0.26, -0.56], [0.36, -0.36], [0.3, -0.2], [0.5, -0.06], [0.56, 0.16], [0.46, 0.34], [0.32, 0.26], [0.26, 0.06], [0.1, -0.06], [0.0, -0.26]],
+    [[0.62, -0.34], [0.76, -0.3], [0.79, -0.12], [0.66, -0.06], [0.58, -0.18]],
+    [[-0.4, 0.5], [-0.2, 0.52], [-0.14, 0.64], [-0.3, 0.72], [-0.44, 0.64]],
+  ];
+  const moonCache = new Map();
+  function moon(c, x, y, R) {
+    let m = moonCache.get(R);
+    if (!m) {
+      const cuts = [[0.7, 1.32], [2.8, 3.3], [4.6, 5.24]], used = new Set(), edge = [], corners = [], at = (a) => [Math.cos(a) * R, Math.sin(a) * R];
+      for (let i = 0; i < 36; i++) {
+        const a = i / 36 * TAU, k = cuts.findIndex(([a0, a1]) => a > a0 && a < a1);
+        if (k >= 0) { if (!used.has(k)) { used.add(k); corners.push(edge.length, edge.length + 1); edge.push(at(cuts[k][0]), at(cuts[k][1])); } continue; }   // срез: прямая между двумя углами
+        edge.push([Math.cos(a) * R * (1 + Math.sin(i * 2.3) * 0.006), Math.sin(a) * R]);
+      }
+      const halo = []; for (let i = 0; i < 20; i++) { const a = i / 20 * TAU, q = R * (1.58 + Math.sin(i * 1.7) * 0.07 + Math.sin(i * 0.9 + 1) * 0.05); halo.push([Math.cos(a) * q, Math.sin(a) * q]); }
+      m = { disc: cutPath(edge, corners), halo: cutPath(halo), seas: MOON_SEAS.map((s) => cutPath(s.map(([u, v]) => [u * R, v * R]))) };
+      moonCache.set(R, m);
+    }
     const a0 = c.globalAlpha;
-    c.fillStyle = '#d6deff'; c.globalAlpha = a0 * 0.05; dot(c, x, y, R * 2.5); c.globalAlpha = a0 * 0.07; dot(c, x, y, R * 1.7); c.globalAlpha = a0;
-    const pts = []; for (let i = 0; i < 14; i++) { const a = i / 14 * TAU; pts.push([x + Math.cos(a) * R * (1 + Math.sin(i * 2.7) * 0.012), y + Math.sin(a) * R]); }
-    blob(c, pts); c.fillStyle = '#e9ecff'; c.fill();
-    c.fillStyle = '#cdd3f7'; dot(c, x - R * 0.3, y - R * 0.25, R * 0.22); dot(c, x + R * 0.32, y + R * 0.18, R * 0.3); dot(c, x - R * 0.12, y + R * 0.5, R * 0.14);
+    c.save(); c.translate(x, y);
+    c.fillStyle = '#d6deff'; c.globalAlpha = a0 * 0.06; c.fill(m.halo); c.globalAlpha = a0;
+    c.fillStyle = '#e9ecff'; c.fill(m.disc);
+    m.seas.forEach((p, i) => { c.fillStyle = i < 2 ? '#cdd3f7' : '#d3d9f9'; c.fill(p); });
+    c.restore();
   }
-
+  /* листва лунных крон: шесть силуэтов — гроздья листьев разного размера с острыми кончиками и выемками между ними,
+     все листья чуть наклонены в одну сторону; радиус около 1, строятся один раз */
+  const FOLIAGE = [];
+  function foliage(i) {
+    i %= 6; if (FOLIAGE[i]) return FOLIAGE[i];
+    const r = mulberry(4001 + i * 37), lobes = [];
+    for (let k = 0, n = 2 + (i % 3); k < n; k++) lobes.push([r() * TAU, 0.12 + r() * 0.2, 1.2 + r() * 2]);
+    const rad = (a) => { let q = 0.66; for (const [ph, amp, wd] of lobes) q += amp * Math.pow(Math.max(0, Math.cos(a - ph)), wd); return q; };
+    const pts = [], corners = [], lean = 0.18 + r() * 0.14;
+    let a = 0;
+    while (a < TAU - 0.15) {
+      const span = 0.32 + r() * 0.38, len = 0.1 + r() * 0.16, mid = a + span / 2, q0 = rad(a), q1 = rad(mid);
+      pts.push([Math.cos(a) * q0 * 0.97, Math.sin(a) * q0 * 0.97]);                                        // выемка между листьями
+      pts.push([Math.cos(a + span * 0.22) * (q0 + len * 0.6), Math.sin(a + span * 0.22) * (q0 + len * 0.6)]);  // бок листа
+      const ta = mid + lean * span; corners.push(pts.length);
+      pts.push([Math.cos(ta) * (q1 + len), Math.sin(ta) * (q1 + len)]);                                    // кончик
+      pts.push([Math.cos(a + span * 0.8) * (q1 + len * 0.45), Math.sin(a + span * 0.8) * (q1 + len * 0.45)]);
+      a += span;
+    }
+    return (FOLIAGE[i] = cutPath(pts.map(([x, y]) => [x, y * 0.9]), corners));
+  }
+  /* облака выси: пять кучевых силуэтов — крупные бугры разной высоты и ширины, перекошены, на плечах мелкие бугорки («цветная капуста»);
+     низ почти ровный, слегка неровный. Ширина около 1, начало координат — середина низа */
+  const CLOUDS = [];
+  function cloud(i) {
+    i %= 5; if (CLOUDS[i]) return CLOUDS[i];
+    const r = mulberry(9001 + i * 53), nb = 3 + (i % 3), B = [];
+    for (let k = 0; k < nb; k++) {
+      const t = (k + 0.25 + r() * 0.5) / nb, hh = (0.16 + r() * 0.16) * (0.6 + Math.sin(t * Math.PI) * 0.55), wd = 0.09 + r() * 0.06, sk = 0.7 + r() * 0.7, cx = -0.4 + t * 0.8;
+      B.push([cx, hh, wd, sk]);
+      for (const sd of [-1, 1]) if (r() < 0.75) B.push([cx + sd * wd * (0.7 + r() * 0.3) * (sd < 0 ? sk : 1), hh * (0.55 + r() * 0.2), wd * (0.4 + r() * 0.2), 0.8 + r() * 0.4]);   // бугорок на плече
+    }
+    const x0 = Math.min(...B.map(([cx, , wd, sk]) => cx - wd * sk)) + 0.005, x1 = Math.max(...B.map(([cx, , wd]) => cx + wd)) - 0.005;
+    const top = [], corners = [];
+    for (let j = 0; j <= 56; j++) {
+      const x = lerp(x0, x1, j / 56); let h = 0.004, best = -1;
+      B.forEach(([cx, hh, wd, sk], k) => { const u = (x - cx) / (x < cx ? wd * sk : wd); if (Math.abs(u) < 1) { const v = hh * Math.pow(1 - u * u, 0.45); if (v > h) { h = v; best = k; } } });
+      top.push([x, -h, best]);
+    }
+    const pts = [];
+    top.forEach(([x, y, k], j) => { pts.push([x, y]); if (j && top[j - 1][2] !== k && k >= 0 && top[j - 1][2] >= 0) corners.push(pts.length - 1); });   // между буграми — излом
+    for (let j = 10; j >= 0; j--) { const x = lerp(x0, x1, j / 10); pts.push([x, 0.008 + Math.sin(j * 2.1 + i) * 0.006 - (j === 0 || j === 10 ? 0.01 : 0)]); }
+    return (CLOUDS[i] = cutPath(pts, corners));
+  }
   function simple(key, w, h, draw) {   // спрайт w×h единиц с началом координат в центре
     let s = sprites.get(key); if (s) return s;
     const c = canvas(w * K, h * K), x = c.getContext('2d'); x.scale(K, K); x.translate(w / 2, h / 2); draw(x);
     s = { c, ox: w / 2, oy: h / 2, w, h }; sprites.set(key, s); return s;
   }
+  /* мыльный пузырь-щит вокруг героя: контур круглый (это пузырь), лёгкий отлив двумя тонами у края,
+     блик-окошко неправильной формы, капля снизу. Без градиентов */
+  const crescent = (x, R, a0, a1, th, col) => {      // серп вдоль внутреннего края: по дуге R и обратно по дуге R − th (толщина плавно сходит на нет)
+    const pts = [], n = 14;
+    for (let i = 0; i <= n; i++) { const a = lerp(a0, a1, i / n); pts.push([Math.cos(a) * R, Math.sin(a) * R]); }
+    for (let i = n; i >= 0; i--) { const a = lerp(a0, a1, i / n), q = R - th * Math.sin(Math.PI * i / n); pts.push([Math.cos(a) * q, Math.sin(a) * q]); }
+    poly(x, pts); x.fillStyle = col; x.fill();
+  };
+  const BUB_WIN = [[-0.58, -0.5], [-0.3, -0.7], [-0.18, -0.6], [-0.28, -0.4], [-0.46, -0.3]];
   const bubble = () => simple('bubble', 96, 96, (x) => {
-    const g = x.createRadialGradient(0, 0, 18, 0, 0, 46); g.addColorStop(0, 'rgba(180,230,255,0)'); g.addColorStop(0.72, 'rgba(180,230,255,.2)');
-    g.addColorStop(0.9, 'rgba(225,246,255,.8)'); g.addColorStop(0.97, 'rgba(225,246,255,0)'); x.fillStyle = g; dot(x, 0, 0, 47);
-    x.strokeStyle = 'rgba(255,255,255,.85)'; x.lineWidth = 3; x.lineCap = 'round'; x.beginPath(); x.arc(0, 0, 34, -2.45, -1.75); x.stroke();
-    x.fillStyle = 'rgba(255,255,255,.9)'; dot(x, 24, 22, 2.4);
+    const R = 42;
+    x.fillStyle = 'rgba(180,230,255,.1)'; dot(x, 0, 0, R);
+    crescent(x, R, 2.3, 3.9, 9, 'rgba(206,188,255,.34)');          // отлив: сиреневый слева
+    crescent(x, R, -0.5, 1.0, 7, 'rgba(176,244,226,.3)');           // и мятный справа внизу
+    x.strokeStyle = 'rgba(225,246,255,.75)'; x.lineWidth = 2; x.beginPath(); x.arc(0, 0, R, 0, TAU); x.stroke();
+    cut(x, BUB_WIN.map(([u, v]) => [u * R, v * R]), [1, 4]); x.fillStyle = 'rgba(255,255,255,.82)'; x.fill();   // окошко-блик
+    cut(x, [[0.5 * R, 0.5 * R], [0.62 * R, 0.3 * R], [0.6 * R, 0.4 * R]]); x.fillStyle = 'rgba(255,255,255,.5)'; x.fill();
+    cut(x, [[-2.4, R - 0.6], [2.2, R - 0.8], [2.8, R + 3.2], [0.2, R + 6.6], [-2.6, R + 3.4]], [3]); x.fillStyle = 'rgba(214,243,255,.8)'; x.fill();   // капля снизу
   });
   /* ---------- ворчуны ----------
      Пять видов: у каждого свой силуэт, лицо и движение. Рисунок по правилам обликов: контуры из вручную расставленных точек,
@@ -1662,42 +1783,79 @@ const Art = (() => {
   const beast = (kind, f) => simple(`beast|${kind}|${f | 0}`, BEAST_BOX[kind][0], BEAST_BOX[kind][1], (x) => BEAST_DRAW[kind](x, f | 0));
   /* ---------- находки ---------- */
   const ITEM_GLOW = { dandelion: '#ffffff', comet: '#8fe9ff', bubble: '#bfe9ff', lantern: '#ffe6a3', feather: '#bff3ff' };
+  // находки на кочках: ~±12 ед., t — время (покачивание и огонёк)
+  const COMET_CORE = [[3.2, -9.6], [7.6, -8.8], [9.6, -5], [8.4, -0.8], [4.4, 0.8], [0.6, -1.4], [-0.4, -5.6]];
   function item(c, type, t) {
     c.lineCap = 'round'; c.lineJoin = 'round';
     switch (type) {
-      case 'dandelion': {
-        c.strokeStyle = '#a6f0d2'; c.lineWidth = 1.6; c.beginPath(); c.moveTo(0, 15); c.quadraticCurveTo(-3, 6, 0, -2); c.stroke();
-        c.strokeStyle = 'rgba(255,255,255,.85)'; c.lineWidth = 0.9; c.fillStyle = '#fff';
-        for (let i = 0; i < 14; i++) {
-          const a = i / 14 * TAU + Math.sin(t * 1.5) * 0.08, r = 10 + (i % 2) * 1.8, x = Math.cos(a) * r, y = -4 + Math.sin(a) * r;
-          c.beginPath(); c.moveTo(0, -4); c.lineTo(x, y); c.stroke(); dot(c, x, y, 1.25);
+      case 'dandelion': {          // шар семян: зонтики разной длины, трёх семян уже нет (пробелы), стебель чуть изогнут
+        c.strokeStyle = '#a6f0d2'; c.lineWidth = 1.5; c.beginPath(); c.moveTo(0.6, 15); c.bezierCurveTo(-2.6, 9, 1.8, 4, -0.4, -2.6); c.stroke();
+        const sw = Math.sin(t * 1.5) * 0.06, gap = (i) => i === 2 || i === 3 || i === 9;
+        for (let i = 0; i < 17; i++) {
+          if (gap(i)) continue;
+          const a = (i + Math.sin(i * 2.7) * 0.3) / 17 * TAU - 1.2 + sw, len = 8.4 + Math.sin(i * 1.9) * 1.6 + (i % 3) * 0.7;
+          const ex = Math.cos(a) * len, ey = -4.2 + Math.sin(a) * len;
+          c.strokeStyle = 'rgba(238,244,255,.8)'; c.lineWidth = 0.6; c.beginPath(); c.moveTo(Math.cos(a) * 2, -4.2 + Math.sin(a) * 2); c.lineTo(ex, ey); c.stroke();
+          c.strokeStyle = 'rgba(255,255,255,.9)'; c.lineWidth = 0.42;                              // зонтик: пушистый веер тонких нитей
+          for (let f = 0; f < 6; f++) { const b = a + (f / 5 - 0.5) * (1.9 + (i % 2) * 0.4), l = 2.2 + ((i + f) % 3) * 0.35; c.beginPath(); c.moveTo(ex, ey); c.quadraticCurveTo(ex + Math.cos(b) * l * 0.6, ey + Math.sin(b) * l * 0.6 - 0.25, ex + Math.cos(b) * l, ey + Math.sin(b) * l); c.stroke(); }
         }
-        c.fillStyle = '#ffe6a3'; dot(c, 0, -4, 2.3); break;
+        c.fillStyle = '#c9b98a'; cut(c, [[-1.8, -5.4], [1.4, -6], [2.2, -3.6], [0.2, -2.4], [-2, -3]]); c.fill();        // цветоложе
+        // одно улетевшее семя рядом
+        const fx = 9 + Math.sin(t * 0.9) * 1.2, fy = -16 + Math.sin(t * 1.3) * 1;
+        c.strokeStyle = 'rgba(238,244,255,.75)'; c.lineWidth = 0.6; c.beginPath(); c.moveTo(fx - 1.6, fy + 3.4); c.lineTo(fx, fy); c.stroke();
+        c.strokeStyle = '#ffffff'; c.lineWidth = 0.5; for (const d of [-1, -0.4, 0.3, 0.9]) { c.beginPath(); c.moveTo(fx, fy); c.lineTo(fx + Math.sin(d) * 2.4, fy - Math.cos(d) * 2.4); c.stroke(); }
+        break;
       }
-      case 'comet': {
-        c.strokeStyle = 'rgba(160,240,255,.8)';
-        for (const l of [[-4, 7, -14, 17, 2.4], [2, 9, -6, 20, 1.6], [-8, 2, -18, 9, 1.6]]) { c.lineWidth = l[4]; c.beginPath(); c.moveTo(l[0], l[1]); c.lineTo(l[2], l[3]); c.stroke(); }
-        c.fillStyle = '#fff'; star5(c, 3, -3, 10, 4.4, Math.sin(t * 1.3) * 0.25); c.fill(); break;
+      case 'comet': {              // ледяное ядро неровной формы и хвост из трёх вырезанных сужающихся языков
+        const sw = Math.sin(t * 1.3) * 0.6;
+        // язык хвоста: от ядра по направлению ang, длина len, ширина у основания w0; кончик чуть загнут и срезан углом
+        const tongue = (bx, by, ang, len, w0, bend, col) => {
+          const dx = Math.cos(ang), dy = Math.sin(ang), nx = -dy, ny = dx, P = (s, k) => [bx + dx * len * s + nx * k, by + dy * len * s + ny * k];
+          c.fillStyle = col; cut(c, [P(0, w0), P(0.38, w0 * 0.78 + bend * 0.3), P(0.72, w0 * 0.42 + bend * 0.7), P(1, bend), P(0.7, -w0 * 0.2 + bend * 0.6), P(0.36, -w0 * 0.62 + bend * 0.25), P(0, -w0)], [3]); c.fill();
+        };
+        tongue(3.6, -3.4, 2.5 + sw * 0.02, 25, 4.4, 1.6 + sw, '#7fd2ff');          // голубой: самый длинный
+        tongue(5.2, -1.2, 2.24 - sw * 0.02, 19, 3.6, -1.2 - sw * 0.6, '#bdeeff');   // светло-голубой: короче, чуть ниже
+        tongue(3.4, -2.2, 2.38, 12, 2.2, 0.6, '#f4fbff');                           // белый: короткий, между ними
+        c.fillStyle = '#e6f6ff'; cut(c, COMET_CORE, [0, 2, 5]); c.fill();
+        c.fillStyle = '#b6e2fb'; poly(c, [[8.4, -0.8], [4.4, 0.8], [0.6, -1.4], [4.6, -3.2], [9.6, -5]]); c.fill();                                       // грань в тени
+        c.fillStyle = '#ffffff'; poly(c, [[3.2, -9.6], [5.8, -9.2], [3.6, -6.6], [1, -6.6]]); c.fill();                                                    // скол на свету
+        break;
       }
-      case 'bubble': {
+      case 'bubble': {             // мыльный пузырь: круглый, отлив двумя тонами, окошко-блик, капля снизу
         c.fillStyle = 'rgba(160,220,255,.16)'; dot(c, 0, 0, 11.5);
-        c.strokeStyle = 'rgba(214,243,255,.95)'; c.lineWidth = 1.6; c.beginPath(); c.arc(0, 0, 11.5, 0, TAU); c.stroke();
-        c.strokeStyle = '#fff'; c.lineWidth = 1.8; c.beginPath(); c.arc(0, 0, 7.6, -2.5, -1.7); c.stroke(); break;
+        const cres = (a0, a1, th, col) => { const pts = []; for (let i = 0; i <= 10; i++) { const a = lerp(a0, a1, i / 10); pts.push([Math.cos(a) * 11.5, Math.sin(a) * 11.5]); }
+          for (let i = 10; i >= 0; i--) { const a = lerp(a0, a1, i / 10), q = 11.5 - th * Math.sin(Math.PI * i / 10); pts.push([Math.cos(a) * q, Math.sin(a) * q]); } poly(c, pts); c.fillStyle = col; c.fill(); };
+        cres(2.3, 3.9, 2.6, 'rgba(206,188,255,.55)'); cres(-0.5, 1, 2.1, 'rgba(176,244,226,.5)');
+        c.strokeStyle = 'rgba(214,243,255,.95)'; c.lineWidth = 1.5; c.beginPath(); c.arc(0, 0, 11.5, 0, TAU); c.stroke();
+        cut(c, BUB_WIN.map(([u, v]) => [u * 11.5, v * 11.5]), [1, 4]); c.fillStyle = '#ffffff'; c.fill();
+        cut(c, [[-1, 10.9], [1.2, 10.8], [1.5, 12.8], [0.1, 14.4], [-1.3, 13]], [3]); c.fillStyle = '#d6f3ff'; c.fill();
+        break;
       }
-      case 'lantern': {
-        c.strokeStyle = '#b9a2ff'; c.lineWidth = 1.5; c.beginPath(); c.arc(0, -11, 4, Math.PI, 0); c.stroke();
-        c.fillStyle = '#2b2170'; rr(c, -7.5, -9, 15, 18, 3.5); c.fill(); c.stroke();
-        c.fillStyle = '#ffe6a3'; rr(c, -4.6, -6, 9.2, 12, 2.4); c.fill();
-        c.fillStyle = '#fffaf0'; dot(c, 0, 0.5, 2.2 + Math.sin(t * 5) * 0.4);
-        c.fillStyle = '#b9a2ff'; rr(c, -9, -11, 18, 2.6, 1.2); c.fill(); rr(c, -6.5, 8, 13, 2.4, 1.2); c.fill(); break;
+      case 'lantern': {            // самодельный бумажный фонарик: неровные грани, проволочная дужка с изгибом, огонёк неправильной формы
+        c.strokeStyle = '#b9a2ff'; c.lineWidth = 1.3; c.beginPath(); c.moveTo(-4.6, -10.6); c.bezierCurveTo(-4.8, -15.4, -1.6, -16.8, 0.4, -15); c.lineTo(1.6, -16.2); c.bezierCurveTo(3.4, -15.4, 4.8, -13.4, 4.4, -10.4); c.stroke();
+        const body = [[-6.4, -9.2], [-1.6, -10], [4.6, -9.4], [7.6, -4.2], [7, 3.6], [4.2, 8.4], [-2.6, 8.6], [-6.8, 4.4], [-7.6, -2.6]];
+        poly(c, body); c.fillStyle = '#ffe6a3'; c.fill();                                                  // бумага светится
+        c.save(); c.clip();
+        poly(c, [[-9, -12], [-3.6, -12], [-4.8, 0], [-3.8, 10], [-9, 10]]); c.fillStyle = '#f2c878'; c.fill();       // левая грань в тени
+        poly(c, [[3.2, -12], [9, -12], [9, 10], [2.6, 10], [3.6, 0]]); c.fillStyle = '#f7d690'; c.fill();             // правая грань
+        const fl = 1 + Math.sin(t * 5) * 0.12 + Math.sin(t * 8.3) * 0.06;                                            // огонёк сквозь бумагу
+        c.fillStyle = '#fffaf0'; cut(c, [[-0.4, 4.4], [-2.6, 1.6], [-1.6, -1.6 * fl], [0.2, -4.6 * fl], [1.2, -1.2 * fl], [2.6, 1.2], [1.4, 4.2]], [3]); c.fill();
+        c.restore();
+        c.strokeStyle = 'rgba(43,33,112,.55)'; c.lineWidth = 0.8;                                         // рёбра каркаса чуть кривые
+        c.beginPath(); c.moveTo(-3.4, -9.6); c.quadraticCurveTo(-5, -0.4, -3.6, 8.5); c.moveTo(3.4, -9.6); c.quadraticCurveTo(4.6, 0.6, 3, 8.5); c.stroke();
+        c.fillStyle = '#3a2f7a'; poly(c, [[-7.2, -9], [-1.2, -11.6], [5.4, -10.8], [5, -8.6], [-1.6, -9], [-6.8, -7.4]]); c.fill();   // крышка
+        poly(c, [[-4.6, 7.8], [3.8, 7.6], [4.6, 9.6], [-2.4, 10.4], [-5.2, 9.4]]); c.fill();                                        // донце
+        break;
       }
-      case 'feather': {             // перо: два плоских тона — белая половина и голубая
+      case 'feather': {            // асимметричное перо: опахало шире с одной стороны, расщеп на краю, изогнутый стержень, пух у основания
         c.save(); c.rotate(-0.5 + Math.sin(t * 2) * 0.08);
-        c.beginPath(); c.moveTo(0, 13); c.bezierCurveTo(-9, 4, -8, -8, 0, -14); c.bezierCurveTo(8, -8, 9, 4, 0, 13); c.closePath();
-        c.fillStyle = '#9ee9ff'; c.fill(); c.save(); c.clip(); c.fillStyle = '#ffffff'; c.fillRect(-12, -16, 12, 32); c.restore();
-        c.strokeStyle = 'rgba(60,120,190,.55)'; c.lineWidth = 1; c.beginPath(); c.moveTo(0, 15); c.lineTo(0, -11);
-        for (let i = 0; i < 3; i++) { const y = 6 - i * 6; c.moveTo(0, y); c.lineTo(-4.5, y - 3.5); c.moveTo(0, y); c.lineTo(4.5, y - 3.5); }
-        c.stroke(); c.restore(); break;
+        cut(c, [[0.6, -14], [5.6, -9], [6.8, -2.6], [5.2, 3.2], [2.6, 7.4], [0.6, 9.4], [-1.4, 6], [-2.6, 0], [-2.4, -7.6]], [0, 5]); c.fillStyle = '#ffffff'; c.fill();
+        c.fillStyle = '#9ee9ff'; cut(c, [[0.6, -14], [-2.4, -7.6], [-2.8, 0], [-1.6, 6], [0.6, 9.4], [0.4, 1], [0.8, -7]], [0, 4]); c.fill();     // узкое опахало другого тона
+        c.fillStyle = 'rgba(34,26,90,.9)'; poly(c, [[6.9, -3.2], [3.6, -1.6], [6.6, -0.6]]); c.fill();                                        // расщеп на краю
+        c.strokeStyle = 'rgba(60,120,190,.6)'; c.lineWidth = 0.9; c.beginPath(); c.moveTo(1.2, 15.6); c.bezierCurveTo(0.2, 6, 1.4, -4, 0.4, -12.4); c.stroke();   // стержень изогнут
+        c.strokeStyle = 'rgba(255,255,255,.85)'; c.lineWidth = 0.6;                                                // пух у основания
+        for (const [dx, dy, ex, ey] of [[0.6, 9.6, -2.6, 8.6], [0.8, 10.4, 3.2, 9.4], [0.9, 11.2, -1.8, 12.2], [1, 11.6, 3.4, 12.4]]) { c.beginPath(); c.moveTo(dx, dy); c.quadraticCurveTo((dx + ex) / 2, dy - 1.4, ex, ey); c.stroke(); }
+        c.restore(); break;
       }
     }
   }
@@ -2463,7 +2621,7 @@ const Art = (() => {
   const setLite = (v) => { LITE_ART = !!v; };
 
   return { setScale, canvas, glow, plat, TYPE, SHROOM, cut, cutPath, taper, simple, bit, glowDash, SKIN_ART, setLite, halo, bracket, shroom, bough, frond, druse, leafy, moon, fernFlower, curl, islet,
-    beast, BEAST_DRAW, burrFace, spiderThread, owlTwig, jellyTentacles, BURR, SPI, BTL, OWL, JEL, bubble, item, ITEM_GLOW, char, hexA, ell, dot, rr, star5, firefly, leaf, poly, blob, spot };
+    beast, BEAST_DRAW, burrFace, spiderThread, owlTwig, jellyTentacles, BURR, SPI, BTL, OWL, JEL, bubble, item, ITEM_GLOW, char, hexA, ell, dot, rr, firefly, leaf, poly, blob, spot, foliage, cloud };
 })();
 
 /* ===== Тихолесье · мир: состояние, генерация, физика, находки, задания ===== */
@@ -3203,7 +3361,7 @@ function drawWedges() {          // своды: два плоских косых
   Art.poly(c, [[262, -10], [296, -10], [250, H + 10], [196, H + 10]]); c.fill();
   c.globalAlpha = 1;
 }
-function drawStars() {           // звёзды-точки трёх размеров, едва заметно сдвигаются вместе с лесом; самые яркие — четырёхлучевые
+function drawStars() {           // звёзды-точки трёх размеров, едва заметно сдвигаются вместе с лесом; самые яркие — неровные ромбики
   const a0 = Z.stars; if (a0 < 0.03) return;
   const off = cam * 0.03, TH = 1500;
   c.fillStyle = '#eef0ff'; c.strokeStyle = '#eef0ff'; c.lineCap = 'round';
@@ -3212,10 +3370,10 @@ function drawStars() {           // звёзды-точки трёх разме�
     const sz = [0.55, 0.85, 1.3][(hash(i * 5.3) * 3) | 0], tw = 0.5 + 0.5 * Math.sin(T * (0.3 + hash(i) * 0.9) + i * 2.4), sx = hash(i * 3.1) * WW;
     c.globalAlpha = a0 * (0.35 + 0.5 * tw);
     c.fillRect(sx - sz / 2, sy - sz / 2, sz, sz);      // в холсте половинного разрешения это точка в пиксель-полтора
-    if (i % 9 === 4) {                                  // лучи: длина дышит вместе с мерцанием
-      const L = (2.6 + 2.4 * tw) * (0.8 + hash(i * 2.9) * 0.5);
-      c.globalAlpha = a0 * (0.25 + 0.55 * tw); c.lineWidth = 0.7;
-      c.beginPath(); c.moveTo(sx - L, sy); c.lineTo(sx + L, sy); c.moveTo(sx, sy - L * 1.2); c.lineTo(sx, sy + L * 1.2); c.stroke();
+    if (i % 9 === 4) {                                  // яркая: маленький неровный ромбик, размер дышит вместе с мерцанием
+      const L = (1.1 + 0.7 * tw) * (0.8 + hash(i * 2.9) * 0.6), k = 0.5 + hash(i * 6.3) * 0.3, b = hash(i * 8.1) - 0.5;
+      c.globalAlpha = a0 * (0.4 + 0.5 * tw);
+      c.beginPath(); c.moveTo(sx + b * L * 0.3, sy - L * 1.3); c.lineTo(sx + L * k, sy - L * 0.08); c.lineTo(sx - b * L * 0.2, sy + L * (1 + hash(i) * 0.3)); c.lineTo(sx - L * k * 0.8, sy + L * 0.16); c.closePath(); c.fill();
     }
   }
   // созвездия: тонкие линии между звёздами-узлами, четыре фигуры на слой неба
@@ -3325,20 +3483,23 @@ function drawFarSpires(a, pass) {
     });
   }
 }
-/* лунные кроны: дальше — редкие шапки крон посреди неба на тонких стволах, ближе — сплошная листва у краёв.
-   Сверху у каждого бугра светлый серп: так луна подсвечивает край листвы */
+/* лунные кроны: дальше — редкие шапки крон посреди неба на тонких плетях, ближе — сплошная листва у краёв.
+   Листва — заранее нарисованные силуэты с зубчиками-листьями (Art.foliage); лунная кромка — тот же контур со сдвигом вверх */
 function drawFarCanopy(a, pass) {
   const col = pass ? PAL.far2C : PAL.farC, body = rgb(col), rim = rgb(mixc(col, Z.glow, 0.2));
   c.globalAlpha = a;
+  const leaf = (x, y, R, i, rot, flip, dx, dy) => {
+    const p = Art.foliage(i);
+    c.save(); c.translate(x + dx, y + dy); c.rotate(rot); c.scale(R * flip, R); c.fillStyle = rim; c.fill(p); c.restore();
+    c.save(); c.translate(x, y); c.rotate(rot); c.scale(R * flip, R); c.fillStyle = body; c.fill(p); c.restore();
+  };
   if (pass === 0) {
     eachCell(360, FF, 150, (k, base) => {
       if (hash2(k, 131) > 0.8) return;
       const ly = base + hash2(k, 132) * 360, cx = 96 + hash2(k, 133) * 208, R0 = 13 + hash2(k, 134) * 13, sy = LY(ly, FF);
-      const B = [[0, 0, 1], [-1.05, 0.38, 0.72], [1.02, 0.32, 0.78], [-0.42, -0.72, 0.68], [0.56, -0.6, 0.64], [0.05, 0.62, 0.75]];
-      c.fillStyle = rim; for (const [dx, dy, q] of B) Art.dot(c, cx + dx * R0 - 1.6, sy + dy * R0 - 2.8, R0 * q);
-      c.fillStyle = body; for (const [dx, dy, q] of B) Art.dot(c, cx + dx * R0, sy + dy * R0, R0 * q);
       c.strokeStyle = body; c.lineWidth = 1; c.lineCap = 'round';                 // из-под шапки свисают тонкие плети
       for (let j = 0; j < 3; j++) { const vx = cx + (j - 1) * R0 * 0.7, vl = R0 * (0.8 + hash2(k + j, 135) * 1.2); c.beginPath(); c.moveTo(vx, sy + R0 * 0.5); c.quadraticCurveTo(vx + 3, sy + R0 * 0.5 + vl * 0.5, vx + 1, sy + R0 * 0.5 + vl); c.stroke(); }
+      leaf(cx, sy, R0 * 1.3, (hash2(k, 136) * 6) | 0, (hash2(k, 137) - 0.5) * 0.5, hash2(k, 138) < 0.5 ? -1 : 1, -1.6, -2.8);
     });
     return;
   }
@@ -3348,9 +3509,8 @@ function drawFarCanopy(a, pass) {
       const h1 = hash2(k * 2 + s, 141), R = 22 + h1 * 22, x = s ? WW + 8 - hash2(k * 2 + s, 142) * 34 : -8 + hash2(k * 2 + s, 142) * 34;
       B.push([x, LY(base + hash2(k * 2 + s, 143) * 22, FF), R, k]);
     });
-    c.fillStyle = rim; for (const [x, y, R] of B) Art.dot(c, x + dir * 2.2, y - 3.2, R);
-    c.fillStyle = body; for (const [x, y, R] of B) Art.dot(c, x, y, R);
-    c.fillRect(s ? WW - 14 : -10, -10, 24, H + 20);
+    c.fillStyle = body; c.fillRect(s ? WW - 14 : -10, -10, 24, H + 20);
+    for (const [x, y, R, k] of B) leaf(x, y, R * 1.08, (hash2(k * 2 + s, 146) * 6) | 0, (hash2(k * 2 + s, 147) - 0.5) * 0.9, dir, dir * 2.2, -3.2);
     c.strokeStyle = body; c.lineWidth = 1.2; c.lineCap = 'round';                     // свисающие плети
     for (const [x, y, R, k] of B) {
       if (hash2(k * 2 + s, 144) > 0.3) continue;
@@ -3361,25 +3521,35 @@ function drawFarCanopy(a, pass) {
 }
 /* звёздная высь: дальше — облачные гряды и крошечные островки, ближе — островки покрупнее; на некоторых
    теплится далёкий огонёк гриба */
-/* Млечный Путь: плоская волнистая полоса наискось через небо, внутри полоса поуже, вдоль неё густая звёздная пыль.
-   Сдвигается медленнее всего (как звёзды); полосы повторяются через 900 ед., чтобы при прокрутке не было скачка */
+/* Млечный Путь: плавная S-образная полоса через небо с неровными краями, внутри полоса поуже и тёмные пылевые прожилки,
+   вдоль оси густая звёздная пыль. Сдвигается медленнее всего (как звёзды); повторяется через 900 ед. без скачка */
 function drawMilky(a) {
-  const base = H * 0.4 + mod(cam * 0.02, 900), tint = mixc(Z.glow, [255, 255, 255], 0.25);
+  const base = H * 0.4 + mod(cam * 0.02, 900), tint = mixc(Z.glow, [255, 255, 255], 0.25), dust = Z.sky[0];
   for (const yc of [base - 900, base, base + 900]) {
-    if (yc < -260 || yc > H + 260) continue;
-    const band = (k, wk) => {
+    if (yc < -320 || yc > H + 320) continue;
+    const C = (u) => [lerp(-60, WW + 60, u), yc + 220 - 440 * u + Math.sin(u * TAU) * 64];          // ось: плавная S
+    const N = (u) => { const p = C(u - 0.01), q = C(u + 0.01), dx = q[0] - p[0], dy = q[1] - p[1], d = Math.hypot(dx, dy); return [-dy / d, dx / d]; };
+    const band = (wk, k, sh) => {
       const top = [], bot = [];
-      for (let i = 0; i <= 10; i++) {
-        const u = i / 10, x = lerp(-50, WW + 50, u), y = lerp(yc + 210, yc - 210, u), w = (34 + Math.sin(u * 7.3 + 1.1) * 10 + Math.sin(u * 13.1 + k) * 6) * wk;
-        top.push([x, y - w]); bot.push([x, y + w * 0.8]);
+      for (let i = 0; i <= 16; i++) {
+        const u = i / 16, [x, y] = C(u), [nx, ny] = N(u), w = (32 + Math.sin(u * 6.1 + k) * 9 + Math.sin(u * 15.3 + k * 2) * 5 + Math.sin(u * 37 + k) * 2) * wk;
+        top.push([x + nx * (sh - w), y + ny * (sh - w)]); bot.push([x + nx * (sh + w * 0.85), y + ny * (sh + w * 0.85)]);
       }
       return [...top, ...bot.reverse()];
     };
-    Art.blob(c, band(0, 1)); c.fillStyle = rgb(tint, 0.05 * a); c.fill();
-    Art.blob(c, band(2, 0.45)); c.fillStyle = rgb(tint, 0.05 * a); c.fill();
+    Art.blob(c, band(1, 0, 0)); c.fillStyle = rgb(tint, 0.05 * a); c.fill();
+    Art.blob(c, band(0.45, 2, -5)); c.fillStyle = rgb(tint, 0.05 * a); c.fill();
+    for (const [u0, u1, w0, sh, k] of [[0.14, 0.3, 4.6, 3, 1], [0.33, 0.42, 3.4, -7, 2], [0.5, 0.71, 5.2, -2, 3], [0.76, 0.86, 3, 8, 4]]) {     // пылевые прожилки: короткие, неровные
+      const L = [], R = [];
+      for (let i = 0; i <= 10; i++) {
+        const t = i / 10, u = lerp(u0, u1, t), [x, y] = C(u), [nx, ny] = N(u), off = sh + Math.sin(t * 5 + k) * 3.5, w = w0 * Math.pow(Math.sin(Math.PI * t), 0.8) * (0.55 + 0.45 * Math.abs(Math.sin(t * 7.3 + k * 1.7)));
+        L.push([x + nx * (off - w), y + ny * (off - w)]); R.push([x + nx * (off + w * 0.7), y + ny * (off + w * 0.7)]);
+      }
+      Art.blob(c, [...L, ...R.reverse()]); c.fillStyle = rgb(dust, 0.38 * a); c.fill();
+    }
     c.fillStyle = '#eef0ff';
     for (let i = 0; i < 150; i++) {
-      const u = hash(i * 1.37 + 3), d = (hash(i * 2.71) + hash(i * 3.97) - 1) * 46, x = lerp(-50, WW + 50, u) + d * 0.3, y = lerp(yc + 210, yc - 210, u) + d;
+      const u = hash(i * 1.37 + 3), d = (hash(i * 2.71) + hash(i * 3.97) - 1) * 46, [x0, y0] = C(u), [nx, ny] = N(u), x = x0 + nx * d, y = y0 + ny * d;
       if (y < -2 || y > H + 2) continue;
       const sz = 0.45 + hash(i * 5.9) * 0.6;
       c.globalAlpha = a * (0.2 + 0.45 * hash(i * 7.3)); c.fillRect(x, y, sz, sz);
@@ -3387,18 +3557,22 @@ function drawMilky(a) {
     c.globalAlpha = a;
   }
 }
-// облака выси: кучевые гряды — бугры-полукруги на плоском низу одной заливкой; по верху бугров светлые дужки
+// облака выси: кучевые силуэты (Art.cloud) — бугры разной формы, низ слегка неровный; светлая кромка — вырезанная полоска по верху
+const cloudRim = new Map();
 function drawClouds(a) {
   eachCell(320, FF, 140, (k, base) => {
     if (hash2(k, 151) > 0.75) return;
     const ly = base + hash2(k, 152) * 320, w = 170 + hash2(k, 153) * 170, cx = -30 + hash2(k, 154) * (WW + 60), sy = LY(ly, FF);
-    const n = 5 + ((hash2(k, 155) * 3) | 0), B = [];
-    for (let i = 0; i < n; i++) { const t = (i + 0.5) / n, R = (12 + hash2(k * 7 + i, 156) * 14) * (0.6 + Math.sin(t * Math.PI) * 0.6); B.push([cx - w / 2 + t * w, sy - R * 0.35, R]); }
-    c.save(); c.beginPath(); c.rect(cx - w, sy - 90, w * 2, 92); c.clip();          // низ гряды срезан ровно
-    c.beginPath(); for (const [x, y, R] of B) { c.moveTo(x + R, y); c.arc(x, y, R, 0, TAU); } c.rect(cx - w / 2, sy - 6, w, 8);
-    c.fillStyle = rgb(PAL.mist, 0.11 * a); c.fill();
-    c.strokeStyle = rgb(mixc(PAL.mist, Z.glow, 0.5), 0.16 * a); c.lineWidth = 1.6; c.lineCap = 'round';
-    for (const [x, y, R] of B) { c.beginPath(); c.arc(x, y, R - 1, -2.5, -0.65); c.stroke(); }
+    const i = (hash2(k, 155) * 5) | 0, flip = hash2(k, 157) < 0.5 ? -1 : 1, body = Art.cloud(i);
+    let rim = cloudRim.get(i);
+    if (!rim) {                                    // кромка: контур, сдвинутый вверх, минус сам контур (заливка «чёт-нечет» внутри сдвинутого)
+      const up = new Path2D(); up.addPath(body, new DOMMatrix([1, 0, 0, 1, 0, -0.022]));
+      const both = new Path2D(); both.addPath(up); both.addPath(body);
+      rim = { up, both }; cloudRim.set(i, rim);
+    }
+    c.save(); c.translate(cx, sy); c.scale(w * flip, w * 0.62);
+    c.fillStyle = rgb(PAL.mist, 0.11 * a); c.fill(body);
+    c.clip(rim.up); c.fillStyle = rgb(mixc(PAL.mist, Z.glow, 0.5), 0.2 * a); c.fill(rim.both, 'evenodd');
     c.restore();
   });
 }
@@ -3936,6 +4110,7 @@ function drawGlowTrail() {       // световой пунктир Светля
   const pts = hs.map((q) => { const pt = [q.x, Y(q.y), q.d, clamp(1 - (game.t - q.t) / 0.8, 0, 1)]; pt.brk = q.brk; return pt; });
   Art.glowDash(c, pts, 1.6);
 }
+const SLIVERS = [[[-0.5, -1], [0.6, -0.4], [0.3, 1], [-0.7, 0.3]], [[-0.2, -1], [0.8, 0.1], [-0.1, 0.9], [-0.6, -0.1]], [[-0.9, -0.3], [0.2, -0.9], [0.9, 0.5], [-0.3, 0.7]]];
 function drawParts(add) {
   for (const q of game.parts) {
     if ((q.k === 'g' || q.k === 'star' || q.k === 'ring') !== add) continue;
@@ -3943,7 +4118,10 @@ function drawParts(add) {
     const u = q.life / q.max, rot = q.rot || 0;
     switch (q.k) {
       case 'g': { const r = q.size * (0.6 + 0.4 * u); c.globalAlpha = Math.min(1, u * 1.4); c.drawImage(Art.glow(q.col), q.x - r, y - r, r * 2, r * 2); break; }
-      case 'star': { const s = q.size * (0.5 + 0.5 * Math.sin(u * Math.PI)); c.globalAlpha = u; c.fillStyle = q.col; Art.star5(c, q.x, y, s, s * 0.45, rot); c.fill(); break; }   // маленькая пятилучевая звезда
+      case 'star': {          // искорка находки: светящийся кусочек бумаги неправильной формы, кружится и гаснет
+        const s = q.size * (0.5 + 0.5 * Math.sin(u * Math.PI)) * 0.7; c.globalAlpha = u; c.fillStyle = q.col;
+        c.save(); c.translate(q.x, y); c.rotate(rot); c.scale(s, s); Art.poly(c, SLIVERS[(Math.abs(q.size * 13) | 0) % 3]); c.fill(); c.restore(); break;
+      }
       case 'ring': c.globalAlpha = u * 0.8; c.strokeStyle = q.col; c.lineWidth = 1.5; c.beginPath(); c.arc(q.x, y, q.size + (1 - u) * 30, 0, TAU); c.stroke(); break;
       case 'dot': c.globalAlpha = Math.min(1, u * 1.6); c.fillStyle = q.col; c.beginPath(); c.arc(q.x, y, q.size * 0.35, 0, TAU); c.fill(); break;   // пыль, хлопья: плоский кружок без света
       case 'bub': c.globalAlpha = u * 0.9; c.strokeStyle = q.col; c.lineWidth = 1.2; c.beginPath(); c.arc(q.x, y, q.size, 0, TAU); c.stroke(); break;
@@ -4126,7 +4304,7 @@ const UI = (() => {
       if (rec === 'new' && was === 'old') replay(el, 'pop');
     }
     const cn = Math.floor(run.coins);
-    if (cn !== hs.c) {               // счётчик вздрагивает на каждом пойманном: видно, куда идут светлячки из стайки
+    if (cn !== hs.c) {               // счётчик вздрагивает на каждом пойманном: видно, куда идут светлячки
       const el = $('hCoins'), up = hs.c >= 0 && cn > hs.c; hs.c = cn; el.textContent = fmt(cn);
       if (up && el.animate) try { el.animate([{ transform: 'scale(1.22)' }, { transform: 'scale(1)' }], { duration: 240, easing: 'ease-out' }); } catch (e) { /* без анимации тоже понятно */ }
     }
