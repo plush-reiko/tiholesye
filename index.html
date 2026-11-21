@@ -106,7 +106,12 @@ button:focus-visible, .tog input:focus-visible { outline: 2px solid var(--accent
 .bar > span { display: block; height: 100%; background: var(--accent); transform-origin: left center; }
 
 /* ---------- меню ---------- */
-.mtop { display: flex; justify-content: flex-end; align-items: center; min-height: 44px; }
+.mtop { display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 44px; }
+.mtop .coins { margin-left: auto; }                 /* счётчик всегда справа: не прыгает, когда кнопки подарка нет */
+/* подарок дня: клочок тёмной бумаги; раз в 2,4 с чуть покачивается, как бумажка на сквозняке. Свечения нет */
+.btn.gift { animation: draft 2.4s ease-in-out infinite; transform-origin: 30% 20%; }
+.btn.gift.away { animation: giftAway .2s ease-in forwards; pointer-events: none; }
+.flyic { position: absolute; left: 0; top: 0; width: 14px; height: 14px; color: var(--firefly); fill: currentColor; pointer-events: none; z-index: 6; }
 .brand { margin-top: clamp(8px, 4vh, 40px); }
 .brand h1 {        /* название по левому краю, с наклоном; буквы наклеены по одной */
   font-family: var(--title); font-weight: 400; line-height: 1; font-size: 72px; font-size: clamp(48px, 18.2cqw, 84px);
@@ -326,7 +331,10 @@ textarea.field { word-break: break-all; font-size: 16px; line-height: 1.25; }   
 @keyframes pop { 0% { transform: scale(1); } 35% { transform: scale(1.45); } 100% { transform: scale(1); } }
 @keyframes ringOut { 0% { opacity: 1; transform: rotate(-90deg) scale(1); } 100% { opacity: 0; transform: rotate(-90deg) scale(1.5); } }
 @keyframes ending { from { opacity: 1; } to { opacity: .35; } }
+@keyframes draft { 0%, 64%, 100% { rotate: 0deg; } 72% { rotate: 1.5deg; } 80% { rotate: -1.3deg; } 87% { rotate: .7deg; } 93% { rotate: -.3deg; } }
+@keyframes giftAway { to { opacity: 0; transform: translateY(-4px) scale(.92); } }
 @media (prefers-reduced-motion: reduce) {
+  .btn.gift { animation: none; }
   .center, .sheet, .toast, #hHint.in, #zonecard.in, .wings.nope, .rb.pop > .ic, .rb.flash .ring, #hMult.pop, .hbest.pop { animation-duration: .01ms; }
   .btn, .btn::before, .btn::after { transition: none; }
 }
@@ -356,7 +364,8 @@ textarea.field { word-break: break-all; font-size: 16px; line-height: 1.25; }   
 
     <section id="menu" class="screen">
       <div class="mtop">
-        <span class="coins" aria-label="Светлячки"><svg class="ic"><use href="#i-fly"/></svg><span id="mCoins">0</span></span>
+        <button id="bGift" class="btn small gift" type="button" hidden>Подарок леса<svg class="ic"><use href="#i-fly"/></svg>100</button>
+        <span class="coins" id="mCoinsBox" aria-label="Светлячки"><svg class="ic"><use href="#i-fly"/></svg><span id="mCoins">0</span></span>
       </div>
       <header class="brand">
         <h1 aria-label="Тихолесье"><span aria-hidden="true">Т</span><span aria-hidden="true">и</span><span aria-hidden="true">х</span><span aria-hidden="true">о</span><span aria-hidden="true">л</span><span aria-hidden="true">е</span><span aria-hidden="true">с</span><span aria-hidden="true">ь</span><span aria-hidden="true">е</span></h1>
@@ -548,6 +557,7 @@ const VJ = 850;            // скорость обычного прыжка
 const M = 10;              // единиц мира в одном «метре» счёта
 const STEP = 1 / 120;      // шаг физики
 const TAU = Math.PI * 2;
+const GIFT = 100;          // подарок леса: светлячков раз в календарный день, забирается кнопкой в меню
 
 const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
 const lerp = (a, b, t) => a + (b - a) * t;
@@ -709,7 +719,7 @@ const MDEF = {
   bouncy:   { kind: 'run', w: 1, tiers: [5, 8, 12, 18, 25], text: (n) => `Прыгни на ${n} грибов-батутов за забег` },
   wings:    { kind: 'run', w: 0.9, tiers: [5, 10, 18, 28], text: (n) => `Сделай ${n} взмахов крыльями за забег` },
   flow:     { kind: 'run', w: 1.1, tiers: [2, 3, 4, 5], cap: true, text: (n) => `Разгони множитель до ×${n}` },
-  puffs:    { kind: 'sum', w: 0.8, tiers: [10, 25, 50, 100], need: 400, text: (n) => `Сломай ${n} ${plural(n, ['сухую ветку', 'сухие ветки', 'сухих веток'])}` },
+  puffs:    { kind: 'sum', w: 0.8, tiers: [10, 25, 50, 100], need: 400, text: (n) => `Сорви ${n} ${plural(n, ['сухой лист', 'сухих листа', 'сухих листьев'])}` },
   stomps:   { kind: 'sum', w: 1.2, tiers: [5, 10, 15, 30], need: 1000, text: (n) => `Приземлись сверху на ${n} ворчунов` },
   flights:  { kind: 'sum', w: 0.8, tiers: [5, 10, 15, 30], text: (n) => `Полетай на одуванчике ${n} раз` },
   runs:     { kind: 'sum', w: 0.6, tiers: [5, 10, 15, 25, 40], text: (n) => `Сыграй ${n} забегов` },
@@ -931,9 +941,10 @@ const Snd = (() => {
       tone({ f: 220, to: 880, toT: 0.16, g: 0.13, a: 0.005, d: 0.3 });
       tone({ f: note(mod(k, 10) + 5), g: 0.14, a: 0.004, d: 0.5, t0: 0.03 });
     },
-    snap() {        // сухая ветка ломается: короткий треск и глухой отзвук
-      hiss({ type: 'highpass', f: 2600, to: 900, g: 0.22, d: 0.08, q: 0.7 }); hiss({ type: 'bandpass', f: 1300, to: 420, g: 0.12, d: 0.16, t0: 0.035, q: 1.1 });
-      tone({ f: 250, to: 105, toT: 0.13, g: 0.08, d: 0.16, type: 'triangle' });
+    rustle() {      // сухой лист срывается: два коротких шороха в полосе 3–5 кГц и мягкое «тук»
+      hiss({ type: 'bandpass', f: 4300, to: 3300, g: 0.14, d: 0.07, q: 1.5, a: 0.004 });
+      hiss({ type: 'bandpass', f: 3500, to: 4700, g: 0.11, d: 0.085, q: 1.3, a: 0.006, t0: 0.08 });
+      tone({ f: 180, to: 120, toT: 0.1, g: 0.09, a: 0.004, d: 0.15 });
     },
     vanish() {      // призрачная кочка тает: выдох и звон вниз
       hiss({ type: 'bandpass', f: 1500, to: 480, g: 0.08, d: 0.5, q: 0.9, a: 0.06 });
@@ -955,6 +966,9 @@ const Snd = (() => {
     fall() { tone({ f: 392, to: 110, toT: 0.9, g: 0.13, a: 0.02, d: 1.0 }); tone({ f: 196, to: 82, toT: 0.9, g: 0.08, a: 0.02, d: 1.1 }); },
     click() { tone({ f: 660, g: 0.06, a: 0.002, d: 0.06 }); },
     buy() { [7, 9, 12].forEach((n, i) => tone({ f: note(n), g: 0.1, d: 0.45, t0: i * 0.07 })); },
+    gift() {        // подарок леса: три мягкие восходящие ноты — ниже, теплее и длиннее, чем покупка
+      [5, 7, 10].forEach((n, i) => { tone({ f: note(n), g: 0.085, a: 0.02, d: 0.85, t0: i * 0.12, type: 'triangle' }); tone({ f: note(n) * 2, g: 0.02, a: 0.02, d: 0.5, t0: i * 0.12 }); });
+    },
     nope() { tone({ f: 196, g: 0.08, d: 0.12, type: 'triangle' }); tone({ f: 174.6, g: 0.08, d: 0.16, type: 'triangle', t0: 0.09 }); },
     mission() { [8, 10, 12, 15].forEach((n, i) => tone({ f: note(n), g: 0.1, d: 0.9, t0: i * 0.09 })); },
     record() { [10, 12, 14, 15, 17, 19].forEach((n, i) => tone({ f: note(n), g: 0.08, d: 0.8, t0: i * 0.06 })); },
@@ -1043,7 +1057,7 @@ const Art = (() => {
   const TYPE = {
     pad: { base: '#6fe0e6', light: '#c8fbff', dark: '#3fa9bd' },
     cap: { base: '#b287ff', light: '#dcc6ff', dark: '#8558de', spot: '#f1e8ff', gill: '#5f3fb0', stem: '#dcd6ff', stemD: '#aba3e6' },
-    twig: { base: '#c4bee8', light: '#eceaff', dark: '#857eb9', inner: '#fdfcff', crack: '#29235f', lichen: '#7fcfe2', lichenL: '#c6f3ff' },
+    leaf: { base: '#c9c0d8', light: '#ebe6f3', dark: '#8c84a6', vein: '#6d6590', speck: '#a8909a' },     // лунный сухой лист: без тёплого коричневого
     ghost: { base: '#dde3ff', line: '#e8ecff' },
     crystal: { base: '#a9eeff', light: '#f1ffff', dark: '#68c6e4' },
   };
@@ -1140,116 +1154,98 @@ const Art = (() => {
     for (const [fx, y, a, b] of [[-0.55, 5.4, 4.2, 2.6], [-0.12, 3.6, 5.2, 3], [0.34, 5.8, 3.4, 2.2], [0.66, 4.2, 2.4, 1.6], [0.08, 8.6, 2.2, 1.3]]) spot(x, fx * hw + (r() - 0.5) * 3, y + (r() - 0.5), a, b, r);
     x.restore();
   }
-  /* сухая ветка (одноразовая): светлая кора, тёмный низ, на левом конце срез с годовыми кольцами, сучки, пятна лишайника.
-     Посередине надлом — белая древесина и щепки, ветка в этом месте провисла: видно, что выдержит один прыжок, не больше.
-     Место надлома и форма трещины общие для рисунка и для разлома (crackClip), чтобы половинки расходились ровно по ней */
-  const TWIG_CRACK = [-5, 4, -1.5, 7], TWIG_SAG = 2.6;
-  const CRACK = [[0.9, -30], [0.9, -1.5], [-1.2, 2.6], [1.4, 5.4], [-0.5, 8.9], [0.6, 30]];
-  const twigTop = (u, hw, cx) => 0.5 + (1 - Math.min(1, Math.abs(u - cx) / (hw + 6))) * TWIG_SAG;     // верх ветки: провисает к надлому
-  const twigTh = (u, hw) => 8.4 - Math.min(1, Math.abs(u) / hw) * 2.4;                               // толщина: к концам тоньше
-  function twig(x, w, v, r) {
-    const hw = w / 2, P = TYPE.twig, cx = TWIG_CRACK[v & 3], L = -hw - 1, R = hw + 2;
-    const top = [], bot = [];
-    for (let u = L; u <= R - 3; u += 4.2 + r() * 2.2) { top.push([u, twigTop(u, hw, cx) + (r() - 0.5) * 0.5]); bot.push([u, twigTop(u, hw, cx) + twigTh(u, hw) + (r() - 0.5) * 0.7]); }
-    const tipY = twigTop(R, hw, cx) + 2.4;
-    // сучок вверх слева и сучок вниз справа: обломанные, с белым торцом
-    const sU = -hw * 0.56 + (r() - 0.5) * 4, sY = twigTop(sU, hw, cx);
-    poly(x, [[sU - 1.6, sY + 1], [sU - 6.2, sY - 5.6], [sU - 4.3, sY - 6.6], [sU + 1.4, sY + 1]]); x.fillStyle = P.base; x.fill();
-    poly(x, [[sU - 6.2, sY - 5.6], [sU - 5.4, sY - 7.4], [sU - 4.3, sY - 6.6]]); x.fillStyle = P.inner; x.fill();
-    const dU = hw * 0.44 + (r() - 0.5) * 4, dY = twigTop(dU, hw, cx) + twigTh(dU, hw);
-    poly(x, [[dU - 1.4, dY - 1], [dU + 3.6, dY + 5.4], [dU + 5.2, dY + 4.4], [dU + 1.6, dY - 1]]); x.fillStyle = P.dark; x.fill();
-    // сухой лист висит на нижнем сучке
-    x.save(); x.translate(dU + 4.6, dY + 5); x.rotate(0.35 + r() * 0.3);
-    x.beginPath(); x.moveTo(0, 0); x.quadraticCurveTo(3.4, 3.6, 0.4, 9.4); x.quadraticCurveTo(-3.2, 4.4, 0, 0); x.fillStyle = P.light; x.fill();
-    x.beginPath(); x.moveTo(0, 0); x.quadraticCurveTo(-3.2, 4.4, 0.4, 9.4); x.lineTo(0.2, 4.6); x.closePath(); x.fillStyle = P.dark; x.fill();
-    x.restore();
-    // тело ветки
-    const body = [...top, [R - 1.5, tipY - 2.2], [R + 1.8, tipY - 0.6], [R - 0.6, tipY + 0.6], [R + 0.8, tipY + 1.8], [R - 2.5, tipY + 2.6], ...bot.reverse()];
-    poly(x, body); x.fillStyle = P.base; x.fill();
+  /* контур «ножницами»: плавная кривая через середины отрезков, а точки из списка corners — острые углы (кончик, срез, надрез) */
+  function cut(c, pts, corners) {
+    const n = pts.length, mid = (i) => { const p = pts[i % n], q = pts[(i + 1) % n]; return [(p[0] + q[0]) / 2, (p[1] + q[1]) / 2]; };
+    let m = mid(n - 1); c.beginPath(); c.moveTo(m[0], m[1]);
+    for (let i = 0; i < n; i++) {
+      const p = pts[i]; m = mid(i);
+      if (corners && corners.includes(i)) { c.lineTo(p[0], p[1]); c.lineTo(m[0], m[1]); } else c.quadraticCurveTo(p[0], p[1], m[0], m[1]);
+    }
+    c.closePath();
+  }
+  /* сухой лист (одноразовая платформа): крупный лист лежит плашмя, виден чуть сверху. Черешок с одного конца загнут,
+     другой конец — острый кончик; оба приподняты, края волнистые и подвёрнуты. Ближняя половина — основной тон,
+     дальняя — светлая (жёсткая граница по средней жилке), снизу узкой полоской видна тёмная изнанка.
+     Контур расставлен вручную под ширину 66; вариант v: с какой стороны черешок и где выемка или дырочка */
+  const LEAF_FAR = [[-27.8, -0.2], [-25.6, -2.2], [-22.2, -2.6], [-18.6, -1.9], [-15.6, -1.3], [-12.4, -1.8], [-9.0, -1.0], [-5.2, -0.4], [-1.4, -0.8], [2.6, -0.3],
+    [6.6, -0.1], [10.4, -0.7], [14.0, -0.4], [17.8, -1.0], [21.4, -1.9], [24.8, -2.8], [28.0, -3.6], [30.6, -4.6]];
+  const LEAF_TIP = [33.8, -6.0];
+  const LEAF_NEAR = [[31.6, -3.2], [29.6, -0.9], [27.4, 1.0], [25.2, 2.1], [23.4, 2.4], [21.4, 4.0], [18.6, 5.4], [15.8, 5.9], [13.9, 5.8], [11.6, 7.1], [8.4, 8.2],
+    [5.2, 8.6], [3.4, 8.3], [0.8, 9.3], [-2.8, 9.9], [-6.6, 10.0], [-9.6, 9.6], [-11.4, 9.0], [-13.6, 9.4], [-17.0, 8.9], [-20.2, 7.6], [-23.0, 5.8], [-25.4, 3.6], [-27.2, 1.6]];
+  const LEAF_RIB = [[-28.4, 0.9], [-22, 3.0], [-14, 4.4], [-6, 5.0], [2, 4.7], [10, 3.9], [18, 2.3], [24.4, 0.2], [29.6, -2.6], [32.6, -5.0]];
+  function leafPlat(x, w, v, r) {
+    const P = TYPE.leaf, k = w / 66;
+    x.save(); x.scale(v & 1 ? -k : k, 1);                     // нечётный вариант — черешок справа
+    // выемка на ближнем краю (v = 0) или на дальнем (v = 3): точки контура заменяются вырезом с прямыми срезами
+    let far = LEAF_FAR.slice(), near = LEAF_NEAR.slice(), cornersFar = [], cornersNear = [];
+    if (v === 0) { const i = near.findIndex((p) => p[0] === 8.4); near.splice(i, 1, [10.1, 7.6], [9.0, 5.9], [7.9, 6.7], [6.9, 5.6], [5.9, 8.4]); cornersNear = [i, i + 1, i + 2, i + 3, i + 4]; }
+    if (v === 3) { const i = far.findIndex((p) => p[0] === -9.0); far.splice(i, 1, [-10.2, -1.3], [-9.1, 0.9], [-7.8, 0.1], [-6.9, 1.3], [-6.1, -0.6]); cornersFar = [i, i + 1, i + 2, i + 3, i + 4]; }
+    const pts = [...far, LEAF_TIP, ...near], tipI = far.length, corners = [...cornersFar, tipI, ...cornersNear.map((i) => i + far.length + 1)];
+    // черешок: крепкий, загнут кверху крючком, сужается к концу; сверху светлая кромка
+    const stem = [[-27.6, -0.4], [-31.0, -0.6], [-34.0, -1.6], [-35.8, -3.6], [-35.6, -5.8], [-34.4, -6.6], [-34.9, -5.0], [-34.6, -3.6], [-33.2, -2.0], [-30.6, 1.0], [-27.4, 1.9]];
+    poly(x, stem); x.fillStyle = P.dark; x.fill();
+    poly(x, [[-27.6, -0.4], [-31.0, -0.6], [-34.0, -1.6], [-35.8, -3.6], [-35.6, -5.8], [-35.1, -4.2], [-33.6, -2.3], [-30.8, -0.1], [-27.6, 0.5]]); x.fillStyle = P.light; x.fill();
+    // изнанка: тот же контур, сдвинутый вниз, — узкая тёмная полоса под ближним краем и под загнутыми концами
+    x.save(); x.translate(0.4, 1.8); cut(x, pts, corners); x.fillStyle = P.dark; x.fill(); x.restore();
+    cut(x, pts, corners); x.fillStyle = P.base; x.fill();
     x.save(); x.clip();
-    x.beginPath(); x.moveTo(L - 4, 40);
-    for (let u = L - 4; u <= R + 4; u += 3) x.lineTo(u, twigTop(u, hw, cx) + twigTh(u, hw) * 0.58);
-    x.lineTo(R + 4, 40); x.closePath(); x.fillStyle = P.dark; x.fill();                                  // тёмный низ
-    x.beginPath(); x.moveTo(L - 4, -10);
-    for (let u = L - 4; u <= R + 4; u += 3) x.lineTo(u, twigTop(u, hw, cx) + 1.25 + Math.sin(u * 0.9) * 0.25);
-    x.lineTo(R + 4, -10); x.closePath(); x.fillStyle = P.light; x.fill();                                // светлая кромка
-    x.strokeStyle = P.dark; x.lineWidth = 0.75; x.lineCap = 'round';                                     // кора: короткие продольные штрихи
-    for (let i = 0, n = Math.round(w / 6); i < n; i++) {
-      const u = L + 3 + r() * (w - 2), y = twigTop(u, hw, cx) + 2 + r() * (twigTh(u, hw) * 0.42), ln = 2.4 + r() * 3.4;
-      if (Math.abs(u - cx) < 4) continue;
-      x.globalAlpha = 0.55; x.beginPath(); x.moveTo(u, y); x.lineTo(u + ln, y + (r() - 0.5) * 0.5); x.stroke();
-    }
-    x.globalAlpha = 1;
-    const kU = cx + (r() < 0.5 ? -1 : 1) * (9 + r() * 6), kY = twigTop(kU, hw, cx) + twigTh(kU, hw) * 0.45;      // сучок-глазок
-    x.fillStyle = P.dark; ell(x, kU, kY, 1.9, 1.3); x.fillStyle = P.light; ell(x, kU - 0.3, kY - 0.3, 0.8, 0.5);
+    // дальняя половина на свету: граница — средняя жилка, но свет не доходит до самого кончика (он завёрнут)
+    x.beginPath(); x.moveTo(-40, -14); x.lineTo(-40, LEAF_RIB[0][1] - 0.4);
+    for (const p of LEAF_RIB) x.lineTo(p[0], p[1] - 0.35);
+    x.lineTo(40, -14); x.closePath(); x.fillStyle = P.light; x.fill();
+    // ближний край подвёрнут: у каждой лопасти видна полоска изнанки, во впадинах она сходит на нет
+    x.beginPath(); x.moveTo(34, -8);
+    const lip = [[31.6, -3.2, 0.2], [29.6, -0.9, 1.1], [27.4, 1.0, 1.4], [25.2, 2.1, 0.8], [23.4, 2.4, 0.1], [21.4, 4.0, 1.0], [18.6, 5.4, 1.5], [15.8, 5.9, 0.9], [13.9, 5.8, 0.1],
+      [11.6, 7.1, 0.9], [8.4, 8.2, 1.3], [5.2, 8.6, 0.6], [3.4, 8.3, 0.1], [0.8, 9.3, 0.9], [-2.8, 9.9, 1.6], [-6.6, 10.0, 1.7], [-9.6, 9.6, 1.0], [-11.4, 9.0, 0.1], [-13.6, 9.4, 0.9],
+      [-17.0, 8.9, 1.5], [-20.2, 7.6, 1.4], [-23.0, 5.8, 1.0], [-25.4, 3.6, 0.6], [-27.2, 1.6, 0.2]];
+    for (const [px, py, d] of lip) x.lineTo(px, py - d);
+    x.lineTo(-30, 14); x.lineTo(34, 14); x.closePath(); x.fillStyle = P.dark; x.fill();
+    poly(x, [[26.2, 0.8], [30.0, -2.2], [34.6, -6.6], [31.4, -3.4], [28.0, -0.2]]); x.fillStyle = P.dark; x.fill();      // кончик завернулся: видна изнанка
+    // ржавые крапины: две-три неровные, в разных местах
+    x.fillStyle = P.speck;
+    for (let i = 0, n = 2 + (r() < 0.5 ? 1 : 0); i < n; i++) spot(x, lerp(-20, 16, (i + r() * 0.8) / n), 1.4 + r() * 5, 1.1 + r() * 0.9, 0.6 + r() * 0.4, r);
+    // жилки: средняя и пять боковых — тонкие вырезанные клинья разной длины, к кончику
+    x.fillStyle = P.vein;
+    const vein = (a, b, w0) => { const dx = b[0] - a[0], dy = b[1] - a[1], L = Math.hypot(dx, dy) || 1, nx = -dy / L, ny = dx / L;
+      poly(x, [[a[0] + nx * w0, a[1] + ny * w0], [b[0] + nx * 0.12, b[1] + ny * 0.12], [b[0] - nx * 0.12, b[1] - ny * 0.12], [a[0] - nx * w0, a[1] - ny * w0]]); x.fill(); };
+    for (let i = 0; i < LEAF_RIB.length - 2; i++) vein(LEAF_RIB[i], LEAF_RIB[i + 1], lerp(0.6, 0.22, i / (LEAF_RIB.length - 2)));
+    for (const [a, b, w0] of [[[-21, 3.1], [-14.6, -0.9], 0.36], [[-14, 4.4], [-7.4, 8.4], 0.34], [[-5, 5.0], [1.6, 0.0], 0.3], [[4, 4.6], [10.6, 7.2], 0.32], [[13, 3.5], [18.6, -0.4], 0.26]]) vein(a, b, w0);
     x.restore();
-    // срез на левом конце: светлый торец с кольцами
-    const eY = twigTop(L, hw, cx) + twigTh(L, hw) / 2, eR = twigTh(L, hw) / 2;
-    x.fillStyle = P.inner; ell(x, L + 0.2, eY, 1.7, eR); x.strokeStyle = P.dark; x.lineWidth = 0.5; x.beginPath(); x.ellipse(L + 0.3, eY, 0.85, eR * 0.5, 0, 0, TAU); x.stroke();
-    // лишайник: два-три пятнышка сверху
-    for (let i = 0, n = 2 + (r() < 0.5 ? 1 : 0); i < n; i++) {
-      const u = lerp(L + 6, cx - 7, r()) * (i === 2 ? -0.6 : 1), y = twigTop(u, hw, cx) + 0.6;
-      x.fillStyle = P.lichen; spot(x, u, y, 2.2 + r() * 1.3, 1.25, r); x.fillStyle = P.lichenL; dot(x, u - 0.6, y - 0.5, 0.6);
+    // дырочка (v = 1 — посередине, v = 2 — ближе к кончику): побуревший край и сквозное отверстие
+    if (v === 1 || v === 2) {
+      const h = v === 1 ? [[-5.4, 6.3], [-3.6, 5.6], [-2.2, 6.6], [-2.8, 7.9], [-4.7, 8.0]] : [[17.4, 1.2], [19.3, 0.6], [20.4, 1.8], [19.0, 2.8], [17.6, 2.4]];
+      const cx0 = h.reduce((s, p) => s + p[0], 0) / h.length, cy0 = h.reduce((s, p) => s + p[1], 0) / h.length;
+      poly(x, h.map((p) => [cx0 + (p[0] - cx0) * 1.5, cy0 + (p[1] - cy0) * 1.5])); x.fillStyle = P.speck; x.fill();
+      x.globalCompositeOperation = 'destination-out'; poly(x, h); x.fill(); x.globalCompositeOperation = 'source-over';
     }
-    // надлом: белая древесина клином, щепки торчат вверх, тёмная трещина уходит вниз на две трети толщины
-    const y0 = twigTop(cx, hw, cx);
-    poly(x, [[cx - 3.8, y0 - 0.2], [cx - 0.8, y0 + 4.2], [cx + 0.7, y0 + 3.4], [cx + 3.5, y0 - 0.2]]); x.fillStyle = P.inner; x.fill();
-    poly(x, [[cx - 3.3, y0 + 0.1], [cx - 2.2, y0 - 3.6], [cx - 1.4, y0 + 0.5]]); x.fill();
-    poly(x, [[cx + 1.8, y0 + 0.2], [cx + 3.3, y0 - 2.8], [cx + 3.6, y0 + 0.2]]); x.fill();
-    poly(x, [[cx - 0.6, y0 + 0.4], [cx + 0.1, y0 - 1.9], [cx + 0.6, y0 + 0.5]]); x.fill();
-    x.strokeStyle = P.crack; x.lineJoin = 'round'; x.lineCap = 'round';
-    x.lineWidth = 1.25; x.beginPath(); x.moveTo(cx + CRACK[1][0], y0 + 1.6); x.lineTo(cx + CRACK[2][0], y0 + CRACK[2][1]); x.lineTo(cx + CRACK[3][0], y0 + CRACK[3][1]); x.stroke();
-    x.lineWidth = 0.7; x.beginPath(); x.moveTo(cx + CRACK[3][0], y0 + CRACK[3][1]); x.lineTo(cx + CRACK[3][0] - 0.8, y0 + 7); x.stroke();   // трещина ещё не до конца
+    x.restore();
   }
-  // половина ветки при разломе: side −1 — левая, +1 — правая; граница идёт по той же ломаной, что нарисована
-  function crackClip(c, v, side) {
-    const cx = TWIG_CRACK[v & 3], y0 = 0.5 + TWIG_SAG, last = CRACK.length - 1;       // y0 — верх ветки у надлома: twigTop(cx) при любой ширине
-    c.beginPath(); c.moveTo(cx + CRACK[0][0], -60);
-    for (let i = 1; i < last; i++) c.lineTo(cx + CRACK[i][0], y0 + CRACK[i][1]);
-    c.lineTo(cx + CRACK[last][0], 60); c.lineTo(side * 400, 60); c.lineTo(side * 400, -60); c.closePath(); c.clip();
-  }
-  /* призрачная кочка: только видимость. Силуэт кочки без вещества — едва заметная заливка и пунктирный край,
-     внутри пунктиром граница мха и камня, снизу вместо корней тают струйки тумана. Пунктир = «здесь ничего нет» */
+  /* призрачная кочка: только видимость. Простейший знак «здесь ничего нет» — пунктирный «стадион» (капсула):
+     верх и низ параллельны, концы — полукруги. Едва заметная заливка, штрихи пунктира разной длины, как от руки:
+     они заданы семенем спрайта и от кадра к кадру не меняются. Внутри две-три точки «морока» */
   function ghost(x, w, r) {
-    const hw = w / 2, P = TYPE.ghost, D = 11 + w * 0.09, ph = r() * TAU;
-    const top = [];                                                         // бугристый верх «мха»
-    for (let u = -hw - 1; u <= hw + 1.01; u += (w + 2) / 9) top.push([u, -1.4 + Math.sin(u * 0.13 + ph) * 1.1 + (r() - 0.5) * 0.7]);
-    const st = [], n = Math.max(4, Math.round(w / 15));                    // клин «камня»: прямые срезы, как у настоящей кочки
-    for (let i = 0; i <= n; i++) {
-      const t = i / n, prof = Math.pow(Math.sin(Math.PI * clamp(t * 0.84 + 0.08, 0, 1)), 0.7);
-      st.push([lerp(hw - 6, -hw + 6, t) + (r() - 0.5) * 4, 9 + D * prof * (0.72 + r() * 0.4)]);
-    }
-    const path = () => {
-      x.beginPath(); x.moveTo(-hw - 3.4, 4.4); x.quadraticCurveTo(-hw - 3.6, top[0][1], top[0][0], top[0][1]);
-      for (let i = 1; i < top.length - 1; i++) x.quadraticCurveTo(top[i][0], top[i][1], (top[i][0] + top[i + 1][0]) / 2, (top[i][1] + top[i + 1][1]) / 2);
-      const e = top[top.length - 1]; x.lineTo(e[0], e[1]); x.quadraticCurveTo(hw + 3.6, e[1], hw + 3.4, 4.4);
-      x.lineTo(hw + 0.5, 9); x.lineTo(hw - 3, 9.4); for (const p of st) x.lineTo(p[0], p[1]); x.lineTo(-hw + 3, 9.4); x.lineTo(-hw - 0.5, 9);
-      x.closePath();
+    const P = TYPE.ghost, hw = (w + 4) / 2, R = 6.5, cy = -1 + R, ax = hw - R;     // верх на y = −1, низ на y = 12
+    const outline = () => { x.beginPath(); x.moveTo(-ax, cy - R); x.lineTo(ax, cy - R); x.arc(ax, cy, R, -Math.PI / 2, Math.PI / 2); x.lineTo(-ax, cy + R); x.arc(-ax, cy, R, Math.PI / 2, Math.PI * 1.5); x.closePath(); };
+    outline(); x.fillStyle = P.base; x.globalAlpha = 0.1; x.fill();
+    // точка на контуре по длине пути s: верх слева направо, правый полукруг, низ справа налево, левый полукруг
+    const L1 = 2 * ax, La = Math.PI * R, per = 2 * L1 + 2 * La;
+    const at = (s) => {
+      s = mod(s, per);
+      if (s < L1) return [-ax + s, cy - R];
+      if ((s -= L1) < La) { const a = -Math.PI / 2 + s / R; return [ax + Math.cos(a) * R, cy + Math.sin(a) * R]; }
+      if ((s -= La) < L1) return [ax - s, cy + R];
+      s -= L1; const a = Math.PI / 2 + s / R; return [-ax + Math.cos(a) * R, cy + Math.sin(a) * R];
     };
-    path(); x.fillStyle = P.base; x.globalAlpha = 0.1; x.fill();
-    x.save(); x.clip(); x.globalAlpha = 0.13; x.fillRect(-hw - 6, -8, w + 12, 17.2); x.restore();       // шапка «мха» чуть плотнее
     x.globalAlpha = 0.9; x.strokeStyle = P.line; x.lineWidth = 1.3; x.lineJoin = 'round'; x.lineCap = 'round';
-    x.setLineDash([3.4, 2.7]); path(); x.stroke();
-    // граница мха и камня — с языками бахромы; грань камня — тонкий пунктир
-    x.globalAlpha = 0.45; x.lineWidth = 1; x.setLineDash([1.8, 2.6]);
-    x.beginPath(); x.moveTo(-hw - 0.5, 9);
-    for (let u = -hw + 6; u < hw - 4; u += 9 + r() * 5) { x.lineTo(u, 9.2); x.quadraticCurveTo(u + 2.2, 13 + r() * 2.2, u + 4.4, 9.2); }
-    x.lineTo(hw + 0.5, 9); x.stroke();
-    const fx = (r() - 0.3) * w * 0.2;
-    x.globalAlpha = 0.28; x.beginPath(); x.moveTo(fx + 5, 10.5); x.lineTo(fx - 4, 9 + D * 0.85); x.stroke();
-    // струйки тумана снизу: волнистые, к концу тают
-    x.lineWidth = 1.1; x.setLineDash([2.2, 2.4]);
-    for (let i = 0, k = 2 + (r() < 0.5 ? 1 : 0); i < k; i++) {
-      const sx = (i - (k - 1) / 2) * w * 0.26 + (r() - 0.5) * 6, sy = 12 + D * 0.55, len = 12 + r() * 9, ph2 = r() * TAU;
-      for (let j = 0; j < 4; j++) {
-        const a = j / 4, b = (j + 1) / 4;
-        x.globalAlpha = 0.5 * (1 - a);
-        x.beginPath(); x.moveTo(sx + Math.sin(a * 5 + ph2) * 2, sy + a * len); x.lineTo(sx + Math.sin(b * 5 + ph2) * 2, sy + b * len); x.stroke();
-      }
+    let s = r() * 3;
+    while (s < per - 2.4) {                   // штрих 3,0–4,2, промежуток 2,2–3,0; каждый — короткая ломаная вдоль контура
+      const len = Math.min(3 + r() * 1.2, per - s - 1.6);
+      x.beginPath(); for (let u = 0; u <= len + 0.01; u += 0.5) { const p = at(s + Math.min(u, len)); if (u) x.lineTo(p[0], p[1]); else x.moveTo(p[0], p[1]); } x.stroke();
+      s += len + 2.2 + r() * 0.8;
     }
-    x.setLineDash([]);
-    x.fillStyle = '#ffffff';                                                                              // искорки морока внутри
-    for (let i = 0; i < 3; i++) { x.globalAlpha = 0.45 + r() * 0.3; dot(x, (r() - 0.5) * (w - 22), 2 + r() * 7, 0.55 + r() * 0.3); }
+    x.fillStyle = '#ffffff';                                                                              // точки «морока» внутри
+    for (let i = 0, n = 2 + (r() < 0.5 ? 1 : 0); i < n; i++) { x.globalAlpha = 0.45 + r() * 0.3; dot(x, (r() - 0.5) * (w - 24), cy + (r() - 0.5) * 6, 0.5 + r() * 0.3); }
     x.globalAlpha = 1;
   }
   function crystal(x, w, r) {      // кристалл: гранёная пластина с острыми концами, шип вверх слева и шип вниз справа
@@ -1263,7 +1259,7 @@ const Art = (() => {
   }
   const PLAT = {
     static: (x, w, z, r) => kochka(x, w, z, r, false), home: (x, w, z, r) => kochka(x, w, z, r, true),
-    moving: (x, w, z, r) => pad(x, w, r), bouncy: (x, w, z, r) => bouncer(x, w, r), puff: (x, w, z, r, v) => twig(x, w, v, r),
+    moving: (x, w, z, r) => pad(x, w, r), bouncy: (x, w, z, r) => bouncer(x, w, r), puff: (x, w, z, r, v) => leafPlat(x, w, v, r),
     fake: (x, w, z, r) => ghost(x, w, r), phase: (x, w, z, r) => crystal(x, w, r),
   };
   PLAT.vmove = PLAT.moving;
@@ -1887,13 +1883,13 @@ const Art = (() => {
     if (sk.mouth === 'beak') { c.fillStyle = '#ffd08a'; poly(c, [[-2.7, ey + 3.5], [2.7, ey + 3.5], [0, ey + 8.6]]); c.fill(); c.fillStyle = '#e8a75a'; poly(c, [[0, ey + 3.5], [2.7, ey + 3.5], [0, ey + 8.6]]); c.fill(); }
   }
 
-  return { setScale, canvas, glow, plat, TYPE, SHROOM, crackClip, TWIG_CRACK, bit, ribbon, sparkle, halo, bracket, shroom, bough, frond, druse, leafy, moon, fernFlower, curl, islet,
+  return { setScale, canvas, glow, plat, TYPE, SHROOM, cut, bit, ribbon, sparkle, halo, bracket, shroom, bough, frond, druse, leafy, moon, fernFlower, curl, islet,
     grump, grumpFace, bubble, item, ITEM_GLOW, char, hexA, ell, dot, rr, star5, firefly, leaf, poly, blob, spot };
 })();
 
 /* ===== Тихолесье · мир: состояние, генерация, физика, находки, задания ===== */
 const view = { cv: null, ctx: null, pfW: 400, pfX: 0, Hpx: 800, s: 1, dpr: 1, K: 1, H: 800, top: 14 };
-const game = { state: 'menu', zen: false, t: 0, dt: 0.016, camY: 0, dCam: 0, startY: 260, plats: [], coins: [], grumps: [], parts: [], flash: 0, seed: 0, reveal: 0, homeId: 0, swarm: 1 };
+const game = { state: 'menu', zen: false, t: 0, dt: 0.016, camY: 0, dCam: 0, startY: 260, plats: [], coins: [], grumps: [], parts: [], flash: 0, seed: 0, reveal: 0, homeId: 0 };
 const ctl = { dx: 0, axis: 0, tilt: 0, tiltSeen: false, keyL: false, keyR: false, ptrs: new Map() };
 const P = {
   x: WW / 2, y: 0, vy: 0, vx: 0, sq: 0, sqv: 0, lean: 0, moved: 0, blink: 0, blinkT: 2.5, flap: 0,
@@ -1911,9 +1907,9 @@ const ctlMode = () => (save.set.control === 'tilt' && !ctl.tiltSeen ? 'swipe' : 
 /* ---------- платформы ---------- */
 // смысл платформы читается сначала по силуэту, потом по цвету: кочка (камень под шапкой мха цвета зоны) держит всегда,
 // плавучая кочка (голубая линза без камня) плывёт, гриб-батут (фиолетовый, на ножке) подбрасывает,
-// сухая ветка с надломом (тип puff) выдерживает один прыжок и ломается, кристалл (гранёная пластина) мерцает,
-// призрачная кочка (тип fake: прозрачный силуэт с пунктирным краем) не держит вовсе и тает от касания
-const DUST = { moving: '#6fe0e6', vmove: '#6fe0e6', bouncy: '#b287ff', puff: '#c4bee8', fake: '#dde3ff', phase: '#a9eeff', ground: '#08082a' };   // цвет пыли при приземлении
+// сухой лист (тип puff) выдерживает один прыжок, срывается и планирует вниз, кристалл (гранёная пластина) мерцает,
+// призрачная кочка (тип fake: пунктирная капсула) не держит вовсе и тает от касания
+const DUST = { moving: '#6fe0e6', vmove: '#6fe0e6', bouncy: '#b287ff', puff: '#c9c0d8', fake: '#dde3ff', phase: '#a9eeff', ground: '#08082a' };   // цвет пыли при приземлении
 let platId = 0;
 function mkPlat(type, x, top, w, zi) {
   const id = ++platId;
@@ -1966,14 +1962,14 @@ function genStep() {
   const pp = h < 300 ? 0 : zi === 1 ? 0.16 : lerp(0.07, 0.14, d);
   const q = r();
   if (q < pm) type = 'moving'; else if (q < pm + pb) type = 'bouncy'; else if (q < pm + pb + pp) type = 'puff';
-  if (type === 'puff') w = 60; else if (type === 'bouncy') w = Math.min(w, 72);
+  if (type === 'puff') w = 66; else if (type === 'bouncy') w = Math.min(w, 72);
   let x = freeX(y, w, 10);
   if (x < 0) x = w / 2 + 8 + r() * (WW - w - 16);
   if (type === 'moving') { for (let i = game.plats.length - 1; i >= 0 && i >= game.plats.length - 8; i--) if (Math.abs(game.plats[i].baseY - y) < 36) { type = 'static'; break; } }
   const pl = mkPlat(type, x, y, w, zi);
   if (type === 'moving') { pl.vx = (r() < 0.5 ? -1 : 1) * lerp(45, 140, d) * (0.8 + r() * 0.4); pl.minX = w / 2 + 8; pl.maxX = WW - w / 2 - 8; }
   game.plats.push(pl);
-  if (type === 'puff') {        // сухая ветка одноразовая, поэтому рядом всегда есть обычная кочка: путь наверх не обрывается
+  if (type === 'puff') {        // сухой лист одноразовый, поэтому рядом всегда есть обычная кочка: путь наверх не обрывается
     const sy = y + (r() - 0.5) * 10, sx = freeX(sy, w0, 16);
     if (sx < 0) { pl.type = 'static'; pl.dust = ZONES[zi].moss[0]; type = 'static'; }
     else game.plats.push(mkPlat('static', sx, sy, w0, zi));
@@ -2129,7 +2125,7 @@ function setMult() {
   if (p.mult > run.maxMult) { run.maxMult = p.mult; if (p.mult > save.stats.maxMult && !game.zen) save.stats.maxMult = p.mult; }
   if (p.mult > was && game.state === 'play') {        // множитель вырос: счётчик светлячков вздрагивает; в первый раз — подсказка, что он умножает
     UI.multUp();
-    if (!save.multTip && p.mult >= 2) { save.multTip = true; UI.hint('×2 — светлячки сбились в пары: каждый пойманный теперь за двух. Новые кочки подряд разгонят до ×5', 5200); }
+    if (!save.multTip && p.mult >= 2) { save.multTip = true; UI.hint('×2 — теперь каждый пойманный светлячок считается за двух. Новые кочки подряд разгонят множитель до ×5', 5200); }
   }
 }
 function wingsReady(all) {      // взмах снова доступен: видно на крыльях героя и в счётчике
@@ -2149,9 +2145,11 @@ function land(pl) {
   if (pl.type === 'fake') { vanish(pl, playing); return false; }       // призрачная кочка не держит: только видимость
   p.y = pl.top; p.vy = VJ; p.sq = -0.3; p.sqv = 0; pl.sq = 0.8; pl.sqv = 0;
   if (pl.type === 'bouncy') { p.vy = VJ * 1.55; pl.sq = 1.3; if (playing) { run.bouncy++; if (!game.zen) save.stats.bouncy++; } }
-  if (pl.type === 'puff') {      // сухая ветка выдержала прыжок и ломается по надлому: половинки складываются вниз и падают
-    pl.fall = 1; pl.vy = -40;
-    burst('shard', pl.x + Art.TWIG_CRACK[pl.v & 3], pl.top - 3, 7, ['#c4bee8', '#857eb9', '#fdfcff'], 140, { grav: 900, life: 0.7, size: 3.4, spread: 3, spreadY: 2 });
+  if (pl.type === 'puff') {      // сухой лист выдержал прыжок и сразу срывается: планирует вниз, покачиваясь
+    pl.fall = 1; pl.ft = 0; pl.fph = 0; pl.fx0 = pl.x; pl.famp = rnd(18, 26) * (Math.random() < 0.5 ? -1 : 1); pl.tilt = 0;
+    const L = Art.TYPE.leaf;
+    for (let i = 0, n = 3 + (Math.random() < 0.5 ? 1 : 0); i < n; i++)          // крошки сухого листа, а не щепки
+      part({ k: 'crumb', x: pl.x + rnd(-14, 14), y: pl.top - rnd(2, 7), vx: rnd(-30, 30), vy: rnd(10, 60), life: rnd(0.6, 0.9), size: rnd(2, 2.6), col: [L.base, L.dark, L.light][i % 3], grav: 520, drag: 1.4, rot: rnd(TAU), vr: rnd(-8, 8) });
     if (playing) { if (!game.zen) save.stats.puffs++; addSum('puffs', 1); }
   }
   if (playing) {
@@ -2162,7 +2160,7 @@ function land(pl) {
       p.lastPlat = pl.id; p.lastTop = pl.baseY;
     }
     setMult();
-    Snd.play(pl.type === 'bouncy' ? 'bouncy' : pl.type === 'puff' ? 'snap' : 'bounce', p.flow);
+    Snd.play(pl.type === 'bouncy' ? 'bouncy' : pl.type === 'puff' ? 'rustle' : 'bounce', p.flow);
     if (pl.type === 'puff') Snd.play('bounce', p.flow);
     burst('dot', p.x, pl.top + 2, pl.type === 'bouncy' ? 6 : 3, [pl.dust], pl.type === 'bouncy' ? 150 : 80, { up: true, life: 0.45, size: 5, spread: 10 });   // пыль при приземлении
     if (save.trail === 'notes') part({ k: 'tNote', x: p.x + rnd(-8, 8), y: p.y + 30, vx: rnd(-16, 16), vy: rnd(30, 55), life: 1.4, size: rnd(5.2, 7), col: ['#b9a2ff', '#7fe8ff', '#ffe6a3'][(Math.random() * 3) | 0], grav: 0, drag: 0.8, rot: rnd(-0.35, 0.35), vr: rnd(-0.6, 0.6), v: Math.random() < 0.35 ? 1 : 0 });
@@ -2258,7 +2256,14 @@ function stepPlats(dt) {
       case 'vmove': p.prevTop = p.top; p.top = p.baseY + Math.sin(p.t * p.om) * p.amp; break;
       case 'phase': { const c = p.t % 3.6; p.on = c < 2.7; p.alpha = c < 2.2 ? 1 : c < 2.7 ? 0.6 + 0.4 * Math.sin(c * 42) : c > 3.4 ? lerp(0.13, 1, (c - 3.4) / 0.2) : 0.13; break; }
       case 'fake': if (p.fall) { p.top += 22 * dt; p.prevTop = p.top; p.alpha -= dt * 2.1; if (p.alpha <= 0) { p.alpha = 0; p.dead = true; } } break;    // тает и чуть всплывает
-      case 'puff': if (p.fall) { p.vy -= GRAV * 0.55 * dt; p.top += p.vy * dt; p.prevTop = p.top; p.alpha -= dt * 1.6; if (p.alpha <= 0) { p.alpha = 0; p.dead = true; } } break;
+      case 'puff': if (p.fall) {         // лист планирует: качается маятником, внизу качания падает быстрее, к краям — наклон меньше
+        p.ft += dt; p.fph += 3.2 * dt;
+        const k = smooth(Math.min(1, p.ft / 0.35)), cs = Math.cos(p.fph);              // первые доли секунды качание нарастает — без рывка
+        p.x = p.fx0 + p.famp * Math.sin(p.fph) * k; p.tilt = 0.5 * cs * k * Math.sign(p.famp);
+        p.top -= (70 + 40 * Math.abs(cs)) * dt; p.prevTop = p.top;
+        const u = p.ft / 1.6; p.alpha = u < 0.45 ? 1 : Math.max(0, 1 - (u - 0.45) / 0.55);
+        if (u >= 1) { p.alpha = 0; p.dead = true; }
+      } break;
     }
   }
 }
@@ -2305,9 +2310,10 @@ function stepWorld(dt) {
       c.dead = true;
       const val = (c.big ? 10 : 1) * p.mult * (game.zen ? 0.5 : 1);
       addCoins(val); Snd.play('coin', c.big);
-      // стайка рассыпается искрами — по одной на каждого светлячка в ней; надпись «+N» только у большого светлячка
-      burst('g', c.x, c.y, c.big ? 7 : 1 + p.mult, ['#ffe3a0'], c.big ? 140 : 60 + 14 * p.mult, { life: 0.4, size: c.big ? 7 : 5 });
+      // вспышка из трёх искр (у большого — из семи); надпись «+N» только у большого светлячка
+      burst('g', c.x, c.y, c.big ? 7 : 3, ['#ffe3a0'], c.big ? 140 : 80, { life: 0.4, size: c.big ? 7 : 5 });
       if (c.big) popText(c.x, c.y + 10, '+' + fmt1(val), 15);
+      if (p.mult >= 2) UI.multJolt();                // «×N» вздрагивает вместе со счётчиком: поймал одного — прибавилось N
     }
   }
   /* находки на кочках; призрачные кочки тают от любого касания — и сверху, и когда пролетаешь сквозь */
@@ -2392,8 +2398,6 @@ function update(dt) {
   if (p.flap > 0) p.flap = Math.max(0, p.flap - dt * 3.2);
   p.lean += (clamp(p.moved / Math.max(dt, 0.001) / 700, -1, 1) * 0.3 - p.lean) * (1 - Math.exp(-dt * 12)); p.moved = 0;
   if (game.flash > 0) game.flash = Math.max(0, game.flash - dt * 0.8);
-  const sw = game.state === 'menu' ? 1 : p.mult;                       // стайки светлячков плавно собираются и рассыпаются вслед за множителем
-  game.swarm += (sw - game.swarm) * (1 - Math.exp(-dt * (sw > game.swarm ? 6 : 9)));
   if (game.state !== 'menu' && game.reveal < 1) game.reveal = Math.min(1, game.reveal + dt * 2.2);
 
   if (game.state === 'play') {
@@ -3071,13 +3075,8 @@ function drawPlats() {
       c.globalAlpha = a * (pl.fall ? 1 : br);
       c.save(); c.translate(pl.x + Math.sin(T * 1.1 + pl.id) * 0.8, py + Math.sin(T * 1.4 + pl.id * 0.7) * 1.1); c.scale(1 + k * 0.35, 1 + k * 0.12);
       c.drawImage(s.c, -s.ox, -s.oy, s.w, s.h); c.restore();
-    } else if (pl.type === 'puff' && pl.fall) {      // сухая ветка сломалась: половинки поворачиваются вокруг внешних концов, надломом вниз
-      const k = clamp(1 - pl.alpha, 0, 1), ang = k * 0.8 + k * k * 0.5;
-      for (const side of [-1, 1]) {
-        const ex = side * (pl.w / 2 + 1.5);
-        c.save(); c.translate(pl.x + ex + side * k * 5, py); c.rotate(-side * ang); c.translate(-ex, 0);
-        Art.crackClip(c, pl.v, side); c.drawImage(s.c, -s.ox, -s.oy, s.w, s.h); c.restore();
-      }
+    } else if (pl.type === 'puff' && pl.fall) {      // сухой лист сорвался: целиком, с наклоном в сторону движения, поворот вокруг середины
+      c.save(); c.translate(pl.x, py + 4.5); c.rotate(pl.tilt || 0); c.translate(0, -4.5); c.drawImage(s.c, -s.ox, -s.oy, s.w, s.h); c.restore();
     } else if (pl.sq !== 0 || pl.fall) {
       c.save(); c.translate(pl.x, py + pl.sq * 4);
       if (pl.fall) c.rotate((1 - pl.alpha) * 0.5 * (pl.id % 2 ? 1 : -1));
@@ -3092,36 +3091,23 @@ function drawPlats() {
     c.globalAlpha = 1;
   }
 }
-/* светлячки. При множителе ×N каждый становится стайкой из N огоньков, кружащих вокруг общего центра:
-   видно, что поймаешь сразу N. Множитель упал — стайки так же плавно сходятся обратно в одиночек */
+/* светлячки: всегда одиночные огоньки — ореол с мерцанием и тёплая точка. Множитель показывают только «×N»
+   у счётчика и сам счётчик, который прибавляет по N; на виде светлячков он не сказывается */
 function drawCoins() {
   const rv = game.reveal; if (rv < 0.01) return;
-  const g = Art.glow('#ffe3a0'), m = clamp(game.swarm, 1, 5), k = smooth(clamp(m - 1, 0, 1));
-  const n = Math.min(5, Math.ceil(m - 0.02)), tail = m - (n - 1);            // tail — насколько «проявился» последний огонёк
-  const R = (2.9 + 0.5 * (n - 2)) * k, dr = lerp(2.6, 1.85, k);
+  const g = Art.glow('#ffe3a0');
   c.globalCompositeOperation = 'lighter';
   for (const q of game.coins) {
     const y = Y(q.y); if (y < -30 || y > H + 30) continue;
-    const r = (q.big ? 22 : 12) + (m - 1) * (q.big ? 3 : 2.6);
+    const r = q.big ? 22 : 12;
     c.globalAlpha = rv * (0.6 + 0.2 * Math.sin(T * 4 + q.ph * 2));
     c.drawImage(g, q.x - r, y + Math.sin(T * 1.8 + q.ph) * 2 - r, r * 2, r * 2);
   }
-  c.globalCompositeOperation = 'source-over'; c.fillStyle = '#fff6dc';
+  c.globalAlpha = rv; c.globalCompositeOperation = 'source-over'; c.fillStyle = '#fff6dc';
   for (const q of game.coins) {
     const y = Y(q.y); if (y < -30 || y > H + 30) continue;
-    const yy = y + Math.sin(T * 1.8 + q.ph) * 2, dir = q.ph > Math.PI ? 1 : -1, spin = T * (1.5 + (q.ph % 1) * 0.5) * dir + q.ph;
-    if (q.big) {                                   // большой светлячок: при множителе вокруг него кружат спутники
-      c.globalAlpha = rv; Art.firefly(c, q.x, yy); c.fillStyle = '#fff6dc';
-      for (let i = 1; i < n; i++) { const a = spin + (i - 1) / Math.max(m - 1, 1e-3) * TAU; c.globalAlpha = rv * (i === n - 1 ? Math.min(1, tail) : 1); Art.dot(c, q.x + Math.cos(a) * 11 * k, yy + Math.sin(a) * 9 * k, 1.9); }
-      continue;
-    }
-    if (n < 2 || R < 0.05) { c.globalAlpha = rv; Art.dot(c, q.x, yy, dr); continue; }
-    const br = 1 + 0.12 * Math.sin(T * 3 + q.ph * 3);
-    for (let i = 0; i < n; i++) {
-      const a = spin + i / m * TAU;                 // шаг по дробному m: новый огонёк выходит из соседа, а не прыгает
-      c.globalAlpha = rv * (i === n - 1 ? Math.min(1, tail) : 1);
-      Art.dot(c, q.x + Math.cos(a) * R * br, yy + Math.sin(a) * R * br * 0.86, dr);
-    }
+    const yy = y + Math.sin(T * 1.8 + q.ph) * 2;
+    if (q.big) { Art.firefly(c, q.x, yy); c.fillStyle = '#fff6dc'; } else Art.dot(c, q.x, yy, 2.6);
   }
   c.globalAlpha = 1;
 }
@@ -3194,6 +3180,8 @@ function drawParts(add) {
       case 'bub': c.globalAlpha = u * 0.9; c.strokeStyle = q.col; c.lineWidth = 1.2; c.beginPath(); c.arc(q.x, y, q.size, 0, TAU); c.stroke(); break;
       case 'mist': { const r = q.size * (1 + (1 - u) * 1.3); c.globalAlpha = u * 0.3; c.fillStyle = q.col; Art.ell(c, q.x, y, r * 1.6, r * 0.7); break; }   // клочок тумана: плоский, расплывается и тает
       case 'petal': c.globalAlpha = Math.min(1, u * 2); c.fillStyle = q.col; c.save(); c.translate(q.x, y); c.rotate(rot); Art.ell(c, 0, 0, q.size, q.size * 0.5); c.restore(); break;
+      case 'crumb': { c.globalAlpha = Math.min(1, u * 2); c.fillStyle = q.col; c.save(); c.translate(q.x, y); c.rotate(rot);   // крошка сухого листа: неровный четырёхугольник
+        const s = q.size * 0.5; c.beginPath(); c.moveTo(-s, -s * 0.45); c.lineTo(s * 0.7, -s * 0.85); c.lineTo(s, s * 0.35); c.lineTo(-s * 0.35, s * 0.8); c.closePath(); c.fill(); c.restore(); break; }
       case 'shard': c.globalAlpha = Math.min(1, u * 2); c.fillStyle = q.col; c.save(); c.translate(q.x, y); c.rotate(rot);
         c.beginPath(); c.moveTo(-q.size * 0.6, q.size * 0.4); c.lineTo(q.size * 0.6, q.size * 0.3); c.lineTo(0, -q.size * 0.6); c.closePath(); c.fill(); c.restore(); break;
       case 'tSpark': case 'tPollen': case 'tBub': case 'tPetal': case 'tStar': c.globalAlpha = Math.min(1, u * 2.2); Art.bit(c, q, q.x, y, u, T); break;
@@ -3255,12 +3243,57 @@ const UI = (() => {
     $('mBest').textContent = best ? `Рекорд ${fmt(best)} м` : '';
     for (const b of $('modeSeg').children) b.classList.toggle('on', (b.dataset.zen === '1') === save.zen);
     $('modeHint').textContent = save.zen ? 'Упасть нельзя. Светлячков вдвое меньше, задания не идут.' : '';
+    syncGift();
   }
-  function gift() {              // подарок дня приходит сам при первом заходе в меню
-    const k = dayKey(); if (save.gift === k) return;
-    save.gift = k; save.coins += 30; save.totalCoins += 30; persist(); toast('Подарок леса', 30);
+  /* ---------- подарок леса: раз в календарный день (местное время), только кнопкой в меню ---------- */
+  const giftReady = () => save.gift !== dayKey();
+  const calm = () => !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  let rollRaf = 0;
+  function syncGift() { const b = $('bGift'); if (!b.classList.contains('away')) b.hidden = !giftReady(); }
+  function claimGift() {
+    const b = $('bGift');
+    if (!giftReady() || b.classList.contains('away')) return;          // второе нажатие не даёт второй награды
+    const from = save.coins;
+    save.gift = dayKey(); save.coins += GIFT; save.totalCoins += GIFT; persist();
+    Snd.unlock(); Snd.play('gift'); toast('Подарок леса', GIFT);
+    if (calm()) { b.hidden = true; $('mCoins').textContent = fmt(save.coins); return; }
+    const land = flyFireflies(b, $('mCoinsBox'), 7);
+    rollCoins(from, save.coins, land);
+    b.classList.add('away'); setTimeout(() => { b.hidden = true; b.classList.remove('away'); }, 200);
   }
-  function showMenu() { base = 'menu'; sheet = null; only('menu'); gift(); syncMenu(); if (game.state === 'menu') menuCamera(); }
+  // светлячки вылетают из кнопки и по разным дугам летят к счётчику; возвращает, когда долетит первый (мс)
+  function flyFireflies(fromEl, toEl, n) {
+    const ui = $('ui'), R = ui.getBoundingClientRect(), a = fromEl.getBoundingClientRect(), b = (toEl.querySelector('.ic') || toEl).getBoundingClientRect();
+    const x0 = a.left - R.left + a.width * 0.7, y0 = a.top - R.top + a.height / 2, x1 = b.left - R.left + b.width / 2, y1 = b.top - R.top + b.height / 2;
+    let first = 1e9;
+    for (let i = 0; i < n; i++) {
+      const el = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); el.setAttribute('class', 'flyic'); el.setAttribute('aria-hidden', 'true');
+      el.innerHTML = '<use href="#i-fly"/>'; ui.append(el);
+      const sx = x0 + rnd(-16, 16), sy = y0 + rnd(-7, 7), lift = Math.min(rnd(16, 40), Math.min(sy, y1) - 4), mx = lerp(sx, x1, rnd(0.3, 0.6)), my = Math.min(sy, y1) - lift;
+      const dur = rnd(500, 800), delay = i * rnd(35, 60), kf = [];
+      for (let j = 0; j <= 8; j++) {             // дуга — квадратичная кривая через точку над строкой
+        const t = j / 8, u = 1 - t, x = u * u * sx + 2 * u * t * mx + t * t * x1, y = u * u * sy + 2 * u * t * my + t * t * y1;
+        kf.push({ transform: `translate(${(x - 7).toFixed(1)}px, ${(y - 7).toFixed(1)}px) scale(${(0.55 + 0.45 * Math.sin(t * Math.PI) + 0.25 * t).toFixed(2)})`, opacity: t < 0.12 ? t / 0.12 : 1 });
+      }
+      first = Math.min(first, dur + delay);
+      try { el.animate(kf, { duration: dur, delay, easing: 'ease-in-out', fill: 'both' }).onfinish = () => el.remove(); } catch (e) { el.remove(); }
+      setTimeout(() => el.remove(), dur + delay + 200);              // на всякий случай: в DOM ничего не остаётся
+    }
+    return first;
+  }
+  // число в счётчике меню набегает от старого к новому, в конце счётчик коротко увеличивается, как в забеге
+  function rollCoins(from, to, wait) {
+    cancelAnimationFrame(rollRaf);
+    const el = $('mCoins'), t0 = performance.now() + wait, ms = 600;
+    const step = (now) => {
+      const k = clamp((now - t0) / ms, 0, 1);
+      el.textContent = fmt(lerp(from, to, smooth(k)));
+      if (k < 1) { rollRaf = requestAnimationFrame(step); return; }
+      try { $('mCoinsBox').animate([{ transform: 'scale(1.22)' }, { transform: 'scale(1)' }], { duration: 240, easing: 'ease-out' }); } catch (e) { /* без анимации тоже понятно */ }
+    };
+    rollRaf = requestAnimationFrame(step);
+  }
+  function showMenu() { base = 'menu'; sheet = null; only('menu'); syncMenu(); if (game.state === 'menu') menuCamera(); }
 
   /* ---------- экран забега ---------- */
   function hint(text, ms) {
@@ -3273,7 +3306,7 @@ const UI = (() => {
     const b = !touch ? 'Пробел — взмах крыльев в воздухе' : m === 'sides' ? 'Смахни вверх — взмах крыльев в воздухе' : 'Короткий тап — взмах крыльев в воздухе';
     hint(a, 4400);
     tutTimers = [setTimeout(() => { if (game.state === 'play') hint(b, 4600); }, 6000),
-      setTimeout(() => { if (game.state === 'play') hint('Новые кочки подряд — и светлячки собираются в стайки: каждая стайка даёт ×2…×5. Дважды на одну кочку — стайки распадаются.', 6800); }, 13000)];
+      setTimeout(() => { if (game.state === 'play') hint('Прыгай на новые кочки подряд — растёт множитель светлячков, до ×5. Снова на ту же кочку — он падает', 6800); }, 13000)];
   }
   function zoneCard(i) {
     const el = $('zonecard'); $('zcName').textContent = ZONES[i].name;
@@ -3353,6 +3386,10 @@ const UI = (() => {
     for (let i = 0; i < w.children.length; i++) if (all ? i < n : i === n - 1) { replay(w.children[i], 'flash'); replay(w.children[i], 'pop'); }
   }
   function multUp() { hud(); replay($('hMult'), 'pop'); }
+  function multJolt() {           // поймал светлячка при ×2 и выше: «×N» коротко вздрагивает вместе со счётчиком
+    const el = $('hMult'); if (el.hidden || !el.animate) return;
+    try { el.animate([{ transform: 'scale(1.18)' }, { transform: 'scale(1)' }], { duration: 200, easing: 'ease-out' }); } catch (e) { /* без анимации тоже понятно */ }
+  }
   function toast(text, coins, kind) {
     const box = $('toasts'), el = document.createElement('div'); el.className = 'toast' + (kind ? ' ' + kind : '');
     if (kind === 'quest') el.insertAdjacentHTML('beforeend', ic('i-check'));
@@ -3545,8 +3582,8 @@ const UI = (() => {
     { plat: ['static', 84], t: 'Кочка', d: 'Камень под шапкой мха. Держит всегда.' },
     { plat: ['moving', 84], t: 'Плавучая кочка', d: 'Голубая подушка мха без камня. Плывёт в стороны или вверх-вниз.' },
     { plat: ['bouncy', 72], t: 'Гриб-батут', d: 'Фиолетовая шляпка в крапинку. Подбрасывает в полтора раза выше.' },
-    { plat: ['puff', 60], t: 'Сухая ветка', d: 'С надломом посередине. Выдержит один прыжок и сломается.' },
-    { plat: ['fake', 78], t: 'Призрачная кочка', d: 'Прозрачная, с пунктирным краем — только видимость. Не держит, тает от касания.' },
+    { plat: ['puff', 66], t: 'Сухой лист', d: 'Лёгкий и ломкий. Выдержит один прыжок, потом сорвётся и улетит.' },
+    { plat: ['fake', 78], t: 'Призрачная кочка', d: 'Пунктирная капсула — только видимость. Не держит и тает от касания.' },
     { plat: ['phase', 78], t: 'Кристалл', d: 'Гранёная пластина. Мерцает: пока погасла, пролетаешь насквозь.' },
     { h: 'Находки' },
     { item: 'dandelion', t: 'Одуванчик', d: 'Несёт вверх несколько секунд.' },
@@ -3556,11 +3593,11 @@ const UI = (() => {
     { item: 'feather', t: 'Перо', d: 'Сразу заряжает крылья.' },
     { h: 'Остальное' },
     { grump: 1, t: 'Ворчун', d: 'Прыгни на него сверху. Сбоку и снизу он сталкивает вниз.' },
-    { icon: 'i-wing', t: 'Крылья', d: 'Взмах в воздухе — запасной прыжок. Заряд восстанавливается сам.' },
-    { swarm: 1, t: 'Множитель светлячков', d: 'Новые кочки подряд — светлячки сбиваются в стайки по 2–5, и каждая приносит столько, сколько в ней огоньков. На высоту не влияет. Прыжок на ту же кочку стайки разбивает.' },
+    { icon: 'i-wing', t: 'Крылья', d: 'Запасной прыжок в воздухе. Заряд восстанавливается сам. У каждого облика свой взмах.' },
+    { mult: 1, t: 'Множитель светлячков', d: 'Новые кочки подряд разгоняют его до ×5 — он горит рядом со счётчиком светлячков. Каждый пойманный светлячок считается за столько. На высоту не влияет. Прыжок на ту же кочку снижает множитель, удар ворчуна сбрасывает.' },
   ];
   // где у каждой платформы середина видимой части (ед. ниже точки приземления): по ней спрайт ставится в центр картинки
-  const LEG_MID = { static: 12, moving: 9, bouncy: 12, puff: 7, fake: 14, phase: 5 };
+  const LEG_MID = { static: 12, moving: 9, bouncy: 12, puff: 3.5, fake: 5.5, phase: 5 };
   function legendArt(cv, it) {
     const x = cv.getContext('2d'); x.clearRect(0, 0, 144, 96);
     if (it.plat) {
@@ -3568,13 +3605,20 @@ const UI = (() => {
       x.drawImage(s.c, (144 - s.w * k) / 2, 48 - (s.oy + LEG_MID[tp]) * k, s.w * k, s.h * k);
     } else if (it.item) {
       x.save(); x.translate(72, 50); x.scale(2.2, 2.2); Art.item(x, it.item, 1.2); x.restore();
-    } else if (it.swarm) {          // одиночный светлячок → стайка из трёх: так в лесу выглядит множитель
-      [[34, 1], [106, 3]].forEach(([cx, n]) => {
-        x.globalCompositeOperation = 'lighter'; x.globalAlpha = 0.8; const r = n > 1 ? 36 : 26; x.drawImage(Art.glow('#ffe3a0'), cx - r, 48 - r, r * 2, r * 2);
-        x.globalCompositeOperation = 'source-over'; x.globalAlpha = 1; x.fillStyle = '#fff6dc';
-        for (let i = 0; i < n; i++) { const a = i / n * TAU - 0.5, R = n > 1 ? 10.5 : 0; Art.dot(x, cx + Math.cos(a) * R, 48 + Math.sin(a) * R * 0.86, n > 1 ? 5.4 : 6.4); }
-      });
-      x.fillStyle = '#a2a7d8'; x.beginPath(); x.moveTo(64, 41); x.lineTo(74, 48); x.lineTo(64, 55); x.closePath(); x.fill();
+    } else if (it.mult) {           // кусочек счётчика забега: «×3», значок светлячка, 12 — теми же цветами и шрифтом, что в HUD
+      const css = getComputedStyle(document.body), fire = css.getPropertyValue('--firefly').trim() || '#ffe3a0', ink = css.getPropertyValue('--ink').trim() || '#eef0ff';
+      let fs = 38; const font = () => `700 ${fs}px 'Alegreya Sans', 'PT Sans', system-ui, sans-serif`;
+      x.font = font(); let wa = x.measureText('×3').width, wb = x.measureText('12').width, icw = fs * 0.79, gap = fs * 0.32;
+      const total = () => wa + fs * 0.1 + gap + icw + gap + wb;
+      if (total() > 136) { const k = 136 / total(); fs *= k; x.font = font(); wa *= k; wb *= k; icw *= k; gap *= k; }
+      let px = (144 - total()) / 2; const base = 48 + fs * 0.34;
+      x.textBaseline = 'alphabetic'; x.textAlign = 'left';
+      const txt = (s, col) => { x.fillStyle = '#05061c'; x.fillText(s, px, base + fs * 0.105); x.fillStyle = col; x.fillText(s, px, base); };
+      txt('×3', fire); px += wa + fs * 0.1 + gap;
+      x.save(); x.translate(px, 48 - icw / 2); x.scale(icw / 24, icw / 24); x.fillStyle = fire;          // значок #i-fly
+      x.beginPath(); x.arc(12, 15, 4.6, 0, TAU); x.fill();
+      x.globalAlpha = 0.65; x.fill(new Path2D('M11 11C7.5 10 5 7.5 5.5 4 9 4.3 11 7 11 11zM13 11c3.5-1 6-3.5 5.5-7C15 4.3 13 7 13 11z')); x.restore();
+      px += icw + gap; txt('12', ink);
     } else if (it.grump) {
       const s = Art.grump();
       x.save(); x.translate(72, 48); x.scale(1.8, 1.8); x.drawImage(s.c, -s.ox, -s.oy, s.w, s.h); Art.grumpFace(x, 0, 0, 0.8); x.restore();
@@ -3600,7 +3644,9 @@ const UI = (() => {
   function importSave() {
     const text = $('saveIn').value;
     if (!text.trim()) { toast('Сначала вставь код в поле'); return; }
+    const day = save.gift;
     if (!importCode(text)) { Snd.play('nope'); toast('Код не подошёл. Проверь, что он скопирован целиком.'); return; }
+    if (day === dayKey()) save.gift = day;          // подарок сегодня уже забран: старый код не даёт второй
     // сначала убрать клавиатуру, потом прятать лист: иначе поле исчезает из-под неё и окно остаётся сжатым.
     // Размер пересчитает afterKeyboard(), когда клавиатура уйдёт (в сохранении может быть другая графика)
     $('saveIn').blur();
@@ -3655,6 +3701,8 @@ const UI = (() => {
     on('bPlay', () => { Snd.unlock(); Snd.play('click'); game.zen = save.zen; askTilt(); startRun(false); });
     on('modeSeg', (e) => { const b = e.target.closest('button'); if (!b) return; save.zen = b.dataset.zen === '1'; Snd.play('click'); persist(); syncMenu(); });
     on('bShop', () => openSheet('shop')); on('bQuests', () => openSheet('quests')); on('bSet', () => openSheet('settings')); on('bHelp', () => openSheet('help'));
+    on('bGift', claimGift);
+    setInterval(() => { if (base === 'menu' && !sheet && !document.hidden) syncGift(); }, 30000);     // меню открыто через полночь — кнопка появится сама
     on('bExport', exportSave); on('bImport', importSave);
     on('oShop', () => openSheet('shop')); on('oQuestsBtn', () => openSheet('quests'));
     document.querySelectorAll('[data-close]').forEach((b) => b.addEventListener('click', closeSheet));
@@ -3685,7 +3733,7 @@ const UI = (() => {
     on('oMenu', () => { Snd.play('click'); toMenu(); });
     on('bHead', () => { if (headstart()) { $('bHead').hidden = true; clearTimeout(headTimer); } });
   }
-  return { init, showMenu, syncMenu, onRunStart, hud, hint, toast, questDone, zoneCard, wingsNope, wingReady, multUp, showPause, onResume, showRevive, onRevived, showOver, covered: () => !!sheet };
+  return { init, showMenu, syncMenu, onRunStart, hud, hint, toast, questDone, zoneCard, wingsNope, wingReady, multUp, multJolt, showPause, onResume, showRevive, onRevived, showOver, covered: () => !!sheet };
 })();
 
 /* ===== Тихолесье · запуск: размер экрана, ввод, главный цикл ===== */
@@ -3862,7 +3910,7 @@ function start(data) {
       if (game.state === 'play') pauseGame();
       if (game.state === 'pause') { if (game.zen) save.bestZen = Math.max(save.bestZen, run.h); else save.best = Math.max(save.best, run.h); }
       persist(); Snd.sleep(true);
-    } else { Snd.sleep(false); lastT = 0; needPaint = true; }
+    } else { Snd.sleep(false); lastT = 0; needPaint = true; UI.syncMenu(); }     // вернулись в игру после полуночи — кнопка подарка уже на месте
   });
   requestAnimationFrame(frame);
 }

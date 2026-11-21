@@ -37,7 +37,7 @@ SHEET = r"""({what, scale}) => {
   }
   if (what === 'plats') {
     A.setScale(scale);
-    const types = [['static', 84], ['moving', 84], ['bouncy', 72], ['puff', 60], ['fake', 78], ['phase', 78], ['home', 150]];
+    const types = [['static', 84], ['moving', 84], ['bouncy', 72], ['puff', 66], ['fake', 78], ['phase', 78], ['home', 150]];
     const cw = 170 * scale, ch = 80 * scale;
     cv.width = cw * 2; cv.height = ch * Math.ceil(types.length / 2); x.fillStyle = '#1a155e'; x.fillRect(0, 0, cv.width, cv.height);
     types.forEach(([tp, w], i) => {
