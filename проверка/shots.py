@@ -3,6 +3,12 @@
 Запуск:
   python3 -m http.server 8765 --bind 127.0.0.1 --directory <папка репозитория>   # в отдельном окне
   python3 shots.py <папка для снимков> [URL]
+Лист «до/после» обликов: раздай старую версию (index.html из git, например коммит 23571e5) на другом порту
+и передай её адрес в TL_OLD_URL, например TL_OLD_URL=http://127.0.0.1:8766/index.html.
+
+Что получится: 01–03 — меню, лавка, памятка (окно 956), 04–06 — то же в окне высотой 700;
+10 — листы обликов (цвет, силуэты, состояния), платформы, ворчуны, находки, облики на небе пяти зон;
+11 — «до/после» обликов (если есть TL_OLD_URL); 20 — забег в пяти зонах.
 """
 import asyncio, base64, os, sys
 from playwright.async_api import async_playwright
@@ -45,6 +51,47 @@ SHEET = r"""({what, scale}) => {
       x.drawImage(s.c, cx - s.ox * scale, cy - s.oy * scale, s.w * scale, s.h * scale); label(tp, cx, cy + 52 * scale, '#eef0ff');
     });
   }
+  if (what === 'beasts') {                     // пять ворчунов крупно: все кадры; у репейника — лицо, у медузы — щупальца
+    const rows = [['burr', [0]], ['spider', [0, 1, 2, 3]], ['beetle', [0, 1]], ['owl', [0, 1, 2, 3]], ['jelly', [0]]], cw = 70 * scale, ch = 80 * scale;
+    cv.width = cw * 4; cv.height = ch * rows.length; x.fillStyle = '#16175a'; x.fillRect(0, 0, cv.width, cv.height);
+    rows.forEach(([kind, frames], r) => frames.forEach((f, k) => {
+      x.save(); x.translate(k * cw + cw / 2, r * ch + ch * 0.45); x.scale(scale * 1.3, scale * 1.3); x.lineCap = 'round'; x.lineJoin = 'round';
+      if (kind === 'jelly') A.jellyTentacles(x, 1.2, 0.3);
+      A.BEAST_DRAW[kind](x, f); if (kind === 'burr') A.burrFace(x, 0.4); x.restore();
+      label(`${kind} ${f}`, k * cw + cw / 2, r * ch + ch - 6 * scale, '#eef0ff');
+    }));
+  }
+  if (what === 'items') {                      // находки крупно и в игровом размере, щит-пузырь
+    const it = ['comet', 'dandelion', 'lantern', 'bubble', 'feather'], cw = 80 * scale, ch = 140 * scale;
+    cv.width = cw * (it.length + 1); cv.height = ch; x.fillStyle = '#141a52'; x.fillRect(0, 0, cv.width, cv.height);
+    it.forEach((tp, i) => {
+      x.save(); x.translate(i * cw + cw / 2, ch * 0.33); x.scale(scale * 2.2, scale * 2.2); A.item(x, tp, 1.2); x.restore();
+      x.save(); x.translate(i * cw + cw / 2, ch * 0.8); x.scale(scale * 1.1, scale * 1.1); A.item(x, tp, 1.2); x.restore();   // игровой размер: в забеге находка ×1,1
+      label(tp, i * cw + cw / 2, ch - 3 * scale, '#eef0ff');
+    });
+    const b = A.bubble(); x.drawImage(b.c, it.length * cw + 4 * scale, ch / 2 - 36 * scale, 72 * scale, 72 * scale);
+  }
+  if (what === 'zones') {                      // каждый облик на небе каждой из пяти зон (с мягким ореолом, как в забеге)
+    const n = T.SKINS.length, cw = 54 * scale, ch = 62 * scale;
+    cv.width = cw * n; cv.height = ch * T.ZONES.length;
+    T.ZONES.forEach((z, r) => {
+      x.fillStyle = z.sky[1]; x.fillRect(0, r * ch, cv.width, ch); x.fillStyle = z.sky[0]; x.fillRect(0, r * ch, cv.width, ch * 0.22);
+      T.SKINS.forEach((sk, i) => {
+        x.save(); x.translate(i * cw + cw / 2, r * ch + ch - 8 * scale); x.scale(scale, scale);
+        x.globalCompositeOperation = 'lighter'; x.globalAlpha = 0.14; x.drawImage(A.glow(sk.glow), -46, -68, 92, 92); x.globalCompositeOperation = 'source-over'; x.globalAlpha = 1;
+        A.char(x, sk, { t: 0.873, wing: 1 }); x.restore();
+      });
+    });
+  }
+  return cv.toDataURL('image/png');
+}"""
+
+# облики старой версии (14) — для листа «до/после»; у старой игры тот же Art.char(c, sk, a)
+OLD_SHEET = r"""(scale) => {
+  const T = window.__tl, A = T.Art, cw = 62 * scale, ch = 66 * scale, n = T.SKINS.length;
+  const cv = document.createElement('canvas'); cv.width = cw * n; cv.height = ch; const x = cv.getContext('2d');
+  x.fillStyle = '#141a52'; x.fillRect(0, 0, cv.width, cv.height);
+  T.SKINS.forEach((sk, i) => { x.save(); x.translate(i * cw + cw / 2, ch - 6 * scale); x.scale(scale, scale); A.char(x, sk, { t: 0.873, wing: 1 }); x.restore(); });
   return cv.toDataURL('image/png');
 }"""
 
@@ -74,13 +121,38 @@ async def main():
         await pg.click('#shop [data-close]'); await pg.wait_for_timeout(200)
         await pg.click('#bSet'); await pg.wait_for_timeout(200); await pg.click('#bHelp'); await pg.wait_for_timeout(400); await shot('03-help')
         await pg.click('#help [data-close]'); await pg.wait_for_timeout(200); await pg.click('#settings [data-close]'); await pg.wait_for_timeout(200)
-        for what in ['skins', 'silhouettes', 'states', 'plats']:
+        for what in ['skins', 'silhouettes', 'states', 'plats', 'beasts', 'items', 'zones']:
             data = await pg.evaluate(SHEET, {'what': what, 'scale': 3})
             open(os.path.join(OUT, f'10-{what}.png'), 'wb').write(base64.b64decode(data.split(',')[1]))
         await pg.evaluate('() => { const T = window.__tl; T.game.zen = true; T.startRun(true); }')
         await pg.wait_for_timeout(800)
         for h in [350, 1100, 2100, 3600, 5600]:
             await pg.evaluate(JUMP, h); await pg.wait_for_timeout(400); await shot(f'20-run-{h}m')
+        # окно высотой 700: меню с кнопкой подарка, лавка, памятка
+        ctx7 = await b.new_context(viewport={'width': 440, 'height': 700}, device_scale_factor=3, is_mobile=True, has_touch=True)
+        p7 = await ctx7.new_page(); p7.on('pageerror', lambda e: errors.append(str(e)))
+        await p7.goto(URL); await p7.wait_for_function('window.__tl && window.__tl.game.state === "menu"'); await p7.wait_for_timeout(1000)
+        await p7.screenshot(path=os.path.join(OUT, '04-menu-700.png'))
+        await p7.click('#bShop'); await p7.wait_for_timeout(400); await p7.screenshot(path=os.path.join(OUT, '05-shop-700.png'))
+        await p7.click('#shop [data-close]'); await p7.wait_for_timeout(200)
+        await p7.click('#bSet'); await p7.wait_for_timeout(200); await p7.click('#bHelp'); await p7.wait_for_timeout(400); await p7.screenshot(path=os.path.join(OUT, '06-help-700.png'))
+        await ctx7.close()
+        # «до/после»: старые облики сверху, новые снизу
+        old_url = os.environ.get('TL_OLD_URL')
+        if old_url:
+            ctxo = await b.new_context(viewport={'width': 440, 'height': 956}, device_scale_factor=3, is_mobile=True, has_touch=True)
+            po = await ctxo.new_page(); await po.goto(old_url); await po.wait_for_function('window.__tl && window.__tl.game.state === "menu"')
+            old = await po.evaluate(OLD_SHEET, 3); new = await pg.evaluate(OLD_SHEET, 3)
+            await ctxo.close()
+            both = await pg.evaluate('''async ([a, c]) => {          // склейка в браузере: подписи кириллицей рисует сам холст
+              const load = (src) => new Promise((ok) => { const im = new Image(); im.onload = () => ok(im); im.src = src; });
+              const A = await load(a), C = await load(c), pad = 120, W = Math.max(A.width, C.width);
+              const cv = document.createElement('canvas'); cv.width = W; cv.height = A.height + C.height + pad * 2; const x = cv.getContext('2d');
+              x.fillStyle = '#0c0f3a'; x.fillRect(0, 0, cv.width, cv.height); x.fillStyle = '#eef0ff'; x.font = '600 54px sans-serif';
+              x.fillText('До: 14 обликов (19.11)', 30, 80); x.drawImage(A, (W - A.width) / 2, pad);
+              x.fillText('После: 12 обликов (21.11)', 30, pad + A.height + 80); x.drawImage(C, (W - C.width) / 2, pad * 2 + A.height);
+              return cv.toDataURL('image/png'); }''', [old, new])
+            open(os.path.join(OUT, '11-before-after.png'), 'wb').write(base64.b64decode(both.split(',')[1]))
         print('ошибок в консоли:', len(errors)); [print(' ', e) for e in errors[:20]]
         await b.close()
 

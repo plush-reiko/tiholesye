@@ -2,6 +2,9 @@
 
 Запуск: python3 -m http.server 8765 --bind 127.0.0.1 --directory <папка репозитория>   # в отдельном окне
         python3 tests.py [только_эти_разделы через запятую]
+Разделы: gift coins ghost leaf beasts migration skins texts bot lite speed offline.
+Для speed и части migration нужна старая версия (index.html из коммита 23571e5), раздайте её на другом порту
+и передайте адрес: TL_OLD_URL=http://127.0.0.1:8766/index.html python3 tests.py speed
 Нужен Playwright: pip install playwright && python3 -m playwright install chromium
 Каждая проверка печатает «ок» или «ОШИБКА» с пояснением; в конце — итог. Ошибки консоли браузера считаются провалом.
 """
@@ -451,7 +454,176 @@ async def t_texts(b):
     await ctx.close()
 
 
-TESTS = [('gift', t_gift), ('coins', t_coins), ('ghost', t_ghost), ('leaf', t_leaf), ('beasts', t_beasts), ('migration', t_migration), ('skins', t_skins), ('texts', t_texts)]
+
+# бот с идеальным прицелом: падая, встаёт ровно над самой высокой целой кочкой ниже себя (в точку, где над ней больше всего места);
+# в подъёме уходит в сторону от ворчуна над головой со скоростью клавиатуры; сам не машет крыльями и не берёт пузырей.
+# Лес проходим, если бот доходит до 7 000 м
+BOT = r"""([seed, beasts]) => { const T = window.__tl, g = T.game, P = T.P, s = T.save;
+  s.up.wings = 0; s.up.bubble = 0; g.seed = seed; g.zen = false; T.startRun(true); P.shield = false; P.charges = 0;
+  const H0 = g.startY, goal = H0 + 7000 * 10;
+  const solid = (q) => !q.dead && !q.fall && q.type !== 'fake' && q.type !== 'ground' && (q.type !== 'phase' || q.on !== false);
+  // куда встать на кочке, чтобы прыжок вверх прошёл мимо ворчунов над ней: точка с наибольшим просветом по x (жук сам на кочке — его можно сбить сверху)
+  const spot = (q) => { let best = null;
+    for (const k of [-0.42, -0.2, 0, 0.2, 0.42]) { const x = q.x + q.w * k; let gap = 1e9;
+      for (const bb of g.beasts) if (!bb.dead && bb.kind !== 'beetle' && bb.y > q.top - 8 && bb.y < q.top + 230) gap = Math.min(gap, Math.abs(bb.x - x));
+      if (!best || gap > best.gap) best = { x, gap }; }
+    return best; };
+  let maxY = P.y, lastGain = 0, t = 0, why = 'ok', hits = 0, wasInv = false, maxGap = 0, prevTop = null;
+  for (let i = 0; i < 60 * 1500; i++) {
+    if (!beasts) g.beasts.length = 0;
+    if (g.state !== 'play') { why = 'упал на ' + Math.round((P.y - H0) / 10) + ' м'; break; }
+    if (P.vy <= 0 && !P.fly) {
+      let best = null;
+      for (const q of g.plats) {
+        if (!solid(q) || q.top > P.y - 1 || q.top < P.y - 600) continue;
+        const sp = spot(q), sc = q.top - (sp.gap < 16 ? 2000 : 0) + (q.type === 'bouncy' ? 30 : 0) - (q.type === 'puff' ? 60 : 0) - (q.type === 'phase' ? 40 : 0);
+        if (!best || sc > best.s) best = { q, s: sc, x: sp.x };
+      }
+      if (best) P.x = best.x + (best.q.vx || 0) * 0.02;
+    }
+    if (P.vy > 0 && !P.fly) {             // в подъёме уходит в сторону от ворчуна над головой — не быстрее 560 ед./с, как с клавиатуры
+      let near = null;
+      for (const bb of g.beasts) { if (bb.dead || bb.kind === 'beetle' || bb.y < P.y - 10 || bb.y > P.y + 260) continue; const dx = bb.x - P.x; if (Math.abs(dx) < 48 && (!near || Math.abs(dx) < Math.abs(near))) near = dx; }
+      if (near !== null) P.x = Math.min(395, Math.max(5, P.x + (near > 0 || (near === 0 && P.x > 200) ? -1 : 1) * 560 / 60));
+    }
+    const top0 = P.lastTop; T.update(1 / 60); t += 1 / 60;
+    if (P.lastTop !== top0 && P.lastTop > -1e8) { if (prevTop !== null && P.lastTop > prevTop) maxGap = Math.max(maxGap, P.lastTop - prevTop); prevTop = P.lastTop; }
+    if (P.inv > 0 && !wasInv) hits++; wasInv = P.inv > 0;
+    if (P.y > maxY + 1) { maxY = P.y; lastGain = t; }
+    if (t - lastGain > 25) { why = 'застрял на ' + Math.round((P.y - H0) / 10) + ' м'; break; }
+    if (P.y >= goal) { why = 'дошёл'; break; }
+  }
+  return { why, h: Math.round((maxY - H0) / 10), t: Math.round(t), hits, maxGap: Math.round(maxGap) };
+}"""
+
+
+async def t_bot(b):
+    print('Лес проходим: бот до 7 000 м')
+    ctx, pg = await page(b)
+    for seed, beasts in [(3, True), (11, True), (501, True), (2027, True), (90001, True), (123457, True), (2027, False)]:
+        r = await pg.evaluate(BOT, [seed, beasts])
+        check(f'сид {seed}, {"с ворчунами" if beasts else "без ворчунов"}: бот дошёл до 7 000 м', r['why'] == 'дошёл', str(r))
+    check('ошибок в консоли нет', not pg.errors, '; '.join(pg.errors[:3]))
+    await ctx.close()
+
+
+# скорость: средний кадр (update + render) при 4-кратном замедлении процессора, «до» против «после»
+SPEED = r"""async ([skin, trail, h, n]) => { const T = window.__tl, g = T.game, P = T.P, s = T.save;
+  s.skin = skin; if (trail !== null && 'trail' in s) s.trail = trail; s.set.fx = 'high';
+  g.zen = false; T.startRun(true); const y = g.startY + h * 10;
+  for (let k = 0; k < 40 && g.plats.length; k++) T.genUpTo(y + 1500);
+  P.y = y; P.vy = 500; if (T.run) T.run.maxY = y; g.camY = y - T.view.H * 0.44;
+  const step = () => { if (P.vy < -200) P.vy = 760; if (g.state !== 'play') { g.state = 'play'; } T.update(1 / 60); T.render(); };
+  for (let i = 0; i < 40; i++) step();                       // разогрев: спрайты, кэши, частицы следа
+  const t0 = performance.now(); for (let i = 0; i < n; i++) step(); const ms = (performance.now() - t0) / n;
+  return { ms: Math.round(ms * 100) / 100, beasts: (g.beasts || []).length, parts: g.parts.length };
+}"""
+
+
+async def speed_of(b, url, cases):
+    ctx = await b.new_context(viewport={'width': 440, 'height': 956}, device_scale_factor=3, is_mobile=True, has_touch=True)
+    pg = await ctx.new_page(); errs = []
+    pg.on('pageerror', lambda e: errs.append(str(e)))
+    await pg.goto(url); await pg.wait_for_function('window.__tl && window.__tl.game.state === "menu"'); await pg.wait_for_timeout(500)
+    cdp = await ctx.new_cdp_session(pg); await cdp.send('Emulation.setCPUThrottlingRate', {'rate': 4})
+    out = {}
+    for name, args in cases.items():
+        rs = [await pg.evaluate(SPEED, args) for _ in range(3)]
+        out[name] = sorted(r['ms'] for r in rs)[1]           # медиана трёх замеров
+    await ctx.close()
+    return out, errs
+
+
+async def t_speed(b):
+    print('Скорость (процессор ×4 медленнее)')
+    if not OLD_URL:
+        check('скорость: нужна старая версия (TL_OLD_URL)', False, 'раздай index.html из коммита 23571e5 и передай адрес в TL_OLD_URL'); return
+    # «до»: самый тяжёлый старый след (сияние-лента) и звездочёт; «после»: светлячок (пунктир и своё свечение) и мухомор (больше всего частиц)
+    old, e1 = await speed_of(b, OLD_URL, {'поляна': ['svetik', 'aurora', 350, 120], 'кроны': ['svetik', 'aurora', 3600, 120], 'высь': ['svetik', 'aurora', 5600, 120], 'высь2': ['zvezda', 'stardust', 5600, 120]})
+    new, e2 = await speed_of(b, URL, {'поляна': ['ezhik', None, 350, 120], 'кроны, листва': ['shmel', None, 3600, 120], 'высь, медузы, светлячок': ['svetlyachok', None, 5600, 120], 'высь, медузы, мухомор': ['mukhomor', None, 5600, 120]})
+    print('    до:', old, '\n    после:', new)
+    for k, v in new.items():
+        ref = old['поляна'] if k == 'поляна' else old['кроны'] if k.startswith('кроны') else max(old['высь'], old['высь2'])
+        check(f'кадр «{k}» не хуже версии «до» больше чем на 15%', v <= ref * 1.15, f'{v} мс против {ref} мс')
+    check('ошибок нет', not e1 and not e2, '; '.join((e1 + e2)[:3]))
+
+
+async def t_lite(b):
+    print('«Экономно»')
+    ctx, pg = await page(b)
+    r = await pg.evaluate(r"""() => { const T = window.__tl, A = T.Art, g = T.game, P = T.P, s = T.save; let halos = 0; const h0 = A.halo; A.halo = (...a) => { halos++; return h0(...a); };
+      s.set.fx = 'low'; const out = [];
+      for (const h of [0, 350, 1100, 2100, 3600, 5600]) {
+        g.zen = false; T.startRun(true); const y = g.startY + h * 10; for (let k = 0; k < 40 && g.plats.length; k++) T.genUpTo(y + 1500);
+        P.y = y + 20; P.vy = 400; g.camY = y - T.view.H * 0.44; for (let i = 0; i < 20; i++) { if (P.vy < -200) P.vy = 700; T.update(1 / 60); } T.render();
+        const cv = T.view.cv, x = cv.getContext('2d'), d = x.getImageData(0, 0, cv.width, cv.height).data; let mn = 1e9, mx = -1;
+        for (let i = 0; i < d.length; i += 4 * 97) { const v = d[i] + d[i + 1] + d[i + 2]; mn = Math.min(mn, v); mx = Math.max(mx, v); }
+        out.push(mx - mn);
+      }
+      A.halo = h0;
+      // свое свечение светлячка: с «Экономно» его нет
+      const sk = T.SKINS.find((q) => q.id === 'svetlyachok'), px = (lite) => { A.setLite(lite); const c2 = document.createElement('canvas'); c2.width = c2.height = 120; const y = c2.getContext('2d');
+        y.fillStyle = '#000'; y.fillRect(0, 0, 120, 120); y.translate(60, 100); y.scale(2, 2); A.char(y, sk, { t: 1, wing: 1 }); const d = y.getImageData(0, 0, 120, 120).data; let sum = 0; for (let i = 0; i < d.length; i += 4) sum += d[i + 1]; return sum; };
+      const lit = px(false), lite = px(true); A.setLite(false); s.set.fx = 'high';
+      return { halos, spread: out, lit, lite }; }""")
+    check('в «Экономно» всё рисуется (кадр не пустой во всех зонах и в меню)', all(v > 60 for v in r['spread']), str(r['spread']))
+    check('в «Экономно» ореолов нет (Art.halo не вызывается)', r['halos'] == 0, str(r['halos']))
+    check('в «Экономно» у Светлячка нет своего свечения', r['lite'] < r['lit'] * 0.97, f"{r['lite']} против {r['lit']}")
+    tr = await pg.evaluate(r"""() => { const T = window.__tl, g = T.game, P = T.P, s = T.save, n = {};
+      for (const fx of ['high', 'low']) { s.set.fx = fx; s.skin = 'shmel'; g.zen = true; T.startRun(true); g.parts.length = 0; let made = 0; const seen = new Set();
+        for (let i = 0; i < 240; i++) { if (P.vy < -150) P.vy = 850; T.update(1 / 60); T.render(); for (const q of g.parts) if (q.trail && !seen.has(q)) { seen.add(q); made++; } }
+        n[fx] = made; }
+      s.set.fx = 'high'; return n; }""")
+    check('в «Экономно» след выпускается примерно вдвое реже', tr['low'] <= tr['high'] * 0.62, str(tr))
+    check('ошибок в консоли нет', not pg.errors, '; '.join(pg.errors[:3]))
+    await ctx.close()
+
+
+def cache_name(repo):
+    import hashlib
+    h = hashlib.sha256()
+    for f in ['icon-180.png', 'icon-192.png', 'icon-512.png', 'index.html', 'manifest.webmanifest']:
+        h.update(f.encode()); h.update(open(os.path.join(repo, f), 'rb').read())
+    return 'tiholesye-' + h.hexdigest()[:12]
+
+
+async def t_offline(b):
+    print('Офлайн')
+    import subprocess, re, socket, time
+    repo = os.environ.get('TL_REPO', os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    sw = open(os.path.join(repo, 'sw.js'), encoding='utf-8').read()
+    name = re.search(r"tiholesye-[0-9a-f]{12}", sw).group(0)
+    files = re.search(r"const FILES = (\[.*?\]);", sw).group(1)
+    check('в sw.js имя кэша = отпечаток файлов игры', name == cache_name(repo), f'{name} / {cache_name(repo)}')
+    check('список FILES прежний', files == "['./', './index.html', './manifest.webmanifest', './icon-180.png', './icon-192.png', './icon-512.png']", files)
+    port = 8790
+    srv = subprocess.Popen([sys.executable, '-m', 'http.server', str(port), '--bind', '127.0.0.1', '--directory', repo], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    try:
+        for _ in range(50):
+            try: socket.create_connection(('127.0.0.1', port), 0.2).close(); break
+            except OSError: time.sleep(0.1)
+        ctx = await b.new_context(viewport={'width': 440, 'height': 956}, device_scale_factor=3, is_mobile=True, has_touch=True)
+        pg = await ctx.new_page(); errs = []
+        pg.on('pageerror', lambda e: errs.append(str(e)))
+        url = f'http://127.0.0.1:{port}/index.html'
+        await pg.goto(url); await pg.wait_for_function('window.__tl && window.__tl.game.state === "menu"')
+        ok = await pg.evaluate("""async (name) => { const reg = await navigator.serviceWorker.ready; for (let i = 0; i < 50; i++) { const keys = await caches.keys(); if (keys.includes(name)) { const c = await caches.open(name); const k = await c.keys(); if (k.length >= 6) return k.length; } await new Promise((r) => setTimeout(r, 200)); } return 0; }""", name)
+        check('после первой загрузки все 6 файлов игры в кэше', ok >= 6, str(ok))
+    finally:
+        srv.terminate(); srv.wait()
+    await pg.wait_for_timeout(300)
+    try:
+        await pg.reload(); await pg.wait_for_function('window.__tl && window.__tl.game.state === "menu"', timeout=10000)
+        played = await pg.evaluate("""() => { const T = window.__tl; T.game.zen = true; T.startRun(true); for (let i = 0; i < 120; i++) { if (T.P.vy < -150) T.P.vy = 800; T.update(1 / 60); T.render(); } return T.game.state; }""")
+        check('сервер выключен: игра открывается и играется', played == 'play', played)
+    except Exception as e:
+        check('сервер выключен: игра открывается и играется', False, str(e)[:200])
+    check('ошибок в консоли нет', not errs, '; '.join(errs[:3]))
+    await ctx.close()
+
+
+TESTS = [('gift', t_gift), ('coins', t_coins), ('ghost', t_ghost), ('leaf', t_leaf), ('beasts', t_beasts), ('migration', t_migration), ('skins', t_skins), ('texts', t_texts),
+         ('bot', t_bot), ('lite', t_lite), ('speed', t_speed), ('offline', t_offline)]
 
 
 async def main():
