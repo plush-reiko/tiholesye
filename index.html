@@ -637,35 +637,36 @@ function zoneMix(h) {
   };
 }
 
-/* ---------- Облики ----------
-   12 обликов, у каждого свой силуэт, лицо, взмах и встроенный след (рисунок — Art.SKIN_ART). Порядок — как в лавке.
-   glow — мягкий ореол за героем; flapK — скорость затухания взмаха (1/с: длительность = 1 / flapK);
-   trail — вид частиц следа и как часто они выпускаются (с), life — сколько живут; trailName — для лавки */
+/* ---------- Облики: «Бестиарий Тихолесья» (24.11.2026) ----------
+   12 диковин этого леса: у каждой свой силуэт, лицо, взмах, позы в полёте и встроенный след (рисунок — Art.SKIN_ART).
+   glow — мягкий ореол за героем; flapK — 1 / длительность взмаха; trail — вид частиц, как часто (с), сколько живут,
+   at — откуда идёт след [вперёд по взгляду, вверх] от ног (по умолчанию [0, 18]), col — цвет пунктира;
+   burst — частицы при взмахе (из той же точки at); trailName — для лавки */
 const SKINS = [
-  { id: 'ezhik', name: 'Ёжик', price: 0, desc: 'Ночной житель с листиком на иголках. С него всё начинается.', glow: '#ffd9a8', flapK: 1 / 0.28,
-    trail: { k: 'tLeaf', every: 0.16, life: 1.4 }, trailName: 'листики' },
-  { id: 'mukhomor', name: 'Мухомор', price: 150, desc: 'Красная шляпка в белых хлопьях. Друг, а не обед.', glow: '#ffb4a0', flapK: 1 / 0.32,
-    trail: { k: 'tSpore', every: 0.12, life: 1.6 }, trailName: 'споры' },
-  { id: 'lis', name: 'Лисёнок', price: 400, desc: 'Рыжий, хвост трубой. Знает короткую дорогу наверх.', glow: '#ffc9a0', flapK: 1 / 0.3,
-    trail: { k: 'tEmber', every: 0.1, life: 0.9 }, trailName: 'угольки' },
-  { id: 'sova', name: 'Совёнок-сипуха', price: 700, desc: 'Лицо сердечком, крылья бесшумные. Видит каждую кочку.', glow: '#ffe6b0', flapK: 1 / 0.4,
-    trail: { k: 'tFeather', every: 0.22, life: 1.6 }, trailName: 'пёрышки' },
-  { id: 'soroka', name: 'Сорока', price: 1000, desc: 'Чёрно-белая модница. Тащит наверх всё, что блестит.', glow: '#c9d6ff', flapK: 1 / 0.3,
-    trail: { k: 'tFoil', every: 0.12, life: 1.1 }, trailName: 'блёстки' },
-  { id: 'zayats', name: 'Заяц-беляк', price: 1300, desc: 'Белый, быстрый, уши с чёрными кончиками. Прыжки — его ремесло.', glow: '#dfe6ff', flapK: 1 / 0.25,
-    trail: { k: 'tPaw', every: 0.12, life: 0.8 }, trailName: 'отпечатки лап' },
-  { id: 'snegir', name: 'Снегирь', price: 1700, desc: 'Румяный зимний гость. Не мёрзнет, потому что круглый.', glow: '#ffc0c0', flapK: 1 / 0.3,
-    trail: { k: 'tFlake', every: 0.18, life: 1.6 }, trailName: 'снежинки' },
-  { id: 'shmel', name: 'Шмель', price: 2100, desc: 'Полуночник в полоску. Летает вопреки учебникам.', glow: '#f3e3b0', flapK: 1 / 0.3,
-    trail: { k: 'tPollen', every: 0.1, life: 1.2 }, trailName: 'пыльца' },
-  { id: 'letyaga', name: 'Белка-летяга', price: 2600, desc: 'Раскрывает плащ — и ветер сам несёт её вверх.', glow: '#e0e6ff', flapK: 1 / 0.35,
-    trail: { k: 'tWind', every: 0.2, life: 0.7 }, trailName: 'завитки ветра' },
-  { id: 'mysh', name: 'Летучая мышка', price: 3200, desc: 'Видит ушами. Ночь для неё — как день.', glow: '#d9c8ff', flapK: 1 / 0.45,
-    trail: { k: 'tEcho', every: 0.35, life: 0.6 }, trailName: 'кольца эха' },
-  { id: 'rys', name: 'Рысь', unlock: { type: 'height', n: 3000 }, desc: 'Открывается на высоте 3 000 м. Ходит по кронам бесшумно.', glow: '#f0d9bf', flapK: 1 / 0.32,
-    trail: { k: 'tMist', every: 0.2, life: 1.2 }, trailName: 'клочки тумана' },
-  { id: 'svetlyachok', name: 'Светлячок', unlock: { type: 'missions', n: 12 }, desc: 'Открывается за 12 выполненных заданий. Сам себе фонарик.', glow: '#e0f57a', flapK: 1 / 0.42,
-    trail: { k: 'dash', every: 0, life: 0.8 }, trailName: 'световой пунктир' },
+  { id: 'tihohodka', name: 'Тихоходка', price: 0, desc: 'Живёт во мху на вершине пня. Не торопится — но доберётся куда угодно.',
+    glow: '#ffc6b8', flapK: 1 / 0.32, trail: { k: 'tMoss', every: 0.14, life: 1.2, at: [-9, 27] }, trailName: 'мох' },
+  { id: 'opyata', name: 'Опята', price: 150, desc: 'Выросли на том самом пне. Трое на одном корешке — прыгают дружно.',
+    glow: '#ffdcaa', flapK: 1 / 0.36, trail: { k: 'tRot', every: 0.12, life: 1.1, at: [0, 4] }, trailName: 'труха', burst: { k: 'tRot', n: 5 } },
+  { id: 'rosyanka', name: 'Росянка', price: 400, desc: 'Хищница с болотных кочек. Ловит комаров на росу. Тебя не тронет.',
+    glow: '#ffb4b0', flapK: 1 / 0.3, trail: { k: 'tDew', every: 0.12, life: 0.8, at: [0, 26] }, trailName: 'роса', burst: { k: 'tDew', n: 7 } },
+  { id: 'baranets', name: 'Баранец', price: 700, desc: 'Растёт на папоротнике, как ягода. Стебель-пружинка — и вверх.',
+    glow: '#fff0c0', flapK: 1 / 0.38, trail: { k: 'tWool', every: 0.2, life: 1.5, at: [0, 28] }, trailName: 'клочки шерсти' },
+  { id: 'beresten', name: 'Берестень', price: 1000, desc: 'Прячется в свёрнутой бересте. Кто там внутри — никто не видел.',
+    glow: '#e8eeff', flapK: 1 / 0.4, trail: { k: 'tBark', every: 0.18, life: 1.4 }, trailName: 'берестяные завитки' },
+  { id: 'zheoda', name: 'Жеода', price: 1300, desc: 'Снаружи — булыжник, внутри — сокровищница. Открывается в прыжке.',
+    glow: '#e6d8ff', flapK: 1 / 0.32, trail: { k: 'tGrit', every: 0.11, life: 0.9, at: [0, 12] }, trailName: 'каменная крошка' },
+  { id: 'udilshchik', name: 'Удильщик', price: 1700, desc: 'Носит на удочке светящийся грибок. Светит себе — и тем, кто ниже.',
+    glow: '#8fe6f5', flapK: 1 / 0.3, trail: { k: 'dash', every: 0, life: 0.8, at: [26, 50], col: '#8fe6f5' }, trailName: 'световая леска' },
+  { id: 'rybaluna', name: 'Рыба-луна', price: 2100, desc: 'Её путают с луной. Она не возражает. Любит лунные ванны.',
+    glow: '#eef0ff', flapK: 1 / 0.45, trail: { k: 'tRipple', every: 0.16, life: 0.7, at: [-8, 18] }, trailName: 'лунная рябь' },
+  { id: 'zvezdoryl', name: 'Звездорыл', price: 2600, desc: 'Роет ходы в ночном небе. Нос — чтобы не заблудиться среди звёзд.',
+    glow: '#e0d0ff', flapK: 1 / 0.3, trail: { k: 'tClod', every: 0.14, life: 0.9, at: [-14, 12] }, trailName: 'комья ночи', burst: { k: 'tClod', n: 6 } },
+  { id: 'zmey', name: 'Воздушный змей', price: 3200, desc: 'Оборвал нитку и улетел. Считает себя драконом. Немного прав.',
+    glow: '#ffd0c0', flapK: 1 / 0.4, trail: { k: 'tPaper', every: 0.18, life: 1.4, at: [0, 36] }, trailName: 'обрывки бумаги' },
+  { id: 'aspid', name: 'Аспид', unlock: { type: 'height', n: 3000 }, desc: 'Открывается на высоте 3 000 м. На землю не садится — только на камень.',
+    glow: '#ffc8a0', flapK: 1 / 0.35, trail: { k: 'tScale', every: 0.13, life: 1, at: [0, 24] }, trailName: 'медные чешуйки' },
+  { id: 'izbushka', name: 'Избушка', unlock: { type: 'missions', n: 12 }, desc: 'Открывается за 12 выполненных заданий. К лесу задом, к тебе передом.',
+    glow: '#c8fff0', flapK: 1 / 0.36, trail: { k: 'tSmoke', every: 0.22, life: 1.4, at: [-7, 58] }, trailName: 'дымок', burst: { k: 'tSmoke', n: 3 } },
 ];
 const skinById = (id) => SKINS.find((s) => s.id === id) || SKINS[0];
 
@@ -722,11 +723,11 @@ function rankInfo(done) {
 }
 
 /* ---------- Сохранение ---------- */
-const SAVE_KEY = 'tiholesye.save.v1';      // ключ не меняется; версия схемы — поле v (сейчас 2)
+const SAVE_KEY = 'tiholesye.save.v1';      // ключ не меняется; версия схемы — поле v (сейчас 3)
 function freshSave() {
   return {
-    v: 2, coins: 0, best: 0, bestZen: 0, runs: 0, totalCoins: 0, totalHeight: 0,
-    skin: 'ezhik', skins: ['ezhik'], refund: 0,
+    v: 3, coins: 0, best: 0, bestZen: 0, runs: 0, totalCoins: 0, totalHeight: 0,
+    skin: 'tihohodka', skins: ['tihohodka'], refund: 0, renew: false,
     up: { wings: 0, dandelion: 0, comet: 0, magnet: 0, luck: 0, bubble: 0 },
     missions: [], mTier: {}, mDone: 0,
     stats: { stomps: 0, bouncy: 0, puffs: 0, flights: 0, wings: 0, maxMult: 1 },
@@ -765,16 +766,30 @@ function migrateV1(d) {           // старое сохранение: новы
   d.v = 2;
   return d;
 }
+/* миграция схемы v2 → v3 (24.11.2026, «Бестиарий»): облики заменены один к одному на той же ступени лавки —
+   цена и условия те же, поэтому купленное остаётся купленным, надетый — надетым; светлячки не меняются */
+const SKIN_MAP_V3 = { ezhik: 'tihohodka', mukhomor: 'opyata', lis: 'rosyanka', sova: 'baranets', soroka: 'beresten', zayats: 'zheoda',
+  snegir: 'udilshchik', shmel: 'rybaluna', letyaga: 'zvezdoryl', mysh: 'zmey', rys: 'aspid', svetlyachok: 'izbushka' };
+function migrateV2(d) {           // сохранение v2: облики по таблице; renew — один раз показать тост
+  if (!d || typeof d !== 'object' || d.v !== 2) return d;
+  const skins = Array.isArray(d.skins) ? d.skins : [];
+  d.skins = ['tihohodka', ...skins.map((id) => SKIN_MAP_V3[id]).filter(Boolean)];
+  d.skin = SKIN_MAP_V3[d.skin] || 'tihohodka';
+  d.renew = true;
+  d.v = 3;
+  return d;
+}
 const num = (v, d) => (typeof v === 'number' && isFinite(v) ? v : d);
 function applySave(data) {       // любые данные (хранилище, код переноса) проходят через одну проверку
   save = freshSave();
-  if (data && typeof data === 'object') { try { mergeSave(save, migrateV1(data)); } catch (e) { save = freshSave(); } }
-  save.v = 2;
+  if (data && typeof data === 'object') { try { mergeSave(save, migrateV2(migrateV1(data))); } catch (e) { save = freshSave(); } }
+  save.v = 3;
   const ids = (list, all) => [...new Set(list.filter((id) => typeof id === 'string' && all.some((x) => x.id === id)))];
   save.skins = ids(save.skins, SKINS);
-  if (!save.skins.includes('ezhik')) save.skins.unshift('ezhik');
-  if (!save.skins.includes(save.skin)) save.skin = 'ezhik';
+  if (!save.skins.includes('tihohodka')) save.skins.unshift('tihohodka');
+  if (!save.skins.includes(save.skin)) save.skin = 'tihohodka';
   save.refund = Math.max(0, Math.floor(num(save.refund, 0)));
+  save.renew = save.renew === true;
   for (const u of UPS) save.up[u.id] = clamp(num(save.up[u.id], 0) | 0, 0, u.cost.length);
   for (const k of ['coins', 'best', 'bestZen', 'runs', 'totalCoins', 'totalHeight', 'mDone', 'playTime']) save[k] = Math.max(0, Math.floor(num(save[k], 0)));
   save.recent = (Array.isArray(save.recent) ? save.recent : []).filter((h) => typeof h === 'number' && isFinite(h) && h >= 0).map(Math.floor).slice(-10);
@@ -795,14 +810,14 @@ function loadSave(fallback) {
   applySave(data);
 }
 /* код переноса: то же сохранение одной строкой, чтобы забрать прогресс в другую копию игры. Префикс TL1. прежний;
-   принимаются схемы v1 (до 21.11) и v2 — старая пройдёт миграцию в applySave */
+   принимаются схемы v1 (до 21.11), v2 (до 24.11) и v3 — старые пройдут миграцию в applySave */
 function exportCode() { return 'TL1.' + btoa(unescape(encodeURIComponent(JSON.stringify(save)))); }
 function importCode(text) {
   try {
     const m = /TL1\.([A-Za-z0-9+/=]+)/.exec(String(text).replace(/\s+/g, ''));
     if (!m) return false;
     const data = JSON.parse(decodeURIComponent(escape(atob(m[1]))));
-    if (!data || typeof data !== 'object' || ![1, 2].includes(data.v) || typeof data.coins !== 'number') return false;
+    if (!data || typeof data !== 'object' || ![1, 2, 3].includes(data.v) || typeof data.coins !== 'number') return false;
     applySave(data); return true;
   } catch (e) { return false; }
 }
@@ -1197,14 +1212,8 @@ const Art = (() => {
   const cutPath = (pts, corners) => { const p = new Path2D(); cutTo(p, pts, corners); return p; };
   const polyPath = (pts) => { const p = new Path2D(); p.moveTo(pts[0][0], pts[0][1]); for (let i = 1; i < pts.length; i++) p.lineTo(pts[i][0], pts[i][1]); p.closePath(); return p; };
   // сужающийся штрих по ломаной: ширина w0 у начала и w1 у конца — жилки, лапки, нитки щупалец
-  function taper(c, pts, w0, w1) {
-    const n = pts.length, L = [], R = [];
-    for (let i = 0; i < n; i++) {
-      const a = pts[Math.max(0, i - 1)], b = pts[Math.min(n - 1, i + 1)], dx = b[0] - a[0], dy = b[1] - a[1], d = Math.hypot(dx, dy) || 1, w = lerp(w0, w1, i / (n - 1)) / 2;
-      L.push([pts[i][0] - dy / d * w, pts[i][1] + dx / d * w]); R.push([pts[i][0] + dy / d * w, pts[i][1] - dx / d * w]);
-    }
-    poly(c, [...L, ...R.reverse()]); c.fill();
-  }
+  function taper(c, pts, w0, w1) { poly(c, taperPts(pts, w0, w1)); c.fill(); }
+
   /* сухой лист (одноразовая платформа): крупный лист лежит плашмя, виден чуть сверху. Черешок с одного конца загнут,
      другой конец — острый кончик; оба приподняты, края волнистые и подвёрнуты. Ближняя половина — основной тон,
      дальняя — светлая (жёсткая граница по средней жилке), снизу узкой полоской видна тёмная изнанка.
@@ -1860,98 +1869,103 @@ const Art = (() => {
   }
 
   /* ---------- следы обликов: частицы из той же бумаги, что и лес ----------
-     q — частица (k, size, rot, col, col2, v), u — сколько жизни осталось (1 → 0), t — время. Те же рисовальщики — в лавке.
-     Ни ореолов, ни мерцания, ни лучей: следы не должны походить на светлячков, находки и частицы ворчунов */
+     q — частица (k, size, rot, col, col2, v — вариант 0…2), u — сколько жизни осталось (1 → 0), t — время. Те же рисовальщики — в лавке.
+     Контуры — в долях половины размера, по три варианта. Ни ореолов, ни мерцания: следы не должны походить на светлячков,
+     находки и частицы ворчунов; поворот гранью (крошка-осколок, чешуйка, бумажка) — единственная «вспышка» */
   const darker = (col, k) => rgb(mixc(hex(col), [40, 26, 110], k));
-  const LEAF_BIT = [[0, -1], [0.42, -0.62], [0.5, -0.05], [0.28, 0.6], [0, 1], [-0.22, 0.52], [-0.46, -0.08], [-0.34, -0.6]];
-  const EMBER = [[[-1, -0.3], [-0.2, -0.9], [0.8, -0.5], [0.6, 0.6], [-0.5, 0.8]], [[-0.8, -0.6], [0.7, -0.8], [1, 0.2], [-0.2, 0.9]], [[-0.9, 0.1], [-0.3, -0.8], [0.9, -0.3], [0.4, 0.8], [-0.6, 0.6]]];
-  const FOIL = [[[-1, -0.4], [0.3, -1], [1, 0.2], [-0.1, 0.9]], [[-0.8, -0.8], [0.9, -0.5], [0.6, 0.9], [-1, 0.4]], [[-1, 0], [-0.2, -0.9], [1, -0.4], [0.5, 0.8]]];
-  const MIST = [[-1, 0.1], [-0.82, -0.3], [-0.5, -0.24], [-0.2, -0.46], [0.1, -0.3], [0.3, -0.38], [0.62, -0.42], [0.86, -0.14], [1, 0.06], [0.7, 0.2], [0.82, 0.36], [0.3, 0.3], [-0.1, 0.42], [-0.44, 0.28], [-0.8, 0.34]];   // рваный край: надрезы
-  // снежинки: три варианта «вырезанных руками» — длина луча и веточки свои у каждого из шести лучей
-  const FLAKES = [
-    [[1, 0.55, 0.32], [0.86, 0.5, 0], [1, 0.6, 0.3], [0.9, 0.45, 0.28], [0.98, 0.55, 0], [0.84, 0.5, 0.3]],
-    [[0.9, 0.38, 0.62], [1, 0.42, 0.6], [0.8, 0.4, 0], [0.94, 0.36, 0.64], [0.86, 0, 0.6], [1, 0.4, 0.66]],
-    [[1, 0.7, 0], [0.82, 0.48, 0.48], [0.96, 0.66, 0], [0.88, 0.5, 0.5], [1, 0.68, 0], [0.78, 0.46, 0.46]],
+  const polyTo = (c, pts) => { c.moveTo(pts[0][0], pts[0][1]); for (let i = 1; i < pts.length; i++) c.lineTo(pts[i][0], pts[i][1]); c.closePath(); };   // ещё один контур в тот же путь
+  // мох: 3–4 лопасти с надрезами между ними, светлая верхушка слева
+  const MOSS_BIT = [
+    { o: [[-1, 0.45], [-1.1, -0.05], [-0.85, -0.5], [-0.5, -0.42], [-0.42, -0.9], [-0.05, -1.08], [0.28, -0.8], [0.42, -0.5], [0.78, -0.62], [1.05, -0.28], [1, 0.2], [0.7, 0.5], [0.35, 0.38], [0.1, 0.62], [-0.3, 0.45], [-0.62, 0.62]],
+      cn: [3, 7, 12, 14], hi: [[-0.95, -0.1], [-0.8, -0.45], [-0.48, -0.35], [-0.38, -0.8], [-0.05, -0.98], [0.2, -0.75], [-0.2, -0.6], [-0.55, -0.15]] },
+    { o: [[-1.1, 0.3], [-1.05, -0.25], [-0.7, -0.45], [-0.62, -0.85], [-0.25, -0.95], [-0.05, -0.6], [0.2, -0.95], [0.6, -0.85], [0.62, -0.45], [1, -0.3], [1.1, 0.15], [0.8, 0.45], [0.45, 0.3], [0.15, 0.55], [-0.25, 0.35], [-0.6, 0.55]],
+      cn: [2, 5, 8, 12, 14], hi: [[-1, -0.15], [-0.68, -0.38], [-0.58, -0.78], [-0.25, -0.86], [-0.1, -0.55], [-0.5, -0.3], [-0.8, 0]] },
+    { o: [[-0.9, 0.5], [-1, 0], [-0.75, -0.35], [-0.45, -0.25], [-0.5, -0.75], [-0.2, -1.1], [0.2, -1], [0.3, -0.6], [0.7, -0.6], [0.95, -0.2], [0.85, 0.3], [0.5, 0.55], [0.2, 0.4], [-0.15, 0.62], [-0.5, 0.45]],
+      cn: [3, 7, 12, 14], hi: [[-0.92, -0.05], [-0.72, -0.3], [-0.45, -0.2], [-0.45, -0.7], [-0.18, -1], [0.1, -0.9], [-0.2, -0.55], [-0.6, -0.05]] },
   ];
+  // труха: неровные 4–5-угольники гнилого дерева
+  const ROT_BIT = [[[-1, -0.3], [-0.2, -0.95], [0.85, -0.55], [0.7, 0.6], [-0.45, 0.85]], [[-0.9, -0.6], [0.6, -0.85], [1, 0.2], [-0.1, 0.95]], [[-1, 0.1], [-0.5, -0.8], [0.5, -0.7], [0.95, 0.3], [0.1, 0.85]]];
+  // капля росы: острый кончик вверх, бок чуть кривой
+  const DEW_BIT = [[0, -1.25], [0.3, -0.55], [0.62, 0.1], [0.55, 0.62], [0.12, 0.92], [-0.38, 0.8], [-0.62, 0.3], [-0.4, -0.45]];
+  // клок шерсти: фестоны (надрезы во впадинах), теневой бок справа снизу и завиток-вырез
+  const WOOL_BIT = [[-1, 0.15], [-1.12, -0.2], [-0.9, -0.38], [-0.95, -0.68], [-0.62, -0.72], [-0.5, -1], [-0.15, -0.88], [0.05, -1.08], [0.35, -0.85], [0.62, -0.95], [0.75, -0.6],
+    [1.05, -0.5], [1, -0.15], [1.15, 0.15], [0.85, 0.35], [0.8, 0.65], [0.45, 0.6], [0.25, 0.85], [-0.1, 0.65], [-0.4, 0.82], [-0.6, 0.52], [-0.95, 0.55]];
+  const WOOL_CN = [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20];
+  const WOOL_SH = [[0.15, 0.15], [0.85, -0.05], [0.92, 0.2], [0.7, 0.5], [0.35, 0.58], [0, 0.55], [-0.05, 0.35]];
+  const WOOL_CURL = [[-0.32, -0.32], [-0.08, -0.56], [0.24, -0.48], [0.32, -0.2], [0.14, -0.02], [0.1, -0.2], [0, -0.34], [-0.18, -0.26]];
+  // берестяной завиток: полоска на 1–1,5 витка (контур сужающегося штриха), два чёрных штриха поперёк
+  function taperPts(pts, w0, w1) {
+    const n = pts.length, L = [], R = [];
+    for (let i = 0; i < n; i++) {
+      const a = pts[Math.max(0, i - 1)], b = pts[Math.min(n - 1, i + 1)], dx = b[0] - a[0], dy = b[1] - a[1], d = Math.hypot(dx, dy) || 1, w = lerp(w0, w1, i / (n - 1)) / 2;
+      L.push([pts[i][0] - dy / d * w, pts[i][1] + dx / d * w]); R.push([pts[i][0] + dy / d * w, pts[i][1] - dx / d * w]);
+    }
+    return [...L, ...R.reverse()];
+  }
+  const BARK_BIT = [1, 1.25, 1.5].map((turns, v) => {
+    const sp = []; for (let i = 0; i <= 18; i++) { const k = i / 18, a = k * turns * TAU + v; sp.push([Math.cos(a) * (1 - 0.55 * k), Math.sin(a) * (1 - 0.55 * k) * 0.8]); }
+    const mark = (i, w) => { const p = sp[i], q = sp[i + 1], dx = q[0] - p[0], dy = q[1] - p[1], d = Math.hypot(dx, dy) || 1, nx = -dy / d * 0.3, ny = dx / d * 0.3, tx = dx / d * w, ty = dy / d * w;
+      return [[p[0] + nx - tx, p[1] + ny - ty], [p[0] + nx + tx, p[1] + ny + ty], [p[0] - nx + tx, p[1] - ny + ty], [p[0] - nx - tx, p[1] - ny - ty]]; };
+    return { strip: taperPts(sp, 0.62, 0.34), marks: [mark(4, 0.16), mark(9 + v, 0.11)] };
+  });
+  // каменная крошка и фиолетовый осколок (грань вспыхивает, когда он повернётся к нам)
+  const GRIT_BIT = [[[-1, -0.2], [-0.3, -0.9], [0.8, -0.6], [0.9, 0.5], [-0.2, 0.9]], [[-0.8, -0.8], [0.7, -0.5], [1, 0.4], [-0.5, 0.8]], [[-1, 0.3], [-0.6, -0.7], [0.4, -0.9], [0.95, 0], [0.3, 0.8]]];
+  const SHARD = [[-1, -0.25], [0.2, -0.5], [1.15, 0.05], [0.1, 0.45]], SHARD_FACE = [[-1, -0.25], [0.2, -0.5], [1.15, 0.05]];
+  // лунная рябь: волнистый штрих в два горба толщиной 0,8, сужается к концам; x — в долях длины, y — в единицах
+  const RIPPLE_BIT = [0.7, 0.95, 0.55].map((A, v) => {
+    const top = [], bot = [];
+    for (let i = 0; i <= 16; i++) { const x = -1 + i / 8, y = -A * Math.sin(Math.PI * (x + 1) + v * 0.4) * (0.75 + 0.25 * Math.sin(i * 0.7)), w = 0.4 * Math.pow(Math.sin(Math.PI * i / 16), 0.7); top.push([x, y - w]); bot.push([x, y + w]); }
+    return [...top, ...bot.reverse()];
+  });
+  // ком ночи: тёмный бок справа снизу и одна бледная крупинка
+  const CLOD_BIT = { o: [[-1, 0.1], [-0.85, -0.55], [-0.35, -0.95], [0.25, -0.85], [0.75, -0.65], [1.05, -0.1], [0.85, 0.5], [0.35, 0.85], [-0.3, 0.8], [-0.8, 0.6]],
+    dk: [[0.05, 0], [0.95, -0.15], [0.82, 0.45], [0.35, 0.75], [-0.25, 0.7], [-0.2, 0.35]], gr: [[-0.5, -0.38], [-0.18, -0.55], [-0.08, -0.22], [-0.38, -0.12]] };
+  // обрывки бумаги: у каждого один рваный край
+  const PAPER_BIT = [[[-1, -0.7], [0.9, -0.8], [0.75, -0.3], [1, 0.05], [0.7, 0.35], [0.95, 0.7], [-0.9, 0.8]],
+    [[-1, 0.6], [-0.6, -0.9], [0.1, -0.5], [0.35, -0.75], [0.6, -0.3], [1, -0.2], [0.6, 0.8]],
+    [[-0.9, -0.9], [0.8, -0.6], [0.95, 0.8], [0.5, 0.55], [0.25, 0.9], [-0.05, 0.6], [-0.35, 0.95], [-0.8, 0.5]]];
+  // медная чешуйка: округлый щиток с кончиком и рёбрышком
+  const SCALE_BIT = [[0, -1], [0.65, -0.75], [0.95, -0.1], [0.6, 0.6], [0.05, 1.05], [-0.6, 0.6], [-0.95, -0.1], [-0.65, -0.75]];
+  const SCALE_RIDGE = [[-0.1, -0.72], [0.08, -0.72], [0.06, 0.62], [-0.04, 0.62]];
+  // клуб дыма: бугры с надрезами, светлая кромка — вырезанная полоса по верхне-левым буграм
+  const SMOKE_BIT = { o: [[-1, 0.35], [-1.05, -0.1], [-0.75, -0.35], [-0.7, -0.75], [-0.3, -0.85], [-0.1, -1.1], [0.35, -1], [0.5, -0.65], [0.9, -0.6], [1.05, -0.2], [0.9, 0.2], [1, 0.5], [0.6, 0.7], [0.1, 0.55], [-0.35, 0.75], [-0.7, 0.6]],
+    cn: [2, 4, 7, 10, 13, 15], hi: [[-0.92, -0.06], [-0.7, -0.3], [-0.64, -0.66], [-0.3, -0.74], [-0.12, -0.98], [0.28, -0.9], [0, -0.72], [-0.4, -0.55], [-0.58, -0.22], [-0.82, 0.08]] };
   function bit(c, q, x, y, u, t) {
-    const s = q.size, rot = q.rot || 0, a0 = c.globalAlpha;
+    const s = q.size, rot = q.rot || 0, a0 = c.globalAlpha, v = (q.v || 0) % 3, k = s * 0.5;
     c.save(); c.translate(x, y);
     switch (q.k) {
-      case 'tLeaf': {        // листик: два тона, половинка темнее; кружится
-        c.rotate(rot); c.scale(s * 0.5, s);
-        poly(c, LEAF_BIT); c.fillStyle = q.col; c.fill();
-        poly(c, [[0, -1], [0.42, -0.62], [0.5, -0.05], [0.28, 0.6], [0, 1]]); c.fillStyle = darker(q.col, 0.26); c.fill(); break;
+      case 'tMoss': { const m = MOSS_BIT[v]; c.rotate(rot); c.scale(k, k); cut(c, m.o, m.cn); c.fillStyle = q.col; c.fill(); poly(c, m.hi); c.fillStyle = q.col2 || q.col; c.fill(); break; }
+      case 'tRot': c.rotate(rot); c.scale(k, k); poly(c, ROT_BIT[v]); c.fillStyle = q.col; c.fill(); break;
+      case 'tDew': {          // капля чуть вытягивается, когда падает быстрее
+        const st = 1 + clamp(-(q.vy || 0) / 260, 0, 0.45); c.scale(k / Math.sqrt(st), k * st);
+        cut(c, DEW_BIT, [0]); c.fillStyle = q.col; c.fill(); c.fillStyle = '#ffffff'; dot(c, -0.24, 0.12, 0.4 / k); break;
       }
-      case 'tSpore': c.fillStyle = q.col; dot(c, 0, 0, s * 0.5); break;          // спора: холодная точка без ореола
-      case 'tEmber': {       // уголёк: неровная чешуйка
-        c.rotate(rot); c.scale(s * 0.5, s * 0.5); poly(c, EMBER[q.v % 3]); c.fillStyle = q.col; c.fill(); break;
-      }
-      case 'tFeather': {     // пёрышко: несимметричное, в два тона, со стержнем
-        c.rotate(rot); const w = s * 0.42;
-        cut(c, [[0, -s], [w * 0.9, -s * 0.5], [w, s * 0.15], [w * 0.4, s * 0.75], [0, s], [-w * 0.55, s * 0.4], [-w * 0.7, -s * 0.3]], [0, 4]); c.fillStyle = q.col; c.fill();
-        poly(c, [[0, -s], [w * 0.9, -s * 0.5], [w, s * 0.15], [w * 0.4, s * 0.75], [0, s]]); c.fillStyle = q.col2; c.fill();
-        c.fillStyle = darker(q.col2, 0.3); taper(c, [[0, -s * 0.9], [0.1, 0], [0, s * 1.15]], 0.35, 0.2); break;
-      }
-      case 'tFoil': {        // блёстка: кусочек фольги; когда поворачивается к нам ребром, одна грань вспыхивает
-        c.rotate(rot); const fl = Math.abs(Math.cos(rot * 1.7)) > 0.94; c.scale(s * 0.5, s * 0.5);
-        const f = FOIL[q.v % 3]; poly(c, f); c.fillStyle = q.col; c.fill();
-        poly(c, [f[0], f[1], f[2]]); c.fillStyle = fl ? '#f4f6fb' : darker(q.col, 0.18); c.fill(); break;
-      }
-      case 'tPaw': {         // отпечаток лапы: подушечка и четыре пальца, неровные
-        c.rotate(rot); c.scale(s, s); c.fillStyle = q.col; c.globalAlpha = a0 * 0.55;
-        cut(c, [[-1.6, 0.6], [-0.6, -0.5], [0.9, -0.4], [1.8, 0.8], [1, 2], [-0.9, 1.9]]); c.fill();
-        for (const [px, py, r] of [[-2.1, -1.4, 0.62], [-0.8, -2.5, 0.66], [0.9, -2.4, 0.6], [2.2, -1.1, 0.56]]) dot(c, px, py, r);
+      case 'tWool': c.rotate(rot); c.scale(v === 1 ? -k : k, v === 2 ? k * 0.85 : k);
+        cut(c, WOOL_BIT, WOOL_CN); c.fillStyle = q.col; c.fill(); c.fillStyle = q.col2; poly(c, WOOL_SH); c.fill(); cut(c, WOOL_CURL, [5]); c.fill(); break;
+      case 'tBark': { const b = BARK_BIT[v]; c.rotate(rot); c.scale(k, k);
+        c.fillStyle = q.col2; c.save(); c.translate(0.16, 0.16); poly(c, b.strip); c.fill(); c.restore();          // рыжая изнанка — краем из-под белого
+        c.fillStyle = q.col; poly(c, b.strip); c.fill(); c.fillStyle = '#1f1c22'; for (const m of b.marks) { poly(c, m); c.fill(); } break; }
+      case 'tGrit': c.rotate(rot); c.scale(k, k);
+        if (q.shard) { poly(c, SHARD); c.fillStyle = q.col; c.fill(); poly(c, SHARD_FACE); c.fillStyle = Math.abs(Math.cos(rot * 1.7)) > 0.94 ? '#f3eeff' : '#8b63c9'; c.fill(); }
+        else { poly(c, GRIT_BIT[v]); c.fillStyle = q.col; c.fill(); }
         break;
-      }
-      case 'tFlake': {       // снежинка, вырезанная из бумаги: шесть клиньев разной длины, на некоторых клинышки-веточки, серединка — неровный шестиугольник
-        c.rotate(rot); c.fillStyle = q.col; const F = FLAKES[q.v % 3], R = s * 0.5;
-        const core = []; for (let i = 0; i < 6; i++) { const a = i / 6 * TAU + 0.52, rr = R * (0.2 + 0.06 * F[i][0]); core.push([Math.cos(a) * rr, Math.sin(a) * rr]); }
-        poly(c, core); c.fill();
-        F.forEach(([len, b1, b2], i) => {
-          const a = i / 6 * TAU, ca = Math.cos(a), sa = Math.sin(a), L = R * len, w = R * 0.14, nx = -sa * w, ny = ca * w;
-          poly(c, [[nx, ny], [ca * L, sa * L], [-nx, -ny]]); c.fill();
-          for (const bb of [b1, b2]) if (bb) for (const sd of [-1, 1]) {
-            const bx = ca * L * bb, by = sa * L * bb, ba = a + sd * 0.75, bl = L * 0.34, bw = R * 0.08;
-            poly(c, [[bx - sa * bw, by + ca * bw], [bx + Math.cos(ba) * bl, by + Math.sin(ba) * bl], [bx + sa * bw, by - ca * bw]]); c.fill();
-          }
-        });
-        break;
-      }
-      case 'tPollen': {      // пыльца: матовая крупинка с тёмным боком, без ореола
-        c.rotate(rot); const r = s * 0.5;
-        cut(c, [[-r, -0.2 * r], [-0.3 * r, -r], [0.8 * r, -0.6 * r], [r, 0.4 * r], [0.2 * r, r], [-0.7 * r, 0.7 * r]]); c.fillStyle = q.col; c.fill();
-        poly(c, [[0.8 * r, -0.6 * r], [r, 0.4 * r], [0.2 * r, r], [-0.7 * r, 0.7 * r], [0.1 * r, 0.1 * r]]); c.fillStyle = darker(q.col, 0.3); c.fill(); break;
-      }
-      case 'tWind': {        // завиток ветра: тонкий штрих переменной толщины с завитком на конце; вытягивается со временем
-        c.scale(q.v ? -1 : 1, 1); c.rotate(rot); c.fillStyle = q.col; c.globalAlpha = a0 * 0.66;
-        const grow = Math.min(1, (1 - u) * 2.4 + 0.25), pts = [];
-        for (let i = 0; i <= 12; i++) { const k = i / 12 * grow, ang = k * k * 4.2; pts.push([k * s * 2.2 - Math.sin(ang) * k * s * 0.5, -Math.sin(k * 2.4) * s * 0.45 - (1 - Math.cos(ang)) * k * s * 0.42]); }
-        taper(c, pts, 0.45, 0.9); break;
-      }
-      case 'tEcho': {        // кольца эха: две-три вложенные дуги 100–140°, вниз и вперёд; расходятся
-        c.rotate(rot); c.fillStyle = q.col; c.globalAlpha = a0 * 0.72 * Math.min(1, u * 1.6);
-        const grow = 1 + (1 - u) * 1.6;
-        for (let j = 0; j < (q.v ? 3 : 2); j++) {
-          const R = s * (0.6 + j * 0.42) * grow, span = (0.85 + j * 0.12) * (1.1 + j * 0.06), pts = [];
-          for (let i = 0; i <= 10; i++) { const a = -span / 2 + span * i / 10; pts.push([Math.cos(a) * R, Math.sin(a) * R]); }
-          const L = [], Rr = [];
-          pts.forEach((p, i) => { const w = 0.25 + 0.55 * Math.sin(i / 10 * Math.PI) * (1 - j * 0.2), n = Math.hypot(p[0], p[1]) || 1; L.push([p[0] * (1 + w / n), p[1] * (1 + w / n)]); Rr.push([p[0] * (1 - w / n), p[1] * (1 - w / n)]); });
-          poly(c, [...L, ...Rr.reverse()]); c.fill();
-        }
-        break;
-      }
-      case 'tMist': {        // клочок тумана: плоский, неровный, расплывается
-        const g = 1 + (1 - u) * 1.8; c.rotate(rot * 0.12); c.scale(s * g * 1.5, s * g * 0.24); c.fillStyle = q.col; c.globalAlpha = a0 * 0.2 * Math.min(1, u * 1.5);
-        cut(c, MIST, [2, 4, 9, 13]); c.fill(); break;
-      }
+      case 'tRipple': c.scale(k * (1 + 0.6 * (1 - u)), 1); poly(c, RIPPLE_BIT[v]); c.fillStyle = q.col; c.fill(); break;   // растягивается в 1,6 раза и тает
+      case 'tClod': c.rotate(rot); c.scale(v === 1 ? -k : k, v === 2 ? k * 0.8 : k);
+        cut(c, CLOD_BIT.o); c.fillStyle = q.col; c.fill(); poly(c, CLOD_BIT.dk); c.fillStyle = '#151838'; c.fill(); poly(c, CLOD_BIT.gr); c.fillStyle = '#e6e9ff'; c.fill(); break;
+      case 'tPaper': { c.rotate(rot); const fl = Math.cos(rot * 1.6 + v * 2); c.scale(k * Math.max(0.2, Math.abs(fl)), k);   // кувыркается: на перевороте мелькает тёмная изнанка
+        poly(c, PAPER_BIT[v]); c.fillStyle = fl < 0 ? darker(q.col, 0.55) : q.col; c.fill(); break; }
+      case 'tScale': { c.rotate(rot); const fl = Math.cos(rot * 1.4 + v * 2); c.scale(k * Math.max(0.2, Math.abs(fl)), k);
+        cut(c, SCALE_BIT, [4]); c.fillStyle = fl < 0 ? '#6a3418' : q.col; c.fill(); if (fl >= 0) { poly(c, SCALE_RIDGE); c.fillStyle = darker(q.col, 0.22); c.fill(); } break; }
+      case 'tSmoke': { const g = k * (1 + 0.8 * (1 - u)); c.rotate(rot); c.scale(v === 1 ? -g : g, v === 2 ? g * 0.82 : g);      // растёт в 1,8 раза и тает
+        cut(c, SMOKE_BIT.o, SMOKE_BIT.cn); polyTo(c, SMOKE_BIT.hi); c.fillStyle = q.col; c.fill('evenodd'); poly(c, SMOKE_BIT.hi); c.fillStyle = q.col2; c.fill(); break; }
     }
     c.restore(); c.globalAlpha = a0;
   }
-  // световой пунктир Светлячка: тонкая линия по пути полёта; штрихи 6–10 и промежутки 4–7 привязаны к пройденному пути
-  // (не ползут); pts — [x, y, d — путь от старта, a — яркость 0…1]; рвётся там, где у соседних точек разрыв (склейка краёв)
-  function glowDash(c, pts, w) {
-    c.strokeStyle = '#d9f36b'; c.lineWidth = w || 1.5; c.lineCap = 'round';
-    const a0 = c.globalAlpha, PER = 13, on = (d) => { const k = Math.floor(d / PER); return d - k * PER < 6 + 3 * hash(k * 1.37); };
+  // световая леска Удильщика: тонкий пунктир по пути грибка-приманки; штрихи 6–10 и промежутки 4–6 привязаны к пройденному пути
+  // (не ползут); pts — [x, y, d — путь от старта, a — яркость 0…1]; рвётся там, где у точки отметка brk (склейка краёв, разворот)
+  function glowDash(c, pts, w, col) {
+    c.strokeStyle = col || '#8fe6f5'; c.lineWidth = w || 1.5; c.lineCap = 'round';
+    const a0 = c.globalAlpha, PER = 12, on = (d) => { const k = Math.floor(d / PER); return d - k * PER < 6 + 2 * hash(k * 1.37); };
     for (let i = 1; i < pts.length; i++) {
       const p = pts[i - 1], q = pts[i]; if (p.cut || q.brk) continue;
       const n = Math.max(1, Math.ceil(Math.abs(q[2] - p[2]) / 1.5));
@@ -1964,13 +1978,19 @@ const Art = (() => {
     c.globalAlpha = a0;
   }
 
-  /* ---------- облики ----------
-     Двенадцать обликов, у каждого своя функция SKIN_ART[id](c, a). Облик собран из 4–10 «кусочков бумаги»: контур каждого —
-     вручную расставленные точки (Path2D, кэш на облик), края «ножницами» (cutTo: плавно, а где надо — острый угол или надрез).
-     Ноги в (0, 0), смотрит вправо, голова повёрнута на 3/4. Верхний кусочек отбрасывает жёсткую тень (+0,8; +1,0) тоном темнее.
-     Без обводок и градиентов; ellipse/arc — только зрачки и точки меньше 3 ед. Свечение есть только у брюшка Светлячка.
-     a: t — время, blink — моргает, lx/ly — куда смотрит (−1…1), ear — вертикальная скорость (−1…1),
-        wing — готовность взмаха (1 — есть заряд), flap — взмах (1 → 0), face — куда смотрит (1 → −1, отражение делает char) */
+  /* ---------- облики: «Бестиарий Тихолесья» ----------
+     Двенадцать диковин этого леса, у каждой своя функция SKIN_ART[id](c, a). Облик собран из 4–14 «кусочков бумаги»
+     (у Опят и Избушки — до 16): контур каждого — вручную расставленные точки (Path2D, кэш), край «рваный», как у кочек:
+     надрезы, зубцы, фестоны, сколы (cutTo: плавно, а где надо — острый угол). Ноги в (0, 0), смотрит вправо; основная масса —
+     x ∈ [−22; 22], y ∈ [−46; 0], выступы — до y −62 и x ±32, в полёте свисающее — до y +26. Жёсткая тень (+0,8; +1,0) —
+     у одного-двух верхних кусочков, у каждого облика своих. Без обводок и градиентов; ellipse/arc — только зрачки и точки меньше 3 ед.
+     Своё холодное свечение — только у пяти и только в одной детали: ростки Тихоходки, корешок Опят, кристаллы раскрытой Жеоды,
+     грибок Удильщика, окошко Избушки; без заряда и в «Экономно» гаснет.
+     a: t — время, blink — моргает, lx/ly — куда смотрит и летит (ly −1 — быстро вверх, +1 — быстро вниз), ear — вертикальная скорость,
+        wing — готовность взмаха (1 — есть заряд), flap — взмах (1 → 0), face — куда смотрит (1 → −1, отражение делает char).
+     В лавке, меню и на иконке ly, flap и blink нет — это покой. Шесть состояний у каждого свои: покой, моргание (у безликих —
+     своё мелкое движение), взмах, без заряда, подъём (ly < −0,3) и спуск (ly > 0,3) — позы полёта перетекают плавно (poseK).
+     Анимированные контуры — из 2–4 ключевых контуров с одинаковым числом точек (keyPath: смесь ступенями, каждая ступень в кэше) */
   const SKP = new Map();
   const P2 = (key, pts, corners) => { let p = SKP.get(key); if (!p) { p = cutPath(pts, corners); SKP.set(key, p); } return p; };
   const H2 = (key, pts) => { let p = SKP.get(key); if (!p) { p = polyPath(pts); SKP.set(key, p); } return p; };
@@ -1999,634 +2019,51 @@ const Art = (() => {
     out.push(base[base.length - 1]);
     return out;
   }
-
-  /* 1. Ёжик: каплевидный бугор иголок, наклонённый назад; из-под него вперёд и вбок торчит острая мордочка */
-  const EZ = { q: '#5b4636', qD: '#3f2f27', tip: '#b39274', face: '#ead9bd', faceD: '#c8b08e', ink: '#1d1614', feet: '#4a382c', leaf: '#c98d44', leafD: '#a8643b', vein: '#8a5a2a', dim: '#8f7656', dimD: '#6e5a45' };
-  const EZ_TEETH = [[0.03, 4.4, -1.6], [0.085, 6.6, -2.6], [0.14, 5.4, -2], [0.2, 8, -3.6], [0.26, 6.2, -2.4], [0.32, 8.8, -4.2], [0.38, 6.8, -3], [0.44, 9, -6.2], [0.5, 7.4, -3.6],
-    [0.56, 9, -4.6], [0.62, 6.4, -3.4], [0.675, 8.4, -6.8], [0.73, 6, -3], [0.785, 7.6, -3.4], [0.84, 5.4, -2.4], [0.89, 6.8, -2.6], [0.94, 4.8, -1.6], [0.985, 4, -1]];
-  const EZ_Q = comb([[-17.6, -2.6], [-21, -8.4], [-22, -15.6], [-20.6, -23.6], [-16.6, -31], [-10, -36.8], [-2.4, -39.4], [5.2, -37.8], [10.8, -32.6], [13.8, -26], [14.4, -19.4]], EZ_TEETH, 1)
-    .concat([[10.4, -16.6], [4, -14.6], [-3.6, -11.6], [-10, -7.6], [-14.6, -3.6]]);
-  const EZ_FACE = [[-14.2, -1.4], [-10.6, -7.2], [-3.8, -11.4], [3.6, -14.6], [10, -16.6], [14.8, -16.2], [18.6, -14.2], [22.4, -11.6], [22.2, -10.2], [19, -8.6], [13.6, -6], [8.6, -2.8], [2.4, -0.8], [-6.4, -0.4]];
-  const EZ_BALL = (() => {        // клубок: иголки вокруг неровного круга
-    const base = []; for (let i = 0; i <= 20; i++) { const a = i / 20 * TAU - 1.9, r = 12.6 + Math.sin(i * 2.7) * 0.7; base.push([Math.cos(a) * r, -18 + Math.sin(a) * r]); }
-    const teeth = []; for (let i = 0; i < 19; i++) teeth.push([0.025 + i * 0.0525, 5 + (i * 7 % 5) * 0.9, -2.2]);
-    return comb(base, teeth, -1);
-  })();
-  function ezhik(c, a) {
-    const E = EZ, t = a.t || 0, f = a.flap || 0, rd = isReady(a);
-    if (f > 0.02) {               // взмах: свернулся клубком и кувыркается через голову
-      const s = 1 - f;
-      c.translate(0, -4); piv(c, 0, -18, ez(s) * TAU, 1.34, 1.34, () => {
-        const ball = H2('ez|ball', EZ_BALL); pcs(c, ball, E.q, E.qD);
-        inside(c, ball, () => fillPts(c, [[-20, -6], [-6, -14], [8, -10], [20, -2], [20, 4], [-20, 4]], E.qD));
-        c.fillStyle = E.tip; for (let i = 2; i < EZ_BALL.length - 2; i += 2) { const p = EZ_BALL[i], v0 = EZ_BALL[i - 1], v1 = EZ_BALL[i + 1]; poly(c, [p, [lerp(p[0], v0[0], 0.4), lerp(p[1], v0[1], 0.4)], [lerp(p[0], v1[0], 0.4), lerp(p[1], v1[1], 0.4)]]); c.fill(); }
-        fillPts(c, [[4, -24], [8.6, -21], [9.4, -15.6], [6.2, -13.4], [3.4, -17]], E.face);           // кончик мордочки из клубка
-        c.fillStyle = E.ink; dot(c, 8.4, -15.8, 1.2);
-      });
-      return;
-    }
-    const q = H2('ez|q', EZ_Q);
-    // одна иголка торчит отдельно — сзади, выше остальных
-    c.fillStyle = E.q; taper(c, [[-15.6, -31.6], [-21.4, -35.4], [-27.4, -37.8]], 2, 0.4); c.fillStyle = E.tip; taper(c, [[-24.4, -36.6], [-27.4, -37.8]], 0.9, 0.3);
-    pcs(c, q, E.q, E.qD);
-    inside(c, q, () => fillPts(c, [[-30, -20], [-15, -13], [-7, -6], [-6, 3], [-30, 3]], E.qD));                       // низ бугра в тени
-    c.fillStyle = E.tip;                                                                                                // светлые кончики иголок
-    for (let i = 2; i <= EZ_TEETH.length * 2; i += 2) { const p = EZ_Q[i], v0 = EZ_Q[i - 1], v1 = EZ_Q[i + 1]; poly(c, [p, [lerp(p[0], v0[0], 0.42), lerp(p[1], v0[1], 0.42)], [lerp(p[0], v1[0], 0.42), lerp(p[1], v1[1], 0.42)]]); c.fill(); }
-    // лапки
-    fillPts(c, [[-9.4, 0.4], [-8.6, -1.8], [-4.6, -2.2], [-3.4, 0.4]], E.feet); fillPts(c, [[4.4, 0.4], [5.4, -1.8], [9.4, -1.6], [10.4, 0.4]], E.feet);
-    // мордочка и брюшко
-    const fc = P2('ez|face', EZ_FACE, [7]); pcs(c, fc, E.face, E.faceD);
-    inside(c, fc, () => fillPts(c, [[-16, 2], [-12, -4], [-2, -6.2], [8, -4.2], [16, -6.6], [26, -9.8], [26, 2]], E.faceD));
-    // ухо у края иголок
-    pcs(c, P2('ez|ear', [[6.2, -17.6], [5.6, -21.4], [7.6, -23.8], [10.2, -22.8], [10.6, -19.4]]), E.tip, E.qD);
-    fillPts(c, [[7.2, -18.6], [7, -21], [8.4, -22.2], [9.4, -20]], '#8a6b52');
-    // глаза-бусинки без бликов, нос-пуговка шевелится
-    const tw = blip(t, 3.1, 0.3, 1.3) * Math.sin(t * 40) * 0.5;
-    c.fillStyle = E.ink;
-    if (a.blink) { taper(c, [[11, -13.8], [12.4, -13.5], [13.8, -13.9]], 0.6, 0.5); taper(c, [[16.4, -14.4], [17.3, -14.2], [18, -14.4]], 0.5, 0.4); }
-    else { dot(c, 12.4 + (a.lx || 0) * 0.25, -14, 1.35); dot(c, 17.3, -14.5, 0.95); }
-    dot(c, 22.3, -11.1 + tw, 1.6);
-    // листик наколот справа сверху: готов — яркий и торчит, без заряда — тусклый и поник
-    piv(c, 3.6, -38.6, rd ? -0.45 + Math.sin(t * 1.3) * 0.04 : 0.95, 1, 1, () => {
-      const lf = [[3.6, -38.6], [5, -41.6], [8.4, -44.4], [12.6, -45.4], [15.6, -44.2], [12.8, -41.4], [8.8, -39.2], [5.4, -38.2]];
-      pcs(c, P2('ez|leaf', lf, [0, 4]), rd ? E.leaf : E.dim, E.qD);
-      fillPts(c, [[3.6, -38.6], [8.8, -39.2], [12.8, -41.4], [15.6, -44.2]], rd ? E.leafD : E.dimD);
-      c.fillStyle = E.vein; taper(c, [[4.4, -39], [9.6, -41.6], [14.6, -44]], 0.5, 0.2);
-    });
+  // позы полёта: [подъём, спуск] 0…1 из a.ly — плавно, пока |ly| растёт от 0,3 до 1; в лавке и меню без ly — [0, 0]
+  const poseK = (a) => { const ly = a.ly || 0; return [ez(clamp((-ly - 0.3) / 0.7, 0, 1)), ez(clamp((ly - 0.3) / 0.7, 0, 1))]; };
+  // ход взмаха 0 → 1 (a.flap идёт 1 → 0); вне взмаха — 0
+  const flapU = (a) => (a.flap > 0 ? 1 - a.flap : 0);
+  // ключевые контуры одного числа точек: u (0…1) идёт вдоль списка K, соседние смешиваются ступенями; каждая ступень — Path2D в кэше
+  const mixPts = (A, B, k) => A.map((p, i) => [p[0] + (B[i][0] - p[0]) * k, p[1] + (B[i][1] - p[1]) * k]);
+  function keyPath(key, K, u, steps, corners) {
+    const n = K.length - 1, st = Math.round(clamp(u, 0, 1) * n * steps), i = Math.min(n - 1, Math.floor(st / steps)), f = st / steps - i, k2 = key + '|' + st;
+    let p = SKP.get(k2); if (!p) { p = cutPath(f < 1e-6 ? K[i] : mixPts(K[i], K[i + 1], f), corners); SKP.set(k2, p); }
+    return p;
   }
 
-  /* 2. Мухомор: широкая шляпка набекрень, ножка с клубнем и юбочкой; лицо — на ножке под юбочкой */
-  const MU = { cap: '#c8402f', capD: '#962d27', capL: '#de6a4f', fl: '#f0eadc', flD: '#c9c0b0', stem: '#ece5d6', stemD: '#c9bfae', skirt: '#ddd3c1', ink: '#241a1a' };
-  const MU_STEM = [[-8.8, -0.8], [-11.6, -4.6], [-11, -9.8], [-8.2, -15], [-6.4, -20.4], [-5.6, -26.2], [7.2, -26.8], [7.6, -21], [9.2, -15.4], [12, -10.4], [12.8, -5], [10.2, -1], [1.6, 0.4]];
-  const MU_CAP = [[-18.8, -27.2], [-18.6, -31], [-15.8, -37.2], [-10.4, -42.4], [-3, -45.4], [4.8, -45.6], [11.8, -43], [16.8, -38.4], [19.8, -33], [20.8, -29.2], [18.4, -28.7], [17.2, -30.4], [15.6, -28.3], [8, -27], [0, -26.4], [-8, -26.2], [-14.2, -26.4]];
-  const MU_SKIRT = [[-8.4, -24.6], [-4.8, -26.4], [2.2, -26.8], [8.4, -26], [10.2, -22.8], [8.2, -20.6], [6.4, -22.2], [4.6, -18.4], [2.8, -21.4], [0, -20], [-2.2, -21.6], [-4.6, -19.8], [-6.6, -21.6], [-8.8, -20.8]];
-  const MU_FLAKES = [[[-11.4, -38.6], [-8.4, -40.2], [-6.6, -37.8], [-9.6, -36.2]], [[-3.2, -42.8], [0.2, -43.6], [1.4, -41], [-1.2, -39.8], [-3.4, -40.6]], [[6.2, -41.4], [9.4, -40.8], [8.8, -38.6], [5.8, -38.8]],
-    [[12.8, -36.4], [15.6, -35.2], [14.4, -32.8], [12, -33.8]], [[-15.6, -33], [-13.6, -33.8], [-13, -32], [-14.8, -31.4]], [[1.6, -35.6], [4.4, -36.2], [4, -34]], [[-6.2, -33.6], [-3.6, -34.4], [-3.8, -32], [-6, -31.8]],
-    [[17, -29.6], [19.2, -29.2], [18.8, -25.6], [16.8, -26.4]], [[9.6, -34], [11, -34.6], [11.2, -33.2]]];
-  function mukhomor(c, a) {
-    const M = MU, t = a.t || 0, f = a.flap || 0, rd = isReady(a);
-    const sway = Math.sin(t * 1.5) * 0.015, lag = Math.sin(t * 1.5 - 0.8) * 0.05;          // шляпка покачивается с запаздыванием за ножкой
-    const u = f > 0 ? 1 - f : 0, sq = f > 0 ? Math.sin(Math.PI * u) * (1 - u * 0.25) : 0;   // взмах: шляпка сжимается вниз и распрямляется
-    piv(c, 0, 0, sway, 1, 1, () => {
-      const st = P2('mu|stem', MU_STEM, [5, 6]); pc(c, st, M.stem);
-      inside(c, st, () => { fillPts(c, [[-14, -26], [10, -27], [10, -20.4], [-14, -20]], M.stemD); fillPts(c, [[-14, -10], [-8, -7], [-4, -2], [-4, 2], [-14, 2]], M.stemD); });
-      // лицо: вертикальные чернильные глаза без бликов, рот-чёрточка
-      c.fillStyle = M.ink;
-      if (a.blink) { fillPts(c, [[1.8, -14.2], [3.8, -14.4], [3.8, -13.7], [1.8, -13.5]], M.ink); fillPts(c, [[6.6, -14.6], [8.2, -14.8], [8.2, -14.1], [6.6, -13.9]], M.ink); }
-      else { fillPts(c, [[2.1, -16.2], [3.4, -16.3], [3.6, -12.6], [2.3, -12.5]], M.ink); fillPts(c, [[6.9, -16.4], [7.9, -16.4], [8, -13.2], [7, -13.1]], M.ink); }
-      fillPts(c, [[4, -10.2], [6.6, -10.6], [6.7, -10], [4.1, -9.6]], M.ink);
-      pcs(c, P2('mu|skirt', MU_SKIRT, [5, 6, 7, 8, 9, 10, 11, 12]), M.skirt, M.stemD);
-      piv(c, 1, -26.6, 0.1 + lag, 1 + sq * 0.16, 1 - sq * 0.45, () => {
-        const cap = P2('mu|cap2', MU_CAP, [10, 11, 12]); pcs(c, cap, M.cap, M.capD);
-        inside(c, cap, () => {
-          fillPts(c, [[-21, -26], [-20.6, -31.6], [-17, -38.6], [-10.6, -44.4], [-3, -47.4], [6, -47.6], [13, -45], [18.6, -40], [21.6, -34], [22, -30], [19.6, -32.4], [16.4, -37], [11.4, -41.6], [4.6, -43.8], [-2.6, -43.6], [-9.4, -40.8], [-14.6, -35.6], [-17, -29.8], [-17.4, -26]], M.capL);   // светлая кромка по куполу
-          fillPts(c, [[-22, -27.4], [-10, -28.2], [0, -28], [10, -28.8], [22, -30.6], [22, -20], [-22, -20]], M.capD);                                                               // пластинки снизу в тени
-        });
-        MU_FLAKES.forEach((fl, i) => fillPts(c, fl, rd ? (i === 7 ? M.stem : M.fl) : M.flD));
-      });
-    });
-  }
+  // временные рисовальщики (этап 2 ТЗ 24.11): простой силуэт-заглушка, пока облик не нарисован
+  const stub = (id, pts, col) => (c, a) => { piv(c, 0, -20, flapU(a) * 0.5 - poseK(a)[0] * 0.2 + poseK(a)[1] * 0.2, 1, isReady(a) ? 1 : 0.95, () => pc(c, H2('stub|' + id, pts), col)); };
+  const tihohodka = stub('tihohodka', [[-18, -4], [-10, -26], [10, -40], [21, -32], [10, -12], [2, 0], [-14, 0]], '#d98a7a');
+  const opyata = stub('opyata', [[-4, 0], [-14, -30], [-20, -36], [-4, -40], [10, -46], [22, -42], [6, -34], [4, 0]], '#b8803c');
+  const rosyanka = stub('rosyanka', [[-6, 0], [-22, -30], [-6, -46], [4, -58], [8, -44], [22, -30], [6, 0]], '#9a2f3a');
+  const baranets = stub('baranets', [[-8, 0], [-8, -12], [-16, -22], [-12, -40], [14, -40], [18, -26], [6, -14], [6, 0]], '#e3cb94');
+  const beresten = stub('beresten', [[-8, 0], [-11, -4], [-9, -40], [8, -40], [11, -4], [8, 0]], '#ecebe6');
+  const zheoda = stub('zheoda', [[-12, 0], [-16, -18], [-6, -32], [10, -30], [16, -14], [10, 0]], '#9c8a74');
+  const udilshchik = stub('udilshchik', [[-8, 0], [-18, -14], [-10, -26], [14, -24], [26, -50], [20, -14], [10, 0]], '#3a2a33');
+  const rybaluna = stub('rybaluna', [[0, 0], [-14, -16], [-16, -44], [-4, -62], [14, -44], [12, -16]], '#cdcad2');
+  const zvezdoryl = stub('zvezdoryl', [[-16, 0], [-18, -12], [-6, -22], [16, -18], [26, -12], [14, -4], [2, 0]], '#2a2546');
+  const zmey = stub('zmey', [[0, -18], [-14, -38], [2, -58], [16, -38]], '#c8433a');
+  const aspid = stub('aspid', [[-6, 0], [-14, -14], [-2, -30], [8, -46], [20, -40], [4, -24], [8, 0]], '#c0642c');
+  const izbushka = stub('izbushka', [[-8, 0], [-14, -18], [-16, -36], [0, -52], [14, -36], [12, -18], [8, 0]], '#7a6656');
 
-  /* 3. Лисёнок: сидит вполоборота, крупная голова, большие острые уши (одно отогнуто), хвост-боб вокруг бока */
-  const LI = { o: '#d9773a', oD: '#a95a2c', oL: '#eb9a5c', w: '#efe9de', wD: '#cdc6bb', k: '#231a1b', ear: '#e8c3a0', iris: '#c98a2e', pup: '#1a1212', gray: '#a9a39a' };
-  const LI_TAIL = comb([[-9.4, -2.4], [-15.6, -1.8], [-22, -5.6], [-26.4, -12.6], [-28, -21], [-26.4, -29.2], [-22, -35.4], [-17.2, -38.6]],
-    [[0.08, 2.4, 1], [0.18, 3, 1.2], [0.29, 2.2, 1], [0.4, 3.2, 1.4], [0.51, 2.4, 1], [0.62, 3, 1.4], [0.73, 2.2, 1], [0.84, 2.8, 1.2], [0.94, 2, 1]], 1)
-    .concat([[-13.6, -39.6], [-14.6, -35], [-17.6, -30.8], [-19.4, -24], [-18.6, -16.4], [-15.4, -10.2], [-10.6, -6.6]]);
-  const LI_BODY = [[-11.8, -0.6], [-14.2, -6.6], [-13.8, -13.6], [-10.6, -19.6], [-5.2, -23.4], [1.8, -24.4], [8.2, -22], [11.4, -16.2], [12.4, -9.4], [11, -3.4], [7.2, -0.4], [-3.6, 0]];
-  const LI_RUFF = [[1.4, -23.8], [7.6, -22.6], [10.4, -17.4], [9.2, -15.2], [10.6, -13], [8.6, -11.6], [9.4, -9], [7, -8.2], [6.8, -5.4], [4.4, -6.8], [2.6, -9], [1.2, -13], [0.2, -18], [0.2, -21.8]];
-  const LI_HEAD = [[-9, -30], [-8.4, -36], [-5, -41], [1.4, -43.4], [8, -42.2], [12.6, -38.4], [14.6, -34], [20.6, -29.8], [21.4, -28.4], [19.6, -27.6], [14.6, -25.2], [8, -23.6], [0, -24], [-6.2, -25.8]];
-  const LI_CHEEK = [[2.6, -30.2], [8, -27.4], [12.4, -30.8], [14.8, -33], [17, -31.4], [21.4, -28.4], [19.6, -27.6], [14.6, -25.2], [8, -23.6], [1.6, -24.4], [-2.8, -26.4], [-0.4, -28]];
-  function lis(c, a) {
-    const L = LI, t = a.t || 0, f = a.flap || 0, rd = isReady(a), lx = a.lx || 0;
-    const roll = f > 0.02 ? ez(1 - f) * TAU : 0;                         // кувырок; хвост при этом заметает полный круг
-    piv(c, 0, -20, roll, 1, 1, () => {
-      piv(c, -10, -4, Math.sin(t * 1.1) * 0.07 - (f > 0 ? Math.sin(Math.PI * (1 - f)) * 0.5 : 0), 1, 1, () => {      // хвост ходит из стороны в сторону
-        const tl = H2('li|tail', LI_TAIL); pcs(c, tl, L.o, L.oD);
-        inside(c, tl, () => { fillPts(c, [[-34, -14], [-24, -12], [-18, -6], [-12, -2], [-12, 4], [-34, 4]], L.oD); fillPts(c, [[-32, -31], [-24, -30.6], [-18.6, -31.6], [-13, -34.6], [-11, -44], [-32, -44]], rd ? L.w : L.gray); });
-      });
-      const bd = P2('li|body', LI_BODY); pc(c, bd, L.o);
-      inside(c, bd, () => fillPts(c, [[-16, -12], [-9, -14.6], [-4.4, -9], [-5.6, 1], [-16, 1]], L.oD));
-      fillPts(c, [[-7.4, 0.4], [-7, -2.6], [-2.6, -3], [-0.8, 0.4]], L.k);                                       // задняя лапа в чёрном носочке
-      const fl2 = [[9.6, -7], [12.2, -6.8], [13.4, -1.2], [13.6, 0.4], [10.4, 0.4], [10.6, -3]];
-      fillPts(c, fl2, L.oD); fillPts(c, [[10.5, -3.6], [13.1, -3.6], [13.6, 0.4], [10.4, 0.4]], L.k);
-      pcs(c, P2('li|ruff', LI_RUFF, [3, 4, 5, 6, 7, 8, 9]), L.w, L.wD);
-      const fl1 = P2('li|leg', [[4.8, -8.6], [8.6, -8.8], [9.6, -3.2], [10.4, 0.2], [5.4, 0.4], [5.6, -3.6]]);
-      pc(c, fl1, L.o); inside(c, fl1, () => fillPts(c, [[3, -4.2], [12, -4.4], [12, 2], [3, 2]], L.k));
-      // голова: чуть повёрнута и наклонена
-      piv(c, 3, -30, -0.06 + lx * 0.04, 1, 1, () => {
-        const eb = P2('li|earB', [[-7.6, -37.4], [-10.4, -46], [-9.8, -53.2], [-6, -47.6], [-2.4, -42.2]], [2]);
-        pc(c, eb, L.o); inside(c, eb, () => fillPts(c, [[-14, -48], [-4, -47], [-4, -58], [-14, -58]], L.k));
-        fillPts(c, [[-7, -39], [-8.8, -45.6], [-6, -43.2], [-3.8, -41.2]], L.ear);
-        piv(c, 8, -42, blip(t, 2.7, 0.25) * 0.14, 1, 1, () => {                                                       // переднее ухо поводит
-          const ef = P2('li|earF', [[3, -42.8], [5.6, -50.4], [8.4, -55.4], [10.6, -52.6], [11.4, -47.4], [11.6, -40.8]], [2]);
-          pc(c, ef, L.o); fillPts(c, [[4.4, -42.4], [6.2, -48.6], [8.6, -50.6], [10, -46.8], [10.2, -42]], L.ear);
-          fillPts(c, [[7.6, -54.4], [10.8, -52.6], [13.6, -51], [10.2, -50.6]], L.k);                                   // кончик отогнут: видна чёрная изнанка
-        });
-        const hd = P2('li|head', LI_HEAD, [8]); pcs(c, hd, L.o, L.oD);
-        inside(c, hd, () => fillPts(c, [[-12, -44], [4, -46], [-4, -40.4], [-8.4, -33], [-10, -26], [-12, -26]], L.oL));       // рыжая кромка на свету
-        pc(c, P2('li|cheek', LI_CHEEK, [2]), L.w);
-        // глаза: узкие миндалины с янтарной радужкой; хитровато
-        if (a.blink) { c.fillStyle = L.k; taper(c, [[5.8, -33.4], [8.6, -32.8], [11.6, -34]], 0.7, 0.5); taper(c, [[13.4, -34], [15.4, -33.6], [17.4, -34.6]], 0.6, 0.4); }
-        else {
-          fillPts(c, [[5.8, -33.8], [7.4, -35.4], [10, -35.8], [11.6, -34.6], [10.2, -33.2], [7.6, -32.8]], L.iris);
-          fillPts(c, [[13.4, -34.4], [14.6, -35.6], [16.6, -36], [17.4, -35], [16.2, -34], [14.4, -33.8]], L.iris);
-          c.fillStyle = L.pup; dot(c, 9 + lx * 0.6, -34.3, 0.95); dot(c, 15.6 + lx * 0.4, -34.9, 0.75);
-          fillPts(c, [[5.6, -34], [7.4, -36], [10.2, -36.4], [11.8, -34.8], [10, -35.6], [7.6, -35.4]], L.k);            // верхнее веко-ресница
-          c.fillStyle = '#f2ede4'; dot(c, 8.5, -34.9, 0.32);
-        }
-        fillPts(c, [[19.2, -29.8], [21.6, -29.6], [21.4, -28], [19.6, -28.4]], L.k);
-        c.fillStyle = L.k; taper(c, [[18.4, -26.6], [19.6, -26], [20.8, -26.8]], 0.5, 0.4);
-      });
-    });
-  }
-
-  /* 4. Совёнок-сипуха: крупная голова шире плеч, лицо-сердечко; крылья сложены ступенькой, концы маховых заходят за хвост.
-        Голова с запозданием поворачивается в сторону движения */
-  const SO = { b: '#cf9f55', bD: '#a37636', bDD: '#7d5a2c', sp1: '#8d8ea6', sp2: '#f2ede2', disc: '#f2eee4', rim: '#c08c4b', eye: '#1c1515', beak: '#e6c5ad', chest: '#f1ebdf', dot: '#9a7a5a', pants: '#ede5d6', claw: '#3a2c26' };
-  const SO_BODY = [[-7.6, -0.8], [-11.6, -5.4], [-13.4, -12.4], [-13.6, -19.6], [-12.6, -23.8], [-15, -27.4], [-16.4, -32.6], [-15.8, -38.4], [-13, -42.8], [-8.6, -45.6], [-6.8, -48.8], [-5.2, -46.6], [-3.8, -48.4], [-2.2, -46.6], [2.2, -45.8],
-    [6.6, -47], [12, -45.4], [15.8, -41.4], [17.6, -36], [17, -30.6], [15, -26.8], [12.2, -24.2], [13.8, -20.6], [14.6, -14.6], [13.4, -8.2], [10.2, -2.8], [4.6, -0.2], [-1.8, 0]];
-  const SO_DISC = [[4, -43.2], [1, -45.4], [-3.2, -45.2], [-7.2, -42.4], [-8.8, -37.6], [-8, -32.8], [-5, -29.2], [-0.6, -27], [3.2, -25.4], [7, -27.4], [11.2, -30], [14, -33.6], [14.6, -38.4], [13, -42.6], [9.4, -45.2], [6.2, -45.2]];
-  const SO_WING = [[0, 0], [7, -6.4], [14.6, -10.2], [22, -11], [27.8, -8.2], [28.4, -4.2], [25.8, -2.4], [26.6, 1], [22.8, 1.6], [22.8, 5], [18.8, 4.4], [17.4, 7.6], [13.2, 6], [6.6, 6.8]];
-  const SO_WL = [[-11.4, -26.8], [-15, -24.6], [-17.2, -19.2], [-17.8, -12.6], [-18.6, -7], [-20.4, -1.6], [-17.4, -3.2], [-17, -0.8], [-14, -3.6], [-13.2, -1.4], [-10.4, -4.8], [-8.4, -10], [-8.4, -17.4], [-9.2, -23.6]];
-  function sova(c, a) {
-    const S = SO, t = a.t || 0, f = a.flap || 0, rd = isReady(a), lx = a.lx || 0, fl = f > 0.02;
-    if (fl) {               // взмах: распахивает свои большие крылья с полосами на маховых, один сильный взмах; дальнее крыло меньше
-      const u = 1 - f, ang = -0.25 - 1.0 * Math.sin(Math.PI * u) + 0.55 * u;
-      for (const [s, k, d] of [[1, 0.78, 0.2], [-1, 1, 0]]) {
-        c.save(); c.translate(s * 10.6, -24.6); c.scale(s * k, k); c.rotate(ang + d);
-        const w = P2('so|wing', SO_WING, [4, 6, 8, 10, 12]); pc(c, w, s > 0 ? S.bDD : S.bD);
-        inside(c, w, () => { c.fillStyle = S.b; poly(c, [[-2, -2], [16, -12], [12, -2], [2, 4]]); c.fill(); c.fillStyle = S.bDD; for (const bx of [17, 21.6, 25.6]) { poly(c, [[bx, -12], [bx + 1.6, -12], [bx - 1.2, 8], [bx - 2.8, 8]]); c.fill(); } });
-        c.restore();
-      }
-    }
-    const body = P2('so|body2', SO_BODY, [4, 10, 11, 12, 22]); pcs(c, body, S.b, S.bD);
-    inside(c, body, () => fillPts(c, [[-20, -27], [-12.4, -24], [-11.6, -14], [-9.4, 2], [-20, 2]], S.bD));
-    // дальнее крыло — узкой полоской справа, за грудкой
-    if (!fl) piv(c, 12, -24, rd ? 0 : 0.12, 1, 1, () => {
-      pc(c, P2('so|wr', [[11.4, -23.8], [14.6, -20.8], [15.6, -13.6], [14.2, -6.4], [12.2, -3.2], [11, -7.4], [9.8, -13.6], [10.2, -19.6]], [4]), S.bD);
-      if (!rd) { c.fillStyle = S.bD; taper(c, [[13.6, -6.6], [17.4, -2.6]], 1.3, 0.4); }
-    });
-    pc(c, P2('so|chest', [[-7.4, -3], [-9.4, -11.6], [-9, -19.6], [-5.4, -24.4], [3, -25.6], [10.4, -23], [12.2, -16.6], [11.4, -9], [8.2, -3], [1, -1]]), S.chest);
-    for (const [x, y, r, t] of [[-4, -18, 0.8, 0.2], [2.6, -20.6, 0.55, -0.3], [6.8, -15, 0.9, 0.1], [-6, -11, 0.6, -0.2], [0.4, -12, 0.75, 0.35], [5.4, -7.6, 0.5, 0], [-2.4, -6, 0.7, -0.4], [9.4, -10.4, 0.45, 0.25]])   // крапины-стрелки разного размера
-      fillPts(c, [[x - r * 1.2, y - r * 0.5 + t], [x + t * 0.5, y + r * 0.9], [x + r * 1.1, y - r * 0.6 - t * 0.5], [x + t * 0.3, y - r * 0.05]], S.dot);
-    // ближнее крыло: маховые лежат ступенькой, концы заходят за хвост; без заряда приоткрыто, два пера торчат
-    if (!fl) piv(c, -11, -25, rd ? 0 : -0.14, 1, 1, () => {
-      const w = P2('so|wl', SO_WL, [5, 6, 7, 8, 9, 10]); pcs(c, w, S.bD, S.bDD);
-      inside(c, w, () => {
-        fillPts(c, [[-19, -27], [-11, -27.4], [-9.4, -21], [-13.4, -18.4], [-19, -16.6]], S.b);                                  // кроющие светлее
-        c.fillStyle = S.bDD; for (const y of [-12.6, -8.4, -4.4]) taper(c, [[-20, y + 0.6], [-14, y - 0.2], [-8, y - 1]], 0.75, 0.5);  // поперечные полосы маховых
-      });
-      for (const [x, y, k] of [[-14.4, -22.6, 1], [-12, -19.6, 0], [-16, -16, 1], [-11, -14.8, 1]]) { c.fillStyle = k ? S.sp2 : S.sp1; dot(c, x, y, 0.55); }
-      if (!rd) { c.fillStyle = S.bD; taper(c, [[-16.4, -6.4], [-21.4, -3.6]], 1.4, 0.4); taper(c, [[-17.2, -10.4], [-22.2, -9.2]], 1.2, 0.35); }
-    });
-    // лапки в перьевых штанишках, тёмные коготки
-    for (const x0 of [-6.6, 2.8]) {
-      fillPts(c, [[x0, 0.4], [x0 + 0.4, -4.2], [x0 + 4.2, -4.4], [x0 + 5, 0.4]], S.pants);
-      c.fillStyle = S.claw; for (const k of [0.9, 2.5, 4.1]) taper(c, [[x0 + k, -0.4], [x0 + k + 0.5, 0.5], [x0 + k + 0.1, 1.1]], 0.7, 0.25);
-    }
-    // крапины на голове и спине — неравномерно
-    for (const [x, y, k] of [[-12, -41, 1], [-7.6, -44.6, 0], [-14.4, -34, 1], [12.4, -43.6, 1], [15.4, -37.6, 0], [-12.4, -29.6, 0], [15.2, -29.4, 1]]) { c.fillStyle = k ? S.sp2 : S.sp1; dot(c, x, y, 0.65); }
-    // лицо-сердечко: повёрнуто в сторону движения с запозданием и наклонено
-    piv(c, 3.6, -36, -0.08 + lx * 0.05, 1, 1, () => {
-      c.save(); c.translate(lx * 1.6, 0);
-      const disc = P2('so|disc', SO_DISC, [0, 8]);
-      piv(c, 3.4, -36, 0, 1.1, 1.09, () => pc(c, disc, S.rim));
-      pc(c, disc, S.disc);
-      if (a.blink) { c.fillStyle = S.eye; taper(c, [[-3.8, -36.4], [-1, -35.6], [1.6, -35.4]], 0.7, 0.5); taper(c, [[6.4, -35.6], [9, -36], [11.4, -37]], 0.6, 0.45); }
-      else {
-        fillPts(c, [[-4, -38.4], [-1.8, -38.8], [0.4, -37.4], [1.6, -34.6], [-0.2, -34.4], [-3, -35.6]], S.eye);       // тёмные капли, склонённые к центру
-        fillPts(c, [[11.4, -38.8], [9.4, -39.2], [7.4, -37.8], [6.4, -35], [8.2, -34.8], [10.8, -36]], S.eye);
-        c.fillStyle = '#ecebe6'; dot(c, -2, -37.6, 0.38); dot(c, 9.6, -38, 0.34);
-      }
-      fillPts(c, [[3, -34], [5.2, -34.2], [4.4, -30.6]], S.beak); fillPts(c, [[4.2, -34.1], [5.2, -34.2], [4.4, -30.6]], darker(S.beak, 0.2));
-      c.restore();
-    });
-  }
-
-  /* 5. Сорока: птица вполоборота, длинный клиновидный хвост по диагонали вверх-назад (кончик ступенькой), бирюзовый отлив;
-        хохолок из двух перьев зачёсан назад. Взмах — свои крылья: поднимаются раскрытыми, с белыми маховыми */
-  const SR = { k: '#1e1d25', kD: '#0e0d13', rim: '#3c4060', w: '#ecebe6', wD: '#c7c8d2', sheen: '#3f8f94', sheenT: '#4b64a8', sheenT2: '#3a4f8a', beak: '#191820', eye: '#0f0f14', dot: '#dfe3ff' };
-  const SR_TB = [-6.6, -12.4], SR_TT = [-24.2, -39.8];
-  const srP = (s, w) => { const dx = SR_TT[0] - SR_TB[0], dy = SR_TT[1] - SR_TB[1], L = Math.hypot(dx, dy), ux = dx / L, uy = dy / L; return [SR_TB[0] + ux * L * s - uy * w, SR_TB[1] + uy * L * s + ux * w]; };
-  const SR_TAIL = [srP(0, 3.6), srP(0.35, 2.7), srP(0.7, 3.2), srP(0.86, 3.4), srP(0.9, 2.4), srP(0.95, 2.3), srP(0.97, 1.1), srP(1.02, 0.2), srP(1, -1), srP(0.94, -1.5),
-    srP(0.9, -2.7), srP(0.82, -3.2), srP(0.55, -2.7), srP(0.25, -2.4), srP(0, -3.6)];
-  const SR_BODY = [[-9.8, -9.4], [-6.4, -16.8], [-1.8, -23.2], [2.6, -29.4], [6.4, -35], [10, -39.2], [14, -40.8], [17.4, -39.2], [19.2, -36.2], [18.8, -33], [18.2, -29.2], [17.8, -23.4],
-    [15.8, -16.4], [12, -10.6], [6.6, -6.6], [0.4, -4.8], [-5.2, -5.4], [-8.6, -7.2]];
-  const SR_WING = [[-10.6, -13], [-4.6, -23.4], [3.6, -25.6], [6.8, -20.4], [2.6, -13.2], [-5.6, -9.2]];
-  // раскрытое крыло: от плеча (0, 0) вдоль +x, передний край — по +y (см. wingOpen), «пальцы» маховых на конце
-  const SR_WOPEN = [[0, 0], [5.4, 4.6], [11.6, 7.4], [18, 8.2], [23.2, 6.8], [26, 4.2], [23.8, 2.8], [25.2, 0.8], [22, 0.2], [22.6, -2.2], [19, -1.8], [19, -4.4], [15.2, -3.4], [10.2, -5], [4.4, -4]];
-  function soroka(c, a) {
-    const S = SR, t = a.t || 0, f = a.flap || 0, rd = isReady(a);
-    const u = f > 0 ? 1 - f : 0, beat = f > 0 ? Math.abs(Math.sin(u * TAU)) : 0;           // два быстрых взмаха
-    const twitch = blip(t, 2.6, 0.22, 0.4) * 0.18 + (f > 0 ? Math.sin(Math.PI * u) * 0.3 : 0);  // хвост вздрагивает
-    const open = beat > 0.2, ang = -3.5 + 1.3 * beat;                                         // крыло: от «назад» до «вверх»
-    const wingOpen = (x, y, k, col, white) => {
-      c.save(); c.translate(x, y); c.rotate(ang); c.scale(k, k);
-      const w = P2('sr|wo', SR_WOPEN, [6, 7, 8, 9, 10, 11, 12]); pc(c, w, col);
-      inside(c, w, () => { fillPts(c, [[13.4, 8.4], [20.6, 9], [22.2, 2], [20.6, -3.6], [15.4, -4], [13.6, 1.6]], white); fillPts(c, [[1, -4], [5, 4.4], [11.6, 7.6], [12.4, -5]], S.sheen); });
-      c.restore();
-    };
-    if (open) wingOpen(2, -26, 0.86, S.kD, S.wD);                                               // дальнее крыло — меньше, за телом
-    piv(c, SR_TB[0], SR_TB[1], -twitch, 1, 1, () => {
-      const tl = P2('sr|tail', SR_TAIL, [3, 4, 5, 6, 9, 10]); pc(c, tl, S.k);
-      inside(c, tl, () => {
-        fillPts(c, [srP(0.3, 0), srP(1.2, 0), srP(1.2, 6), srP(0.3, 6)], S.sheenT); fillPts(c, [srP(0.42, 0), srP(1.2, 0), srP(1.2, -6), srP(0.5, -6)], S.sheenT2);
-        c.fillStyle = S.k; taper(c, [srP(0.05, 0), srP(0.6, 0.1), srP(1, 0)], 0.9, 0.3);                                      // стержень пера
-      });
-    });
-    c.fillStyle = S.beak; taper(c, [[-1.6, -5.4], [-2.2, -0.2]], 0.8, 0.6); taper(c, [[2.2, -5.6], [2.8, -0.2]], 0.8, 0.6);      // лапки
-    taper(c, [[-3.6, 0], [-1.8, 0.2], [0.2, -0.2]], 0.6, 0.4); taper(c, [[1, 0.1], [3, 0.2], [4.8, -0.2]], 0.6, 0.4);
-    const body = P2('sr|body', SR_BODY); pcs(c, body, S.k, S.kD);
-    inside(c, body, () => fillPts(c, [[-11.6, -11], [-7, -19.2], [-1.6, -26.2], [2.8, -33.4], [7.2, -39], [12.6, -41.6], [12.4, -39.8], [8, -37.2], [4, -31.8], [-0.2, -24.8], [-5.6, -17.6], [-9.8, -10.2]], S.rim));   // холодная кромка
-    pc(c, P2('sr|belly', [[-7.6, -7.6], [-3, -12.2], [3.6, -14.6], [10, -14.2], [12.4, -12], [8.4, -8], [2.6, -5.6], [-4, -5.2]]), S.w);
-    inside(c, body, () => fillPts(c, [[-8, -6], [2, -7.4], [9.4, -9.6], [9, -4], [-8, -3]], S.wD));
-    const patch = P2('sr|patch', [[-6.2, -21.2], [-0.4, -26], [3, -22.2], [-2.4, -17.6], [-7, -17.4]]);
-    if (open) { pc(c, patch, S.w); wingOpen(-1, -24, 1.22, S.k, S.w); }                         // ближнее крыло раскрыто: белые маховые
-    else piv(c, 0, -23, rd ? 0 : 0.14, 1, 1, () => {                                            // сложено; без заряда приспущено
-      const w = P2('sr|wing', SR_WING); pcs(c, w, S.k, S.kD);
-      inside(c, w, () => fillPts(c, [[-12, -10], [-6, -14.4], [2, -16.8], [8, -16.4], [8, -8], [-12, -8]], S.sheen));
-      pc(c, patch, rd ? S.w : S.wD);
-    });
-    // голова: чуть наклоняется набок
-    piv(c, 13, -35, Math.sin(t * 0.9) * 0.05, 1, 1, () => {
-      c.fillStyle = S.k; taper(c, [[9.4, -38.6], [6.8, -42.2], [3.6, -43.4]], 1.6, 0.35); taper(c, [[11.6, -40], [9.8, -43.6], [7.2, -45.4]], 1.3, 0.3);    // хохолок зачёсан назад
-      fillPts(c, [[18.6, -36.8], [25.2, -34.6], [18.2, -34.2]], S.beak); fillPts(c, [[18.2, -33.6], [24.2, -32.6], [17.6, -32]], S.beak);   // клюв чуть приоткрыт
-      inside(c, body, () => { c.fillStyle = '#2a2933'; dot(c, 18, -37.6, 1); });                                                     // второй глаз виден краешком
-      if (a.blink) { c.fillStyle = S.eye; taper(c, [[12.4, -35.4], [13.8, -35], [15.2, -35.4]], 0.6, 0.5); }
-      else { c.fillStyle = '#34333f'; dot(c, 13.8, -35.6, 1.9); c.fillStyle = S.eye; dot(c, 13.9, -35.6, 1.45); c.fillStyle = S.dot; dot(c, 13.3, -36.2, 0.45); }
-    });
-  }
-
-  /* 6. Заяц-беляк: сидит, длинные уши — одно стоит, второе надломлено и свисает; крупные задние лапы */
-  const ZA = { f: '#eeeef2', fD: '#c2c7dc', fDD: '#a3a9c4', tip: '#1f1e26', earIn: '#e2b7bc', nose: '#d99aa0', eye: '#2a1d18', rim: '#8a5a3a' };
-  const ZA_BODY = [[-12.6, -1.2], [-16.8, -7.6], [-18, -11.4], [-16.8, -12.2], [-17.6, -15.6], [-14.6, -23.6], [-11.6, -26.8], [-10.6, -25.6], [-8.8, -28.4], [-1.6, -30.4], [3, -34.4], [8, -37.4],
-    [13.6, -36.8], [17.8, -32.8], [19.8, -28], [19, -25.4], [15.6, -22.8], [12.8, -18.6], [11.8, -12], [12.6, -4], [10.6, -0.6], [-2, 0]];
-  function zayats(c, a) {
-    const Z = ZA, t = a.t || 0, f = a.flap || 0, rd = isReady(a);
-    const kick = f > 0 ? Math.sin(Math.PI * (1 - f)) : 0;                     // толчок задними лапами
-    const flat = Math.max(kick * 0.95, rd ? 0 : 0.75);                         // уши прижаты
-    const twitch = blip(t, 2.6, 0.2, 0.9) * 0.14;
-    // уши — позади головы
-    piv(c, 5, -36, -flat - twitch, 1, 1, () => {
-      const ue = P2('za|earU', [[3.2, -35.4], [1.2, -41], [-0.4, -47.6], [-0.6, -53.4], [0.8, -57.8], [3.4, -60.2], [5.6, -58.6], [6.8, -54.2], [7.2, -48.6], [6.6, -42.4], [5.8, -37.2]], [5]);
-      pcs(c, ue, Z.f, Z.fDD); inside(c, ue, () => fillPts(c, [[-2, -53], [10, -51.4], [10, -62], [-2, -62]], Z.tip));
-      fillPts(c, [[3.4, -38.6], [2, -44.6], [1.6, -50.4], [2.8, -54.4], [4.6, -55.4], [5.4, -50], [5.2, -43.6], [4.6, -39.6]], Z.earIn);
-    });
-    piv(c, 10, -37, -flat * 0.8, 1, 1, () => {
-      const eb = P2('za|earB', [[8, -36.4], [8.6, -41.8], [10.2, -45.6], [13.2, -46.4], [18.8, -44.6], [22.8, -41.4], [22.2, -39.4], [17.6, -40.8], [13.4, -41.6], [12, -39.8], [12, -36.6]], [2]);
-      pcs(c, eb, Z.fD, Z.fDD); inside(c, eb, () => fillPts(c, [[18.6, -50], [26, -50], [26, -36], [17.4, -38]], Z.tip));
-    });
-    // хвостик: короткий, пушистый, с зазубренным краем
-    pc(c, P2('za|tail2', [[-15.4, -8.2], [-18.4, -9.6], [-21.2, -10.6], [-22.2, -12.8], [-21, -14.2], [-21.8, -16], [-19.6, -16.8], [-17.6, -15.6], [-16, -14.4]], [3, 5]), Z.f);
-    const body = P2('za|body2', ZA_BODY, [2, 3, 6, 7, 14]); pcs(c, body, Z.f, Z.fDD);
-    inside(c, body, () => fillPts(c, [[2, -36], [-3, -31], [-10, -28], [-16, -23], [-20, -26], [-20, -40]], Z.fD));
-    // задняя лапа: бедро и большая ступня; при толчке выпрямляется назад-вниз
-    piv(c, -6, -10, kick * 0.75, 1, 1, () => {
-      pcs(c, P2('za|haunch', [[-17.6, -8], [-16.6, -14.6], [-11.6, -18.8], [-5, -18], [-1.4, -13.4], [-0.6, -8.4], [-2.2, -4.2], [-7, -2.4], [-13.4, -2.6]], [6]), Z.fD, Z.fDD);
-      pc(c, P2('za|foot', [[-14.6, 0.6], [-13.2, -1.6], [-4.2, -2.4], [5.6, -1.4], [7.4, 0.2], [6, 0.8]]), Z.f);
-    });
-    pcs(c, P2('za|paw', [[7.6, -1], [8.8, -7.4], [11.4, -7.6], [12.8, -1.4], [11.6, 0.4], [8.6, 0.4]]), Z.f, Z.fDD);
-    // лицо: глаз на боку головы, второй — краешком; нос шевелится; губа двумя дугами; вибриссы разной длины
-    if (a.blink) { c.fillStyle = Z.eye; taper(c, [[9, -30.2], [11, -29.6], [13, -30.4]], 0.7, 0.5); }
-    else {
-      cut(c, [[8.2, -30.4], [9.8, -32.9], [12.3, -33.3], [13.9, -31.2], [12.7, -28.9], [10.2, -28.6]], [0]); c.fillStyle = Z.rim; c.fill();   // глаз миндалем, уголок назад
-      cut(c, [[9.1, -30.5], [10.4, -32.4], [12.2, -32.6], [13.1, -31], [12.1, -29.4], [10.2, -29.2]], [0]); c.fillStyle = Z.eye; c.fill();
-      c.fillStyle = '#ecebe6'; dot(c, 10.6, -31.6, 0.42);
-    }
-    inside(c, body, () => { c.fillStyle = Z.rim; dot(c, 19.4, -31.8, 1.3); c.fillStyle = Z.eye; dot(c, 19.6, -31.8, 0.9); });
-    const nw = blip(t, 1.9, 0.35, 0.2) * Math.sin(t * 34) * 0.35;
-    fillPts(c, [[18.6, -28.4 + nw], [20.2, -28.6 + nw], [20, -27 + nw], [18.9, -27.2 + nw]], Z.nose);
-    c.fillStyle = Z.fDD; taper(c, [[17.4, -25.2], [18.3, -24.5], [19.2, -25.3]], 0.5, 0.4); taper(c, [[19.2, -25.3], [20, -24.7], [20.7, -25.6]], 0.5, 0.4);
-    c.fillStyle = '#9aa0bc'; for (const [x2, y2] of [[26, -29.6], [27.6, -26.6], [24.4, -23.6]]) taper(c, [[18.6, -26.6], [x2, y2]], 0.35, 0.15);
-    for (const [x2, y2] of [[11, -27.4], [10.2, -24.8], [12.2, -22.6]]) taper(c, [[16.4, -25.8], [x2, y2]], 0.3, 0.12);
-  }
-
-  /* 7. Снегирь: почти шар в пушистых надрезах — самый круглый облик. Чёрная шапочка до глаз и у клюва, красные щёки и грудка,
-        серая спинка, чёрное крыло вдоль бока с белой полосой, чёрный хвостик назад */
-  const SN = { r: '#cc5a5c', rD: '#a2434a', g: '#858aa1', gD: '#646a83', k: '#1e1d26', kD: '#0f0e15', bar: '#e9e9ef', cov: '#5f6378', vent: '#d4d4de', beak: '#24222c', eye: '#0e0d12' };
-  const SN_BODY = [[4.4, -39.2], [7.6, -39.4], [11, -38], [13.4, -35.6], [15.4, -32], [15.8, -27.6], [17.6, -25], [17.4, -22.6], [18.2, -19.6], [17, -14.6], [15.6, -12.6], [14.8, -10.6],
-    [11.2, -5], [6.4, -1.8], [4, -0.8], [3, -1.2], [1.6, -0.4], [-4, -0.8], [-9.2, -2.8], [-13.2, -6], [-14.2, -7.6], [-14.8, -9], [-17, -12.6], [-18.6, -17.4], [-19.2, -20.8], [-18, -21.6],
-    [-18.2, -25.6], [-15.4, -29.4], [-10.8, -31.6], [-6.2, -32.6], [-3.2, -35.6], [0.4, -38.2]];
-  const SN_NOTCH = [6, 10, 15, 20, 25];
-  const SN_WING = [[-4.6, -27], [0.4, -25.4], [1.4, -22], [-2.6, -18.6], [-8.6, -15.6], [-14.6, -13.4], [-20.6, -12.4], [-18.2, -15.2], [-13.6, -19.6], [-9.4, -23.6]];   // вдоль спины назад, к хвосту
-  function snegir(c, a) {
-    const S = SN, t = a.t || 0, f = a.flap || 0, rd = isReady(a);
-    const u = f > 0 ? 1 - f : 0, beat = f > 0 ? Math.abs(Math.sin(u * 3 * Math.PI)) : 0;     // три частых взмаха
-    const puff = rd ? blip(t, 4.1, 0.6, 1.7) * 0.045 : 0.06;                                   // распушается; без заряда — нахохлился
-    c.save(); c.translate(0, -beat * 2.5);
-    piv(c, 0, -19, 0, 1 + puff, 1 + puff * 0.8, () => {
-      // хвостик: чёрный, назад и чуть вверх, кончик с выемкой; основание спрятано под телом
-      pc(c, P2('sn|tail', [[-12.6, -16.4], [-21.4, -21.4], [-25.6, -22.6], [-24.8, -20], [-27.2, -18.4], [-25.2, -16.8], [-20.4, -14.4], [-12.6, -10.2]], [2, 3, 4, 5]), S.k);
-      c.fillStyle = S.beak; taper(c, [[-2.4, -1.6], [-2.8, 1]], 0.9, 0.6); taper(c, [[3, -1.4], [3.4, 1]], 0.9, 0.6);
-      const body = P2('sn|body', SN_BODY, SN_NOTCH); pcs(c, body, S.g, S.gD);
-      inside(c, body, () => {
-        fillPts(c, [[-24, -16], [-14, -13], [-8, -6], [-9, 2], [-24, 2]], S.gD);                                                         // низ спинки в тени
-        fillPts(c, [[6.4, -31], [11.4, -30.2], [15.6, -27.6], [18.4, -22], [20, -14], [20, 2], [-6.4, 2], [-4.8, -2.6], [-0.2, -7.4], [3.4, -13.6], [4.6, -20.4], [5.4, -26.4]], S.r);   // щёки и грудка
-        fillPts(c, [[-6, 2], [0, -4], [6, -8.4], [14, -10.4], [20, -12], [20, 2]], S.rD);
-        fillPts(c, [[-7.6, 2], [-4.6, -2.4], [0.4, -3.4], [4.2, 2]], S.vent);                                                            // светлый подхвостник
-        fillPts(c, [[-4.6, -36.6], [1.6, -41], [8, -41.4], [13.6, -38.4], [17, -33.4], [17.4, -29.6], [19.6, -27], [19.4, -23.6], [16.6, -23.4], [15.2, -27.2], [13, -30.2], [9.8, -31.6], [5.6, -32.8],
-          [0.6, -33.6], [-3.4, -33.8]], S.k);                                                                                             // шапочка до глаз и чёрное у клюва
-      });
-      // крыло вдоль бока назад-вниз, белая полоса поперёк; при взмахе поднимается и раскрывается; без заряда опущено, полосы не видно
-      piv(c, -2, -24, rd ? beat * 1.3 : -0.12, 1 + beat * 0.22, 1, () => {                          // в покое крыло лежит вдоль спины, кончиком к хвосту
-        const w = P2('sn|wing2', SN_WING, [6]); pcs(c, w, S.k, S.kD);
-        if (rd) inside(c, w, () => {                                                                                                   // светлая полоса поперёк крыла: нижний край — фестоны кончиков перьев
-          poly(c, [[-3.2, -25.6], [1, -24.2], [0.4, -22.2], [-1.6, -22.8], [-3.4, -21.2], [-5.4, -21.4], [-7.4, -19.4], [-9.4, -19.4], [-11.8, -17.4], [-11.4, -19.6], [-7.6, -22.8]]); c.fillStyle = '#d3d4de'; c.fill();   // полоса вдоль кроющих, низ — фестонами
-        });
-        fillPts(c, [[-4.6, -27], [0.4, -25.4], [0.8, -24.4], [-3, -25], [-6.6, -24.8]], S.cov);                                           // серые кроющие у плеча
-      });
-      fillPts(c, [[15.8, -31.4], [21.2, -29.2], [20.8, -27.8], [15.8, -26.2]], S.beak);       // клюв: короткий толстый конус
-      fillPts(c, [[15.8, -28.8], [21, -28.4], [20.8, -27.8], [15.8, -26.2]], '#3a3744');
-      c.fillStyle = S.eye; dot(c, 11.6, -33, 1.3);                                           // глаз утоплен в чёрное — виден по точке
-      if (!a.blink) { c.fillStyle = '#eeeef2'; dot(c, 11.2, -33.5, 0.48); }
-    });
-    c.restore();
-  }
-
-  /* 8. Шмель: пушистый овал в поперечных полосах, смешно маленькие крылышки на спине, шесть коротких лапок */
-  const SM = { y: '#e3b93e', yD: '#b38e2a', k: '#211d20', w: '#ece6d8', wing: '#dfe6ff', vein: '#2f2c3c', eye: '#141217', rim: '#3a3544', hl: '#8f8aa4' };
-  const SM_BODY = [[-19.6, -10.4], [-20.8, -14.4], [-19.4, -15.6], [-20.2, -19.6], [-18, -22.6], [-17.8, -25.4], [-14.6, -27.6], [-12.2, -30.4], [-9.4, -30.8], [-6.2, -33.2], [-3.4, -32.6],
-    [0.2, -34.4], [2.6, -33.2], [6.2, -33.6], [8.2, -31.4], [11.4, -30.4], [12.2, -27.6], [14.2, -25], [13, -21.8], [13.6, -18.4], [11, -15.6], [10.6, -12.2], [7.4, -10.4], [5.8, -7.4],
-    [2.2, -6.6], [-0.6, -4.2], [-4, -4.8], [-7.2, -3], [-10, -4.4], [-13.4, -3.8], [-15.4, -6.4], [-18.4, -7.2]];
-  // полосы поперёк тела: от головы — жёлтая, чёрная, жёлтая, белый кончик; границы чуть неровные
-  const SM_BAND = (s0, s1, w0, w1) => { const d = [0.913, -0.408], n = [0.408, 0.913], o = [-3, -19];
-    const P = (s, k, w) => [o[0] + d[0] * (s + w) + n[0] * k, o[1] + d[1] * (s + w) + n[1] * k];
-    return [P(s0, -30, 0), P(s0, 0, w0), P(s0, 30, 0), P(s1, 30, 0), P(s1, 0, w1), P(s1, -30, 0)]; };
-  function shmel(c, a) {
-    const S = SM, t = a.t || 0, f = a.flap || 0, rd = isReady(a), A0 = c.globalAlpha;
-    const u = f > 0 ? 1 - f : 0, jerk = f > 0 ? Math.sin(Math.PI * u) * 2.2 : 0;
-    const droop = rd ? 0 : 1, tremble = blip(t, 3.3, 0.35, 0.6) * Math.sin(t * 70) * 0.12;
-    c.save(); c.translate(jerk * 0.4, -jerk);
-    // лапки
-    c.fillStyle = '#16131a'; for (const [x0, y0, x1, y1] of [[-8.2, -4.4, -9.6, 0], [-2.6, -4.6, -3, 0.2], [3, -6.6, 4.2, -0.6]]) taper(c, [[x0, y0], [(x0 + x1) / 2 - 1, (y0 + y1) / 2], [x1, y1]], 1.2, 0.5);
-    c.fillStyle = S.k; for (const [x0, y0, x1, y1] of [[-11, -4.2, -12.6, 0.2], [-5.4, -3.6, -6, 0.4], [0.2, -5.4, 0.8, 0.2]]) taper(c, [[x0, y0], [(x0 + x1) / 2 - 1.2, (y0 + y1) / 2], [x1, y1]], 1.4, 0.55);
-    const body = P2('sm|body', SM_BODY, [1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31]); pcs(c, body, S.y, S.yD);
-    inside(c, body, () => {
-      for (const [b, col] of [[SM_BAND(-2.6, 4.4, 2.4, 1.6), S.k], [SM_BAND(-30, -11.6, 0, 2.6), S.w], [SM_BAND(-11.6, -9.6, 1.8, 1.4), S.k]]) { cut(c, b, [0, 2, 3, 5]); c.fillStyle = col; c.fill(); }   // полосы изогнуты по телу
-      fillPts(c, [[-24, -2], [-10, -8], [2, -9.4], [16, -14], [16, 2], [-24, 2]], 'rgba(60,40,10,.22)');                                   // низ брюшка в тени
-    });
-    // голова: чёрная мордочка, крупные фасеточные глаза с одной светлой чёрточкой, усики с изгибом
-    const hd = P2('sm|head', [[10.6, -30.2], [14.2, -33.4], [18.6, -33.2], [21.6, -29.4], [21.8, -24.8], [19.6, -21.4], [15.6, -20.6], [12.2, -23]]);
-    pcs(c, hd, S.k, '#0d0b0e');
-    const al = droop * 0.5 + Math.sin(t * 2.1) * 0.06;
-    c.fillStyle = S.k;
-    piv(c, 15.6, -32.6, al, 1, 1, () => taper(c, [[15.6, -32.6], [16.4, -38.2], [19.2, -42.4], [23, -43.2]], 0.95, 0.4));
-    piv(c, 18.4, -33, al * 1.2 + Math.sin(t * 2.1 + 1.3) * 0.05, 1, 1, () => taper(c, [[18.4, -33], [20.4, -37.6], [24.2, -39.4], [25.8, -37.4], [24.6, -35.6]], 0.9, 0.35));
-    if (a.blink) { c.fillStyle = S.rim; taper(c, [[14.2, -27.6], [16.4, -27], [18.6, -27.8]], 0.9, 0.6); }
-    else {
-      cut(c, [[14.2, -30.8], [16.6, -32.6], [18.9, -30.6], [18.6, -26.6], [16.4, -25.1], [14.4, -27]]); c.fillStyle = S.rim; c.fill();
-      cut(c, [[14.8, -30.4], [16.6, -31.8], [18.3, -30.2], [18, -27], [16.4, -25.8], [15, -27.4]]); c.fillStyle = S.eye; c.fill();
-      fillPts(c, [[19.8, -31], [21.2, -29.4], [21, -26], [19.6, -26.8]], S.rim);
-      c.fillStyle = S.hl; taper(c, [[15.6, -30], [16.8, -30.8]], 0.55, 0.4);
-    }
-    // крылышки: смешно маленькие; при взмахе «размываются» в три положения; без заряда опущены
-    const wings = (ang, al2) => { c.globalAlpha = A0 * al2;
-      piv(c, -1, -32, ang, 1, 1, () => { const w = P2('sm|w1', [[-1, -32], [-5.6, -38.6], [-5.2, -43.6], [-1.4, -44.4], [2, -40.4], [1.6, -34.4]]); pc(c, w, S.wing); });
-      piv(c, 1.6, -33, ang * 0.8, 1, 1, () => { const w = P2('sm|w2', [[1.6, -33], [1.2, -40.8], [4.4, -46], [8, -45.6], [9.2, -41], [6, -34.4]]); pc(c, w, S.wing); });
-      c.globalAlpha = A0 * Math.min(1, al2 * 1.6); c.fillStyle = S.vein;
-      piv(c, -1, -32, ang, 1, 1, () => taper(c, [[-1, -32.6], [-3.2, -39], [-3, -42.6]], 0.4, 0.2));
-      piv(c, 1.6, -33, ang * 0.8, 1, 1, () => taper(c, [[2, -33.6], [3.8, -40], [5.8, -44.2]], 0.4, 0.2));
-      c.globalAlpha = A0; };
-    if (f > 0.02) { wings(-0.5, 0.2); wings(0.05, 0.22); wings(0.55, 0.2); }
-    else wings(droop * 0.6 + tremble, 0.45);
-    c.restore();
-  }
-
-  /* 9. Белка-летяга: маленькое тело, крупная круглая голова, огромные тёмные глаза; плоский хвост-перо лежит назад и загибается кончиком;
-        перепонка вдоль бока собрана складками. Взмах — раскрывает перепонку-плащ: широкий парус, лапки по углам */
-  const LE = { b: '#9aa0b4', bD: '#727990', bDD: '#565c73', belly: '#eef0f5', ring: '#2b2a37', eye: '#14121b', tail: '#8b91a7', tailE: '#b6bbcc', nose: '#d6a3a6', earIn: '#b9a6ae', fold: '#5d6378', paw: '#c9cdda' };
-  // хвост: широкий и плоский, лежит назад низко, кончик загнут вверх; по краю редкие надрезы «ножницами»
-  const LE_TAIL = [[-6, -9.6], [-11, -10], [-15.4, -11.6], [-16.4, -10.6], [-19.6, -12.6], [-22.6, -15.2], [-23.6, -14.4], [-25.2, -18], [-25.8, -21.8], [-27.8, -24.6], [-30.6, -23.6], [-32, -19.6],
-    [-31.8, -14.4], [-30.6, -10.4], [-29.2, -10.8], [-26.6, -6.6], [-22.4, -3.6], [-21.2, -4.4], [-17, -1.8], [-11.6, -1], [-6, -1.4]];
-  const LE_TAIL_CUT = [2, 3, 5, 6, 13, 14, 16, 17];
-  const LE_BODY = [[-9.6, -0.6], [-12.2, -6.4], [-11.6, -13.4], [-8.4, -19], [-2.4, -21.6], [4.4, -21.6], [9.6, -18], [11.4, -11.6], [10.6, -5], [7.6, -0.6], [-1, 0.2]];
-  const LE_HEAD = [[-10, -28], [-9.4, -35], [-5.2, -40.6], [1.4, -42.8], [8.4, -41.4], [13.6, -37], [16.2, -31.4], [17.8, -27.4], [16.4, -24.4], [11.6, -21.6], [4.4, -20.4], [-3.4, -21.2], [-8.2, -23.4]];
-  // парус: запястья и лодыжки по углам, края между ними вогнуты; дальняя сторона (справа) короче
-  const LE_SAIL = [[-27.4, -33.6], [-17, -31.4], [-6.6, -31.2], [0, -32.2], [7, -32.4], [16, -33.6], [23.4, -35.6], [20.6, -28], [19.4, -21], [20.8, -10.4], [13, -10.6], [5, -8.8],
-    [-5, -8.8], [-14, -10.4], [-24.4, -10.8], [-22.4, -20], [-23.6, -27.4]];
-  const leEye = (cx, cy, r) => { const pts = []; for (let i = 0; i < 10; i++) { const an = i / 10 * TAU, q = r * (1 + Math.sin(i * 1.9) * 0.05); pts.push([cx + Math.cos(an) * q, cy + Math.sin(an) * q * 0.96]); } return pts; };
-  function leFace(c, a, hd, lx, t, rd) {        // голова в 3/4: уши настороже (без заряда опущены), огромные глаза, розоватый нос, вибриссы
-    const L = LE, ed = rd ? 0 : 0.55;
-    piv(c, -6, -38, -ed, 1, 1, () => { pc(c, P2('le|ear1', [[-6.4, -34.6], [-10.4, -39.6], [-11.4, -44.6], [-8.4, -46.8], [-4.6, -44.8], [-2.2, -39.6]]), L.b);
-      fillPts(c, [[-7.2, -38.6], [-9.4, -42.6], [-8.4, -45], [-5.6, -43.2], [-4.4, -40]], L.earIn); });
-    piv(c, 4, -42, -ed * 0.8, 1, 1, () => { pc(c, P2('le|ear2', [[1.6, -38.6], [0.6, -45.6], [2.8, -49.4], [6.6, -49], [8.4, -44.6], [6.6, -38.6]]), L.b);
-      fillPts(c, [[2.6, -42.4], [2.4, -46.2], [4.2, -47.8], [6.2, -46.4], [6.4, -42.6]], L.earIn); });
-    pcs(c, hd, L.b, L.bD);
-    fillPts(c, [[6, -27.2], [12, -26], [16.6, -25.4], [14.2, -22.8], [8.6, -21.4], [3, -22]], L.belly);
-    if (a.blink) { c.fillStyle = L.ring; taper(c, [[0.6, -31.8], [4.6, -30], [8.6, -31.6]], 1.1, 0.7); inside(c, hd, () => taper(c, [[10.6, -32.2], [13.2, -31], [15.4, -32]], 0.9, 0.6)); }
-    else {
-      cut(c, leEye(4.6, -31.4, 4.5)); c.fillStyle = L.ring; c.fill();
-      inside(c, hd, () => { cut(c, leEye(13, -32, 3.2)); c.fill(); });
-      cut(c, leEye(4.8 + lx * 0.4, -31.4, 3.9)); c.fillStyle = L.eye; c.fill(); inside(c, hd, () => { cut(c, leEye(13.2, -32, 2.7)); c.fill(); });
-      c.fillStyle = '#eeeef2'; dot(c, 3.4, -33, 0.62); dot(c, 12.4, -33.2, 0.45);
-    }
-    fillPts(c, [[16.6, -28.6], [18.2, -28.2], [17.8, -26.8], [16.6, -27.2]], L.nose);
-    c.fillStyle = '#c3c7d6'; const wh = Math.sin(t * 2.4) * 0.6;
-    for (const [x2, y2] of [[24.4, -29.6 + wh], [25.2, -26.6 + wh], [23.4, -23.8 + wh]]) taper(c, [[16.8, -26.6], [x2, y2]], 0.3, 0.12);
-  }
-  function letyaga(c, a) {
-    const L = LE, t = a.t || 0, f = a.flap || 0, rd = isReady(a), lx = a.lx || 0;
-    const open = f > 0 ? Math.sin(Math.PI * Math.min(1, (1 - f) * 1.15)) : 0;                 // раскрыла плащ-перепонку и планирует
-    const hd = P2('le|head', LE_HEAD);
-    if (open > 0.15) {
-      piv(c, 0, -22, -0.06, 0.35 + open * 0.65, 1, () => {
-        // хвост-перо вытянут вниз, за парусом
-        c.fillStyle = L.tail; taper(c, [[-0.6, -12], [-0.4, -4], [0.8, 2.6]], 6.4, 3.2);
-        c.fillStyle = L.tailE; taper(c, [[-0.6, -11], [-0.4, -4], [0.8, 2]], 2, 0.8);
-        const s = P2('le|sail', LE_SAIL, [0, 6, 9, 14]); pcs(c, s, L.b, L.bDD);
-        inside(c, s, () => {
-          fillPts(c, [[-30, -12.6], [-14, -12.6], [-5, -10.6], [5, -10.6], [13, -12.4], [24, -12.2], [24, 0], [-30, 0]], L.bD);                   // задний край в тени
-          c.fillStyle = L.tailE; for (const [x0, y0, x1, y1] of [[-6, -28, -22, -31], [-6, -22, -21, -21.6], [-5.6, -15, -21.6, -12.6], [6, -28, 19, -32.2], [6, -21, 18, -20.6], [5.4, -14, 17.8, -11.6]])
-            taper(c, [[x0, y0], [x1, y1]], 0.5, 0.2);                                                                                         // натянутая кожа
-        });
-        pc(c, P2('le|gbody', [[-6.4, -31.4], [6, -32], [7.6, -22], [5.6, -11.4], [0, -8.6], [-5.8, -11], [-7.8, -22]]), L.belly);
-        for (const [x, y, k] of [[-27.4, -33.6, 0], [23.4, -35.6, 1], [20.8, -10.4, 2], [-24.4, -10.8, 3]]) fillPts(c, [[x - 1.6, y - 0.4 + k * 0.2], [x + 0.4, y - 1.5], [x + 1.6, y + 0.3], [x - 0.2, y + 1.4 - k * 0.2]], L.paw);   // лапки по углам паруса
-      });
-      leFace(c, { blink: a.blink }, hd, lx, t, true);
-      return;
-    }
-    piv(c, -6.4, -5, Math.sin(t * 1.2) * 0.05, 1, 1, () => {                                     // хвост-перо шевелится
-      const tl = P2('le|tail', LE_TAIL, LE_TAIL_CUT); pcs(c, tl, L.tail, L.bD);
-      inside(c, tl, () => { fillPts(c, [[-40, -40], [-28.4, -21], [-26, -16], [-21, -11.4], [-14, -9.4], [-6, -8.8], [-6, -40]], L.tailE); c.fillStyle = L.bD; taper(c, [[-6, -5.2], [-14, -5.6], [-21.6, -8], [-26.4, -12.6], [-28.6, -18.6]], 1, 0.5); });
-    });
-    const body = P2('le|body', LE_BODY); pcs(c, body, L.b, L.bD);
-    pc(c, P2('le|belly', [[-2.6, -18.6], [3.6, -19.6], [8, -15.4], [9, -8.4], [6.8, -2.8], [1, -1.4], [-2.4, -5], [-3.6, -12]]), L.belly);
-    // перепонка вдоль бока, собрана складками: от передней лапки к задней, низ фестонами
-    pc(c, P2('le|fold', [[5.6, -12.2], [1.4, -10.4], [-3.4, -9.6], [-8.4, -8.8], [-11.6, -6.4], [-11.8, -3.6], [-9.8, -2.8], [-8.6, -4.6], [-6.2, -3.2], [-4.6, -5.2], [-1.8, -4.2], [0.2, -6.6], [3.4, -6.2], [5.2, -8.6]],
-      [5, 6, 7, 8, 9, 10, 11, 12]), L.b);
-    c.fillStyle = L.bD; taper(c, [[-1.6, -9.4], [-5, -6.4], [-6, -3.6]], 0.55, 0.25); taper(c, [[2.6, -10], [-0.4, -7.2], [-1.6, -4.6]], 0.5, 0.2); taper(c, [[-6.4, -8.6], [-9, -5.6]], 0.45, 0.2);
-    fillPts(c, [[2.4, 0.4], [2.8, -3.2], [6.6, -3.6], [7.8, 0.4]], L.bD); fillPts(c, [[-7.8, 0.4], [-7.2, -2.6], [-3.2, -2.8], [-2.4, 0.4]], L.bD);
-    fillPts(c, [[5.4, -13.6], [8.4, -14], [9.6, -11.4], [7.2, -10.6]], L.paw);                                                // передняя лапка у груди
-    piv(c, 3, -30, -0.05 + lx * 0.04, 1, 1, () => leFace(c, a, hd, lx, t, rd));
-  }
-
-  /* 10. Летучая мышка: маленькое пушистое тело в крыльях-плаще, большие уши чуть разной формы, мордочка с одним клычком */
-  const MY = { f: '#5b4740', fD: '#3e302b', muz: '#c9a787', earIn: '#b67d74', mem: '#3a2f37', memE: '#5a4a56', rim: '#6f6a8c', eye: '#0f0c0c' };
-  const MY_WING = [[0, 0], [6, -8], [14, -12.6], [22, -13.4], [29, -10.4], [33.6, -4], [30.6, -2.4], [28, 1.4], [23.8, -0.6], [20.4, 4.4], [16.6, 1.2], [12.4, 5.6], [8.6, 2.6], [3.4, 4.6]];
-  function mysh(c, a) {
-    const M = MY, t = a.t || 0, f = a.flap || 0, rd = isReady(a);
-    const u = f > 0 ? 1 - f : 0, open = f > 0 ? Math.min(1, Math.sin(Math.PI * u) * 1.6) : 0;
-    if (open > 0.02) {           // распахнула крылья (размах около 70), два взмаха
-      const ang = -0.55 * Math.sin(u * 2 * TAU) * open;
-      for (const s of [1, -1]) { const k = s > 0 ? 0.8 : 1; c.save(); c.translate(s * 5, -24); c.scale(s * open * k, k); c.rotate(ang + (s > 0 ? 0.12 : 0));
-        const w = P2('my|wing', MY_WING, [5, 7, 9, 11, 13]); pc(c, w, M.mem);
-        c.fillStyle = M.memE; for (const [x2, y2] of [[33.6, -4], [28, 1.4], [20.4, 4.4], [12.4, 5.6]]) taper(c, [[1, -1], [x2 * 0.6, y2 * 0.6 - 6], [x2, y2]], 1, 0.4);
-        c.restore(); }
-    }
-    // уши поворачиваются, как локаторы; заднее наклонено
-    piv(c, -5, -39, -0.22 + Math.sin(t * 1.7) * 0.12, 1, 1, () => { const e = P2('my|earB', [[-6, -38], [-12.2, -47.6], [-13.4, -56.4], [-8, -52.6], [-2.4, -43]], [2]); pcs(c, e, M.f, M.fD); fillPts(c, [[-6.4, -41], [-10.6, -48], [-11, -52.4], [-7.4, -49], [-4.4, -43.4]], M.earIn); });
-    piv(c, 7, -42, Math.sin(t * 1.7 + 1.9) * 0.12, 1, 1, () => { const e = P2('my|earF', [[3.4, -42.6], [5.2, -51.6], [9.4, -58.2], [12.4, -51.4], [11.6, -41.6]], [2]); pcs(c, e, M.f, M.fD); fillPts(c, [[5.4, -43], [6.6, -50.4], [9.2, -54.6], [10.6, -50.4], [10.2, -43.2]], M.earIn); });
-    const hd = P2('my|head', [[-7.6, -31.6], [-8.2, -37], [-4.6, -41.6], [1.6, -43.2], [8, -41.6], [12.4, -37.4], [14.6, -33.2], [15.4, -29.6], [12.6, -27], [6.4, -26.2], [-1.6, -26.8], [-6, -28.6]]);
-    pc(c, hd, M.f);
-    inside(c, hd, () => fillPts(c, [[-10, -27], [-9.8, -35], [-7.4, -39.8], [-6.4, -38.8], [-8.2, -34.8], [-8.6, -27]], M.rim));      // холодная кромка — узкой полоской слева
-    pc(c, P2('my|chest', [[-2.2, -27], [4.6, -27.2], [5.4, -18], [3.8, -8.4], [0.6, -4], [-1.8, -9.6], [-3.4, -19]]), M.muz);
-    // крылья-плащ: запахнуты неровно; видны «пальцы», фестончатый край, сверху коготок; без заряда висят
-    const hang = rd ? 0 : 0.16;
-    piv(c, -4, -26, -hang, 1, 1, () => {
-      const cn = P2('my|cloakN', [[-3, -28.4], [-8.8, -27.4], [-12.6, -22], [-14, -13.6], [-13.4, -5.6], [-11.6, -2.6], [-9.6, -4.8], [-7.6, -1.6], [-5.4, -4.2], [-3, -0.8], [-0.8, -3.6], [1.4, -7.8], [1.8, -16], [0.8, -23.4]], [5, 6, 7, 8, 9, 10]);
-      pcs(c, cn, M.mem, '#221b22');
-      inside(c, cn, () => fillPts(c, [[-16, -28], [-9.4, -28.4], [-13.2, -22], [-14.6, -12], [-16, -6]], M.rim));
-      c.fillStyle = M.memE; for (const [x2, y2] of [[-11.6, -2.6], [-7.6, -1.6], [-3, -0.8]]) taper(c, [[-6.4, -25.6], [x2 * 0.8 - 1, y2 - 9], [x2, y2]], 0.7, 0.3);
-      c.fillStyle = M.muz; taper(c, [[-7.2, -27.6], [-8.4, -30.2], [-7, -31]], 0.8, 0.3);                                    // коготок
-    });
-    piv(c, 6, -26, hang, 1, 1, () => {
-      const cf = P2('my|cloakF', [[4.6, -27.6], [10.4, -26.4], [12.8, -20.6], [12.6, -11.4], [10.8, -4.6], [8.8, -2.8], [7.4, -5.4], [5.2, -3.2], [3.6, -6.6], [3.2, -14.6]], [5, 6, 7, 8]);
-      pc(c, cf, '#33282f'); c.fillStyle = M.memE; taper(c, [[8.6, -25.2], [10.2, -14], [8.8, -2.8]], 0.6, 0.3);
-    });
-    c.fillStyle = M.fD; taper(c, [[-1.6, -1.4], [-1.4, 0.6]], 0.9, 0.5); taper(c, [[2.2, -1.6], [2.6, 0.6]], 0.9, 0.5);
-    // мордочка: светлая, курносый нос, глазки-бусинки с точкой, рот с одним клычком
-    pc(c, P2('my|muz', [[6.2, -33.6], [11, -35.6], [15.4, -33.4], [16.6, -29.6], [14.4, -27], [9.4, -26.6], [5.8, -29]]), M.muz);
-    c.fillStyle = M.eye;
-    if (a.blink) { taper(c, [[7, -35.6], [8.2, -35.2], [9.4, -35.6]], 0.5, 0.4); taper(c, [[12.4, -35.8], [13.2, -35.5], [14, -35.8]], 0.45, 0.35); }
-    else { dot(c, 8.2, -35.8, 1.25); dot(c, 13.2, -36, 1); c.fillStyle = '#ecebe6'; dot(c, 7.8, -36.3, 0.36); }
-    fillPts(c, [[14.6, -32.2], [16.6, -32.8], [16.6, -31], [15, -30.8]], M.fD);
-    c.fillStyle = M.fD; taper(c, [[11.2, -29.2], [12.8, -28.6], [14.4, -29.1]], 0.5, 0.4);
-    fillPts(c, [[12.3, -28.9], [13.2, -28.8], [12.9, -27.3]], '#ecebe6');
-  }
-
-  /* 11. Рысь: рысёнок вполоборота; крупные уши с чёрными кисточками, зазубренные бакенбарды, короткий хвост, большие лапы */
-  const RY = { f: '#b9a48f', fD: '#8e7b69', sp: '#5d4b3f', w: '#efe9de', wD: '#cfc6b8', k: '#1f1a19', iris: '#c9a54a', pup: '#1a1414', nose: '#b88275' };
-  function rys(c, a) {
-    const R = RY, t = a.t || 0, f = a.flap || 0, rd = isReady(a), lx = a.lx || 0;
-    const leap = f > 0 ? Math.sin(Math.PI * (1 - f)) : 0;                                    // прыжок-распрыжка: тянется, лапы вперёд
-    const flatE = rd ? 0 : 0.6, tw = blip(t, 2.2, 0.28, 0.5) * 0.35;
-    piv(c, 0, -14, -leap * 0.22, 1 - leap * 0.06, 1 + leap * 0.12, () => {
-      piv(c, -12, -6, -tw - leap * 0.4, 1, 1, () => { const tl = P2('ry|tail', [[-12.6, -5.2], [-18.4, -9.4], [-22.2, -15.6], [-21.4, -18.6], [-18.4, -16.6], [-15.4, -11.8], [-11.2, -9.4]], [2, 3]);
-        pc(c, tl, R.f); inside(c, tl, () => fillPts(c, [[-26, -12], [-18.6, -12.6], [-16, -17], [-16, -22], [-26, -22]], R.k)); });
-      const body = P2('ry|body', [[-11.6, -0.6], [-14.6, -6.8], [-14.4, -14.4], [-11.2, -20.4], [-5.2, -23.6], [2.2, -24], [8.4, -21.2], [11.6, -15], [12.2, -8.6], [10.4, -2.8], [6, -0.4], [-3, 0]]);
-      pcs(c, body, R.f, R.fD);
-      inside(c, body, () => { fillPts(c, [[-18, -10], [-10, -12], [-6, -4], [-8, 2], [-18, 2]], R.fD);
-        for (const s of [[[-10, -16], [-7.6, -17.2], [-6.8, -15], [-9, -14.2]], [[-5, -20], [-2.6, -21], [-2, -19.4], [-4.4, -18.8]], [[-12.4, -8.4], [-10.6, -9.6], [-9.6, -7.4], [-11.4, -6.8]], [[2.6, -17.6], [4.4, -18.4], [4.2, -16.2]], [[-6.4, -10.4], [-4.8, -11.2], [-4.2, -9]]]) fillPts(c, s, R.sp); });
-      piv(c, 8, -6, -leap * 0.7, 1, 1, () => {                                                // большие передние лапы
-        fillPts(c, [[9.6, 0.6], [10.4, -4.8], [13.8, -5.8], [16, -2.6], [15.4, 0.6]], R.fD);
-        pcs(c, P2('ry|paw', [[3.6, 0.6], [4, -6.6], [7.8, -8.2], [10.8, -6.8], [12.4, -2], [11.6, 0.6]]), R.f, R.fD);
-        c.fillStyle = R.fD; taper(c, [[8, 0.2], [8.4, -1.8]], 0.4, 0.3); taper(c, [[10.2, 0.2], [10.6, -1.6]], 0.4, 0.3);
-      });
-      // голова: уши с кисточками; без заряда прижаты
-      piv(c, 3, -31, -0.05 + lx * 0.04, 1, 1, () => {
-        piv(c, -5, -40, -flatE - leap * 0.2, 1, 1, () => { const e = P2('ry|earB', [[-7.4, -37], [-9.4, -45.2], [-8.6, -50.8], [-4.4, -46.6], [-1.6, -41.4]], [2]); pc(c, e, R.k);
-          fillPts(c, [[-6.4, -39], [-7.8, -45], [-7.4, -48], [-4.6, -45], [-3, -41.6]], R.w);
-          c.fillStyle = R.k; taper(c, [[-8.6, -50.4], [-9.4, -54.4], [-10, -57.6]], 1.4, 0.3); taper(c, [[-8.2, -49.8], [-7.6, -53.6]], 0.7, 0.2); });
-        piv(c, 6.6, -42, -flatE * 0.8 + leap * 0.25, 1, 1, () => { const e = P2('ry|earF', [[2.8, -42.2], [3.8, -49.4], [6.4, -54.2], [9.6, -49], [10.6, -40.4]], [2]); pc(c, e, R.k);
-          fillPts(c, [[4.2, -42.2], [5, -48.4], [6.4, -51.2], [8.4, -48], [9.2, -41.6]], R.w);
-          c.fillStyle = R.k; taper(c, [[6.4, -53.6], [6, -57.4], [5.4, -60.4]], 1.3, 0.3); taper(c, [[6.8, -53.2], [7.8, -57]], 0.6, 0.2); });
-        const hd = P2('ry|head', [[-9.4, -29.4], [-8.8, -35.6], [-5, -40.4], [1.6, -42.4], [8.4, -41.2], [13.4, -37], [15.8, -32.4], [17.6, -29.4], [16.8, -27.2], [12.6, -24.6], [6.6, -23.4], [-1, -23.8], [-6.6, -25.6]]);
-        pcs(c, hd, R.f, R.fD);
-        // бакенбарды: зазубренные и разные
-        pcs(c, P2('ry|sb1', [[-8.6, -32], [-11.4, -30.6], [-13.4, -27.8], [-11.6, -27.4], [-13.6, -24.6], [-10.6, -24.8], [-11.2, -21.8], [-7.6, -23], [-4.8, -22.4], [-6.4, -27.4]], [2, 3, 4, 5, 6, 7]), R.w, R.fD);
-        pc(c, P2('ry|sb2', [[14.6, -27.8], [17.6, -26.6], [16.6, -24.8], [18.6, -23.4], [15.2, -22.8], [15.8, -20.8], [12, -22.2], [11.4, -24.8]], [1, 2, 3, 4, 5]), R.w);
-        pc(c, P2('ry|throat', [[1.4, -27.6], [6.4, -26.4], [10.6, -28.4], [13.8, -27.6], [12.4, -24.4], [8.8, -22], [3.4, -21.6], [-0.8, -23.2]]), R.w);
-        for (const s of [[[-1.6, -40], [0.2, -40.6], [0.6, -37.4], [-0.8, -37.2]], [[2.6, -41], [3.8, -41.2], [3.6, -38.4], [2.6, -38.6]], [[-5.4, -37.4], [-3.8, -38.6], [-3.4, -36.2]]]) fillPts(c, s, R.sp);
-        // глаза: янтарные, зрачки круглые; под глазами светлые полосы
-        c.fillStyle = R.w; taper(c, [[4.4, -30.2], [7, -29.6], [9.4, -30.6]], 0.8, 0.4); taper(c, [[12.2, -30.8], [13.8, -30.4], [15.2, -31.2]], 0.6, 0.3);
-        if (a.blink) { c.fillStyle = R.k; taper(c, [[4.2, -32.4], [6.6, -31.8], [9.2, -32.6]], 0.7, 0.5); taper(c, [[12, -32.8], [13.6, -32.4], [15.2, -33.2]], 0.6, 0.4); }
-        else {
-          c.fillStyle = R.iris; cut(c, [[4.4, -32.6], [5, -34.6], [7, -35.6], [9, -34.6], [9.4, -32.6], [8.2, -31], [5.8, -30.9]]); c.fill();
-          cut(c, [[12.2, -33.2], [12.7, -35], [14.4, -35.8], [15.9, -34.6], [15.8, -32.8], [14.6, -31.5], [12.9, -31.7]]); c.fill();
-          c.fillStyle = R.pup; dot(c, 6.9 + lx * 0.5, -33.2, 1.35); dot(c, 14.2 + lx * 0.4, -33.6, 1.05);
-          c.fillStyle = '#f2ede4'; dot(c, 6.3, -34, 0.34);
-          c.fillStyle = R.k; taper(c, [[4.4, -31.8], [6.6, -30.5], [9, -31.1], [9.8, -32.4]], 0.55, 0.25);                       // тёмная кромка снизу, а не веко сверху
-        }
-        fillPts(c, [[15.6, -29.6], [17.8, -29.8], [17.2, -28], [16, -28.2]], R.nose);
-        c.fillStyle = R.k; taper(c, [[15, -26.4], [16.2, -25.8], [17.4, -26.6]], 0.45, 0.35);
-      });
-    });
-  }
-
-  /* 12. Светлячок: жук вполоборота, корпус наклонён головой вверх. Щиток-капюшон набок закрывает голову, из-под него выглядывают глазки;
-        длинные надкрылья с кромкой, светится только кончик брюшка. Рисуется в своей системе: x — вдоль тела (хвост −22 … голова +20), y — к брюху */
-  const SV = { el: '#1f1d26', elF: '#15141b', elE: '#cdc489', sh: '#d0663f', shD: '#a54c2f', shSp: '#3a1d18', head: '#16141b', abd: '#2a2730', glow: '#e0f57a', glowL: '#f1fbb4', dim: '#7f8a4a', leg: '#2a2730', legF: '#1b1920', rim: '#5f6488', wing: '#dfe6ff' };
-  const SV_A = -0.72, SV_C = Math.cos(SV_A), SV_S = Math.sin(SV_A), SV_O = [-1, -17];          // корпус круто вверх: жук взлетает, а не ползёт
-  const svW = (x, y) => [SV_O[0] + x * SV_C - y * SV_S, SV_O[1] + x * SV_S + y * SV_C];       // из системы жука в систему облика
-  const SV_ELY = [[7, -7.6], [-2, -8.4], [-12, -7.6], [-19.6, -5], [-22.6, -1.4], [-21.6, 1.4], [-16, 2.4], [-6, 2.6], [4, 2], [7.6, 0]];
-  const SV_SHIELD = [[4.6, -6.6], [8.6, -9.4], [13.2, -9.8], [17.6, -7.8], [20.4, -4.4], [20.8, -1.2], [18.6, 0.4], [13.6, 0.8], [8.4, 1.6], [4.8, 0.6]];
-  function svetlyachok(c, a) {
-    const S = SV, t = a.t || 0, f = a.flap || 0, rd = isReady(a), A0 = c.globalAlpha;
-    const u = f > 0 ? 1 - f : 0, open = f > 0 ? Math.min(1, Math.sin(Math.PI * u) * 1.7) : 0;
-    const breath = 0.72 + 0.28 * Math.sin(t * 1.6);                                            // свет брюшка медленно «дышит»
-    const leg = (p0, knee, foot, w) => taper(c, [svW(p0[0], p0[1]), knee, foot], w, w * 0.45);
-    // дальние лапки — темнее, за телом
-    c.fillStyle = S.legF; leg([9, 4.6], [13.4, -14.6], [12.8, -9.4], 0.85); leg([1, 5.4], [7.4, -9.6], [6.6, -4.8], 0.85); leg([-7, 5.6], [0.6, -4.6], [-0.6, -1.4], 0.8);
-    // свечение брюшка — единственное своё свечение облика
-    const gp = svW(-17.6, 3.6);
-    if (!LITE_ART && rd) { c.globalCompositeOperation = 'lighter'; c.globalAlpha = A0 * 0.46 * breath; c.drawImage(glow(S.glow), gp[0] - 18, gp[1] - 16, 36, 32); c.globalCompositeOperation = 'source-over'; c.globalAlpha = A0; }
-    c.save(); c.translate(SV_O[0], SV_O[1]); c.rotate(SV_A);
-    // брюшко снизу: тёмные сегменты, кончик — фонарик в два сегмента
-    pc(c, P2('sv|abd', [[-21.6, 0.6], [-19.4, 4.6], [-13, 6.8], [-4, 7.2], [4, 6.4], [9, 4.4], [8, 1], [-21.6, -0.6]]), S.abd);
-    const lamp = P2('sv|lamp2', [[-23.2, -0.4], [-22, 4.2], [-17.6, 6.8], [-9.6, 7.6], [-8.4, 2.6], [-13, 0.2]], [3, 4]);
-    pc(c, lamp, rd ? S.glow : S.dim);
-    inside(c, lamp, () => { if (rd) fillPts(c, [[-21.4, 1.2], [-15.6, 2.4], [-13.6, 6.4], [-19.8, 5.4]], S.glowL); c.fillStyle = S.abd; taper(c, [[-15.4, 0.6], [-15, 7.8]], 0.5, 0.4); });
-    c.fillStyle = S.legF; for (const x of [-6, 0.6]) taper(c, [[x, 2.6], [x - 0.6, 7]], 0.45, 0.35);
-    // задние крылышки: при взмахе два взмаха из-под надкрыльев
-    if (open > 0.02) {
-      const beat = Math.abs(Math.sin(u * 2 * Math.PI));
-      c.globalAlpha = A0 * 0.36; c.fillStyle = '#efe6cc';
-      for (const [k, d] of [[0.8, 0.25], [1, 0]]) { c.save(); c.translate(3, -6); c.rotate(-2.3 + d - beat * 0.9); c.scale(k, k);
-        cut(c, [[0, 0], [9, -2.4], [19, -2.8], [26, -0.8], [20.6, 1.4], [10, 1.6]], [3]); c.fill(); c.restore(); }          // длинные узкие тёплые крылья — не овалы шмеля
-      c.globalAlpha = A0;
-    }
-    // дальнее надкрылье — краешком сверху; ближнее — длинное, с кромкой; при взмахе оба приподнимаются
-    piv(c, 6, -7, -open * 0.55, 1, 1, () => pc(c, P2('sv|elyF', [[6.4, -9.6], [-4, -10.4], [-14, -9], [-21, -5.4], [-19.6, -3], [-8, -5.6], [5.6, -6]]), S.elF));
-    piv(c, 6, -6, -open * 0.75, 1, 1, () => {
-      const e = P2('sv|ely', SV_ELY); pcs(c, e, S.el, '#0f0e14');
-      inside(c, e, () => {
-        fillPts(c, [[7, -10], [-2, -10.4], [-12, -9.6], [-20.6, -6.4], [-20.2, -4.4], [-12, -6.6], [-2, -7.2], [6.4, -6.8]], S.rim);                   // холодная кромка
-        fillPts(c, [[8.4, 0.2], [4, 0.8], [-6, 1.3], [-16, 1], [-21.6, -0.4], [-23, -2], [-23, 4], [8.4, 4]], S.elE);                               // светлая кромка снизу
-      });
-    });
-    // голова под щитком: тёмные глазки с одной точкой
-    pc(c, P2('sv|head', [[12.4, 0.6], [15.4, -1.4], [18.8, -0.8], [20.6, 1.8], [18, 4.4], [14, 4.4]]), S.head);
-    if (a.blink) { c.fillStyle = S.rim; taper(c, [[15.4, 1.4], [16.6, 1.8], [17.8, 1.4]], 0.5, 0.4); }
-    else { c.fillStyle = '#3c3a4c'; dot(c, 16.6, 1.6, 1.4); dot(c, 19.4, 2, 1); c.fillStyle = '#0b0a0f'; dot(c, 16.7, 1.7, 1); dot(c, 19.5, 2.1, 0.7); c.fillStyle = '#e8ecff'; dot(c, 16.2, 1.2, 0.34); }
-    // щиток-капюшон набок, с двумя тёмными пятнами
-    piv(c, 12, -4, 0.1, 1, 1, () => {
-      const sh = P2('sv|shield', SV_SHIELD); pcs(c, sh, S.sh, S.shD);
-      inside(c, sh, () => fillPts(c, [[2, -1.4], [12, -1.2], [22, -2.6], [22, 3], [2, 3]], S.shD));
-      fillPts(c, [[9.6, -7.2], [12.4, -7.8], [13, -5], [10.2, -4.6]], S.shSp); fillPts(c, [[14.4, -6.6], [16.8, -5.8], [16.4, -3.6], [14, -4]], S.shSp);
-    });
-    c.restore();
-    // ближние лапки: бедро вверх, голень вниз до земли
-    c.fillStyle = S.leg; leg([8, 5.2], [11.6, -13.6], [10.4, -7.8], 1); leg([0, 6.4], [5.8, -8.4], [4.4, -3.2], 1); leg([-8, 6.4], [-1.4, -3.4], [-3.4, -0.4], 0.95);   // лапки поджаты в полёте
-    // усики-нити из-под щитка: один загнут сильнее
-    const an = svW(18.6, -0.4), sw = Math.sin(t * 1.9) * 0.6;
-    c.fillStyle = S.leg;
-    taper(c, [an, [an[0] + 2.4, an[1] - 4.6], [an[0] + 5.2, an[1] - 8.4 + sw * 0.6], [an[0] + 8.2, an[1] - 10 + sw * 0.6]], 0.9, 0.35);                 // усики короткие: у светлячка они не длиннее тела
-    taper(c, [[an[0] + 1.4, an[1] + 0.4], [an[0] + 4.6, an[1] - 2.6], [an[0] + 7.8, an[1] - 3.4 - sw * 0.6], [an[0] + 9.2, an[1] - 1.8 - sw * 0.6], [an[0] + 8.2, an[1] - 0.8 - sw * 0.6]], 0.85, 0.32);
-  }
-
-  const SKIN_ART = { ezhik, mukhomor, lis, sova, soroka, zayats, snegir, shmel, letyaga, mysh, rys, svetlyachok };
-  let LITE_ART = false;                       // «Экономно»: без своего свечения у Светлячка
+  const SKIN_ART = { tihohodka, opyata, rosyanka, baranets, beresten, zheoda, udilshchik, rybaluna, zvezdoryl, zmey, aspid, izbushka };
+  // точка следа [вперёд, вверх] от ног для позы a: если деталь двигается с позой (грибок на удилище, труба), её отдаёт сам рисовальщик
+  const ANCHOR = {};
+  const anchor = (sk, a) => { const f = ANCHOR[sk.id]; return f ? f(a || {}) : (sk.trail.at || [0, 18]); };
+  let LITE_ART = false;                       // «Экономно»: своё свечение (ростки, корешок, кристаллы, грибок, окошко) гаснет — светлые детали остаются плоской заливкой
+  /* облик: отражение по a.face (разворот «бумажкой» через ребро) и рисовальщик SKIN_ART[id](c, a); запасной — Тихоходка.
+     a — { t, blink, lx, ly, ear, wing, flap, face } (смысл — в шапке раздела); в лавке, меню и на иконке — только t, wing и face */
   function char(c, sk, a) {
     a = a || {};
-    const draw = SKIN_ART[sk.id] || ezhik, face = a.face === undefined ? 1 : a.face;
+    const draw = SKIN_ART[sk.id] || tihohodka, face = a.face === undefined ? 1 : a.face;
     c.save(); c.lineCap = 'round'; c.lineJoin = 'round';
-    if (face !== 1) c.scale(Math.abs(face) < 0.05 ? (face < 0 ? -0.05 : 0.05) : face, 1);     // разворот «бумажкой» через ребро
+    if (face !== 1) c.scale(Math.abs(face) < 0.05 ? (face < 0 ? -0.05 : 0.05) : face, 1);
     draw(c, a);
     c.restore();
   }
   const setLite = (v) => { LITE_ART = !!v; };
 
-  return { setScale, canvas, glow, plat, TYPE, SHROOM, cut, cutPath, taper, simple, bit, glowDash, SKIN_ART, setLite, halo, bracket, shroom, bough, frond, druse, leafy, moon, fernFlower, curl, islet,
+  return { setScale, canvas, glow, plat, TYPE, SHROOM, cut, cutPath, taper, simple, bit, glowDash, SKIN_ART, anchor, setLite, halo, bracket, shroom, bough, frond, druse, leafy, moon, fernFlower, curl, islet,
     beast, BEAST_DRAW, burrFace, spiderThread, owlTwig, jellyTentacles, BURR, SPI, BTL, OWL, JEL, bubble, item, ITEM_GLOW, char, hexA, ell, dot, rr, firefly, leaf, poly, blob, spot, foliage, cloud };
 })();
 
@@ -2637,7 +2074,7 @@ const ctl = { dx: 0, axis: 0, tilt: 0, tiltSeen: false, keyL: false, keyR: false
 const P = {
   x: WW / 2, y: 0, vy: 0, vx: 0, sq: 0, sqv: 0, lean: 0, moved: 0, blink: 0, blinkT: 2.5, flap: 0,
   fly: null, shield: false, inv: 0, magnet: 0, charges: 1, chargeT: 0, lastPlat: 0, lastTop: -1e9, flow: 0, mult: 1,
-  hist: [], trailAcc: 0, face: 1, faceT: 1, pawSide: 1,
+  hist: [], trailAcc: 0, face: 1, faceT: 1,
 };
 function newRun() {
   return { h: 0, maxY: 0, coins: 0, bonus: 0, bouncy: 0, wings: 0, noWingH: 0, maxMult: 1, zone: 0, revives: 0, t: 0, nextBubble: 0, headUsed: false, record: false, checkT: 0, soft: false };
@@ -2982,10 +2419,11 @@ function checkUnlocks(liveH) {
     if (ok) { save.skins.push(s.id); UI.toast(`Новый облик: ${s.name}`); Snd.play('record'); }
   }
 }
-// сразу после загрузки сохранения (запуск, код переноса): возврат за прежние облики и следы — один раз,
+// сразу после загрузки сохранения (запуск, код переноса), один раз: возврат за облики и следы v1 или тост о новых обликах v2;
 // и облики, условия которых игрок выполнил ещё до обновления (рекорд 3 000 м, 12 заданий)
 function afterLoad() {
-  if (save.refund > 0) { UI.toast('Облики обновились: вернули светлячков за прежние облики и следы', save.refund); save.refund = 0; }
+  if (save.refund > 0) { UI.toast('Облики обновились: вернули светлячков за прежние облики и следы', save.refund); save.refund = 0; save.renew = false; }
+  if (save.renew) { UI.toast('Облики теперь новые. Вместо каждого купленного — новый, и он уже твой'); save.renew = false; }
   checkUnlocks(0); persist();
 }
 function checkMissions(quiet) {
@@ -3064,8 +2502,8 @@ function flap() {
   Snd.play('wing');
   burst('dot', p.x, p.y + 14, 5, ['#d6f6ff', '#ffffff'], 130, { life: 0.45, size: 6, spread: 14 });
   part({ k: 'ring', x: p.x, y: p.y + 14, vx: 0, vy: 0, life: 0.4, size: 12, col: '#d6f6ff', grav: 0, drag: 0 });
-  if (save.skin === 'mukhomor') for (let i = 0; i < 9; i++)          // шляпка хлопнула зонтом — из-под неё вниз облачко спор
-    part({ k: 'tSpore', x: p.x + rnd(-12, 12), y: p.y + 14 + rnd(-3, 3), vx: rnd(-50, 50), vy: rnd(-150, -60), life: rnd(0.6, 0.9), size: rnd(1.2, 1.8), col: '#e3ecee', grav: 0, drag: 2.2, rot: 0, trail: 1 });
+  const sk = skinById(save.skin);
+  if (sk.burst) emitBits(sk, sk.burst.k, sk.burst.n, true);          // свой всплеск облика: труха, роса, комья ночи, дым из трубы
 }
 function startFly(kind, dur) {
   const p = P;
@@ -3234,37 +2672,66 @@ function stepWorld(dt) {
   }
 }
 
-/* ---------- кадр ---------- */
-const TRAIL_MAX = 40;             // живых частиц следа одновременно — не больше
+/* ---------- след облика ---------- */
+const TRAIL_MAX = 40;             // живых частиц следа одновременно (вместе со всплесками взмаха) — не больше
+// точка облика [вперёд, вверх] → мир: разворот face, сжатие k и наклон lean — как в drawPlayerAt
+function artToWorld(ax, ay) {
+  const p = P, k = p.sq + clamp(p.vy / 2600, -0.14, 0.2);
+  const x = ax * p.face * (1 - k * 0.55), y = -ay * (1 + k), cs = Math.cos(p.lean), sn = Math.sin(p.lean);
+  return [p.x + x * cs - y * sn, p.y - (x * sn + y * cs)];
+}
+// поза героя для рисунка (её же берёт Art.anchor для точки следа): время, моргание, взгляд, скорость, заряд, взмах, разворот
+function playerPose() {
+  const p = P, wing = game.state !== 'play' || p.charges > 0 ? 1 : clamp(1 - p.chargeT / UP.wingCd(), 0, 1) * 0.55;
+  return { t: game.t, blink: p.blink > 0, lx: p.lean * 3.3, ly: clamp(-p.vy / 900, -1, 1), wing, flap: p.flap, ear: clamp(-p.vy / 1100, -1, 1), face: p.face };
+}
+/* выпуск частиц: одна таблица на след и на всплеск взмаха (b — всплеск). q уже стоит в точке следа; скорости — единицы мира
+   в секунду, y вверх (отрицательная vy — падает). Каждая пятая труха — светлая гнилушка, каждая четвёртая крошка — осколок кристалла */
+const pick = (arr) => arr[(Math.random() * arr.length) | 0];
+const MOSS_LIGHT = { '#5f8f82': '#8fc0b0', '#3f6a60': '#5f8f82', '#8fc0b0': '#b9dccf' };
+let bitN = 0;
+const TRAIL_SPAWN = {
+  tMoss: (q) => { q.col = pick(['#5f8f82', '#8fc0b0', '#3f6a60']); Object.assign(q, { vx: rnd(-14, 14), vy: rnd(-26, -8), size: rnd(2.5, 4), col2: MOSS_LIGHT[q.col], sway: 0.6, vr: rnd(-1.5, 1.5) }); },
+  tRot: (q, p, b) => Object.assign(q, { vx: b ? rnd(-50, 50) : rnd(-16, 16), vy: b ? rnd(30, 90) : rnd(-30, -10), grav: b ? 160 : 0, size: rnd(1.6, 3),
+    col: bitN % 5 === 0 ? '#bff5d8' : pick(['#6e5638', '#8a6e4c', '#4a3a2a']), sway: b ? 0 : 0.4, vr: rnd(-4, 4) }),
+  tDew: (q, p, b) => Object.assign(q, { vx: b ? rnd(-80, 80) : rnd(-10, 10), vy: b ? rnd(40, 120) : rnd(-50, -30), grav: 220, drag: 0.2, size: rnd(1.6, 2.6), col: '#e6eeff', rot: 0 }),
+  tWool: (q) => Object.assign(q, { vx: rnd(-12, 12), vy: rnd(-18, -6), size: rnd(3, 5), col: pick(['#f1e2b8', '#e3cb94']), col2: '#bf9f62', vr: rnd(-1, 1), sway: 0.5 }),
+  tBark: (q) => Object.assign(q, { vx: rnd(-14, 14), vy: rnd(-24, -8), size: rnd(3, 5), col: '#ecebe6', col2: '#d9844e', vr: rnd(-3, 3) }),
+  tGrit: (q) => { const sh = bitN % 4 === 0; Object.assign(q, { vx: rnd(-16, 16), vy: rnd(-40, -20), grav: 160, size: rnd(1.4, 2.6) * (sh ? 1.2 : 1), shard: sh,
+    col: sh ? '#b897ee' : pick(['#9c8a74', '#75644f', '#b9a88f']), vr: rnd(-6, 6) }); },
+  tRipple: (q, p) => Object.assign(q, { x: q.x - Math.sign(p.face || 1) * rnd(0, 4), y: q.y - rnd(2, 6), vx: 0, vy: rnd(-6, -2), size: rnd(6, 10), col: '#dfe6ff', drag: 0, rot: 0 }),
+  tClod: (q, p, b) => Object.assign(q, { vx: -Math.sign(p.face || 1) * (b ? rnd(80, 140) : rnd(40, 80)), vy: b ? rnd(0, 60) : rnd(-20, 20), grav: 120, drag: 0.4, size: rnd(3, 5), col: '#23285a', vr: rnd(-4, 4) }),
+  tPaper: (q) => Object.assign(q, { vx: rnd(-18, 18), vy: rnd(-22, -8), size: rnd(2.5, 4), col: pick(['#c8433a', '#ecebe6', '#d6a24a']), sway: 0.7, vr: rnd(-5, 5) }),
+  tScale: (q) => Object.assign(q, { vx: rnd(-14, 14), vy: rnd(-26, -10), size: rnd(2, 3), col: pick(['#c0642c', '#d98a4a']), sway: 0.4, vr: rnd(-5, 5) }),
+  tSmoke: (q, p, b) => Object.assign(q, { vx: rnd(-6, 6), vy: b ? rnd(20, 40) : rnd(10, 30), drag: 1, size: b ? rnd(7, 9) : rnd(4.4, 6), col: '#a59cc0', col2: '#c6bfdc', rot: rnd(-0.4, 0.4) }),
+};
+const BIT_SPREAD = { tSmoke: 2, tDew: 2 };      // разброс вокруг точки: дым из трубы и роса — плотно, остальное — до ±8 по x и ±9 по y
+function emitBits(sk, k, n, burst) {
+  const p = P, at = Art.anchor(sk, playerPose()), [x0, y0] = artToWorld(at[0], at[1]), sp = BIT_SPREAD[k];
+  let live = 0; for (const q of game.parts) if (q.trail) live++;
+  for (let i = 0; i < n && live < TRAIL_MAX; i++, live++) {
+    bitN++;
+    const q = { k, x: x0 + (sp ? rnd(-sp, sp) : rnd(-8, 8)), y: y0 + (sp ? rnd(-sp, sp) : rnd(-9, 9)), vx: 0, vy: 0, life: sk.trail.life, size: 3, col: '#fff', grav: 0, drag: 1, rot: rnd(TAU), vr: 0, trail: 1, v: (Math.random() * 3) | 0 };
+    TRAIL_SPAWN[k](q, p, burst); part(q);
+  }
+}
 function emitTrail(dt) {
-  const p = P, sk = skinById(save.skin), tr = sk.trail, cx = p.x, cy = p.y + 18;
-  // путь полёта для светового пунктира: точки с пройденным расстоянием и временем; живут 0,85 с
-  const hs = p.hist, last = hs[hs.length - 1], d = last ? last.d + Math.hypot(wdx(cx, last.x), cy - last.y) : 0;
-  hs.push({ x: cx, y: p.y + 6, d, t: game.t, brk: !!last && Math.abs(cx - last.x) > WW / 2 });       // у Светлячка линия идёт от брюшка
-  while (hs.length && game.t - hs[0].t > 0.85) hs.shift();
-  if (!tr || tr.k === 'dash') return;
+  const p = P, sk = skinById(save.skin), tr = sk.trail, hs = p.hist;
+  if (tr.k === 'dash') {          // световая леска: путь грибка-приманки — точки с пройденным расстоянием и временем; живут 0,85 с
+    const at = Art.anchor(sk, playerPose()), [x, y] = artToWorld(at[0], at[1]), last = hs[hs.length - 1], turn = Math.abs(p.face) < 0.9;
+    const d = last ? last.d + Math.hypot(wdx(x, last.x), y - last.y) : 0;
+    hs.push({ x, y, d, t: game.t, turn, brk: !last || Math.abs(x - last.x) > WW / 2 || turn || last.turn });   // рвётся на склейке краёв и на развороте
+    while (hs.length && game.t - hs[0].t > 0.85) hs.shift();
+    return;
+  }
+  if (hs.length) hs.length = 0;
   const every = tr.every * (LITE ? 2 : 1);
   p.trailAcc += dt;
   while (p.trailAcc > every) {
     p.trailAcc -= every;
     let live = 0; for (const q of game.parts) if (q.trail) live++;
     if (live >= TRAIL_MAX) { p.trailAcc = 0; break; }
-    const x = cx + rnd(-8, 8), y = cy + rnd(-9, 9), pick = (arr) => arr[(Math.random() * arr.length) | 0], life = tr.life;
-    const q = { k: tr.k, x, y, vx: 0, vy: 0, life, size: 4, col: '#fff', grav: 0, drag: 1, rot: rnd(TAU), vr: 0, trail: 1, v: (Math.random() * 3) | 0 };
-    switch (tr.k) {
-      case 'tLeaf': Object.assign(q, { vx: rnd(-20, 20), vy: rnd(-30, -6), size: rnd(4.6, 6), col: pick(['#c98d44', '#a8643b', '#8f9a52']), vr: rnd(2, 4) * (Math.random() < 0.5 ? -1 : 1), sway: 1 }); break;
-      case 'tSpore': Object.assign(q, { vx: rnd(-26, 26), vy: rnd(16, 44), size: rnd(2, 3.2), col: '#e3ecee', drag: 0.8 }); break;
-      case 'tEmber': Object.assign(q, { vx: rnd(-14, 14), vy: rnd(18, 46), size: rnd(2, 3.2), col: pick(['#e07a3a', '#c8602e', '#a8452a']), vr: rnd(-4, 4), drag: 0.6 }); break;
-      case 'tFeather': Object.assign(q, { vx: rnd(-10, 10), vy: rnd(-24, -10), size: rnd(3.4, 4.4), col: '#f2ede2', col2: '#cf9f55', vr: 0, drag: 1.2, swing: 1 }); if (q.v === 1) { q.col = '#cf9f55'; q.col2 = '#f2ede2'; } break;
-      case 'tFoil': Object.assign(q, { vx: rnd(-22, 22), vy: rnd(-26, 10), size: rnd(2, 3.6), col: pick(['#d9dde8', '#6fc6c9', '#b7a9e0']), vr: rnd(5, 9) * (Math.random() < 0.5 ? -1 : 1) }); break;
-      case 'tPaw': { p.pawSide = -(p.pawSide || 1); Object.assign(q, { x: cx + p.pawSide * 3.4, y: cy - 6 + rnd(-2, 2), size: 1, col: '#cfd8ff', drag: 0, rot: rnd(-0.3, 0.3) + (p.vy < 0 ? Math.PI : 0) }); break; }
-      case 'tFlake': Object.assign(q, { vx: rnd(-14, 14), vy: rnd(-26, -10), size: rnd(4, 6.4), col: Math.random() < 0.6 ? '#eef2ff' : '#cfe0ff', vr: rnd(-1.2, 1.2), sway: 0.6 }); break;
-      case 'tPollen': Object.assign(q, { vx: rnd(-10, 10), vy: rnd(-34, -14), size: rnd(1.8, 2.8), col: Math.random() < 0.6 ? '#b88a34' : '#cfa452', vr: rnd(-3, 3), sway: 0.5 }); break;
-      case 'tWind': { const s = Math.random() < 0.5 ? -1 : 1; Object.assign(q, { x: cx + s * rnd(12, 18), y: cy + rnd(-6, 10), vx: s * rnd(14, 26), vy: rnd(-10, 6), size: rnd(4.4, 6), col: '#d6e2ff', v: s < 0 ? 1 : 0, rot: rnd(-0.3, 0.3), drag: 1.4 }); break; }
-      case 'tEcho': Object.assign(q, { x: cx + rnd(-3, 3), y: cy - 6, size: rnd(5, 6.4), col: '#cbbfff', drag: 0, rot: (p.face >= 0 ? 0.9 : Math.PI - 0.9) + rnd(-0.2, 0.2), v: Math.random() < 0.5 ? 1 : 0 }); break;
-      case 'tMist': Object.assign(q, { x: cx + rnd(-6, 6), y: cy - 12 + rnd(-3, 3), vx: rnd(-8, 8), vy: rnd(-8, 2), size: rnd(8, 12), col: '#cfe0ff', drag: 1, rot: rnd(-0.8, 0.8) }); break;
-    }
-    part(q);
+    emitBits(sk, tr.k, 1, false);
   }
 }
 function update(dt) {
@@ -4116,12 +3583,11 @@ function drawPlayerAt(px) {
     c.save(); c.translate(lx, ly); c.rotate(Math.sin(T * 1.8) * 0.12); Art.item(c, 'lantern', T); c.restore();
     c.globalAlpha = 1;
   }
-  const cd = UP.wingCd(), wing = game.state !== 'play' || p.charges > 0 ? 1 : clamp(1 - p.chargeT / cd, 0, 1) * 0.55;
   const st = clamp(p.vy / 2600, -0.14, 0.2), k = p.sq + st;
   c.save(); c.translate(px, py);
   if (p.inv > 0 && !fly) c.globalAlpha = 0.62 + 0.38 * Math.sin(T * 34);
   c.rotate(p.lean); c.scale(1 - k * 0.55, 1 + k);
-  Art.char(c, sk, { t: T, blink: p.blink > 0, lx: p.lean * 3.3, ly: clamp(-p.vy / 900, -1, 1), wing, flap: p.flap, ear: clamp(-p.vy / 1100, -1, 1), face: p.face });
+  Art.char(c, sk, playerPose());
   c.restore();
   if (p.shield) { const b = Art.bubble(), s = 68 + Math.sin(T * 3) * 2; c.globalAlpha = 0.85; c.drawImage(b.c, px - s / 2, py - 21 - s / 2, s, s); c.globalAlpha = 1; }
 }
@@ -4131,10 +3597,15 @@ function drawPlayer() {
   drawPlayerAt(x);
   if (x < 40) drawPlayerAt(x + WW); else if (x > WW - 40) drawPlayerAt(x - WW);
 }
-function drawGlowTrail() {       // световой пунктир Светлячка: тонкая линия по пути полёта, хвост тает за 0,8 с; на склейке краёв рвётся
+function drawGlowTrail() {       // световая леска Удильщика: пунктир по пути грибка-приманки, хвост тает за 0,8 с; на склейке краёв и на развороте рвётся
   const hs = P.hist; if (hs.length < 2) return;
+  const col = skinById(save.skin).trail.col;
   const pts = hs.map((q) => { const pt = [q.x, Y(q.y), q.d, clamp(1 - (game.t - q.t) / 0.8, 0, 1)]; pt.brk = q.brk; return pt; });
-  Art.glowDash(c, pts, 1.6);
+  Art.glowDash(c, pts, 1.6, col);
+  // у края мира герой рисуется ещё раз по ту сторону (drawPlayer) — и леска вместе с ним
+  let lo = false, hi = false; for (const q of hs) { if (q.x < 40) lo = true; if (q.x > WW - 40) hi = true; }
+  if (lo) { c.save(); c.translate(WW, 0); Art.glowDash(c, pts, 1.6, col); c.restore(); }
+  if (hi) { c.save(); c.translate(-WW, 0); Art.glowDash(c, pts, 1.6, col); c.restore(); }
 }
 const SLIVERS = [[[-0.5, -1], [0.6, -0.4], [0.3, 1], [-0.7, 0.3]], [[-0.2, -1], [0.8, 0.1], [-0.1, 0.9], [-0.6, -0.1]], [[-0.9, -0.3], [0.2, -0.9], [0.9, 0.5], [-0.3, 0.7]]];
 function drawParts(add) {
@@ -4164,12 +3635,11 @@ function drawParts(add) {
         Art.poly(c, [[0, -s * 0.6], [s * 0.4, 0.1], [0.1, s * 0.5], [-s * 0.36, 0]]); c.fill(); c.restore(); break; }
       case 'crumb': { c.globalAlpha = Math.min(1, u * 2); c.fillStyle = q.col; c.save(); c.translate(q.x, y); c.rotate(rot);   // крошка сухого листа: неровный четырёхугольник
         const s = q.size * 0.5; c.beginPath(); c.moveTo(-s, -s * 0.45); c.lineTo(s * 0.7, -s * 0.85); c.lineTo(s, s * 0.35); c.lineTo(-s * 0.35, s * 0.8); c.closePath(); c.fill(); c.restore(); break; }
-      case 'tLeaf': case 'tSpore': case 'tEmber': case 'tFeather': case 'tFoil': case 'tPaw': case 'tFlake': case 'tPollen': case 'tWind': case 'tEcho': case 'tMist': {
-        let x = q.x, qq = q;
+      case 'tMoss': case 'tRot': case 'tDew': case 'tWool': case 'tBark': case 'tGrit': case 'tRipple': case 'tClod': case 'tPaper': case 'tScale': case 'tSmoke': {
+        let x = q.x;
         if (q.sway) x += Math.sin(T * 2.6 + rot * 3) * 4 * q.sway;                                         // падает с покачиванием
-        if (q.swing) { const ph = T * 3.2 + q.v * 2.1; x += Math.sin(ph) * 5; qq = { ...q, rot: Math.sin(ph) * 0.65 }; }   // пёрышко — маятником
-        c.globalAlpha = q.k === 'tPaw' ? u : Math.min(1, u * 2.2);
-        Art.bit(c, qq, x, y, u, T); break;
+        c.globalAlpha = q.k === 'tRipple' ? 0.55 * u : q.k === 'tSmoke' ? 0.5 * u : Math.min(1, u * 2.2);   // рябь и дым тают ровно, остальное — под конец
+        Art.bit(c, q, x, y, u, T); break;
       }
       case 'txt': c.globalAlpha = Math.min(1, u * 2.5); c.fillStyle = q.col; c.font = `700 ${q.size}px 'Alegreya Sans', system-ui, sans-serif`; c.textAlign = 'center'; c.fillText(q.txt, q.x, y); break;
     }
@@ -4434,21 +3904,34 @@ const UI = (() => {
   }
 
   /* ---------- лавка ---------- */
-  // за обликом в карточке — 3–5 неподвижных частиц его следа, теми же рисовальщиками, что в забеге
-  const TRAIL_LOOK = { tLeaf: [10, ['#c98d44', '#a8643b', '#8f9a52']], tSpore: [5, ['#e3ecee']], tEmber: [5.6, ['#e07a3a', '#c8602e', '#a8452a']], tFeather: [7.4, ['#f2ede2', '#cf9f55']],
-    tFoil: [6.4, ['#d9dde8', '#6fc6c9', '#b7a9e0']], tPaw: [1.9, ['#cfd8ff']], tFlake: [11, ['#eef2ff', '#cfe0ff']], tPollen: [4.6, ['#b88a34', '#cfa452']], tWind: [9.6, ['#d6e2ff']],
-    tEcho: [9, ['#cbbfff']], tMist: [12, ['#cfe0ff']] };
+  // за обликом в карточке — несколько неподвижных частиц его следа, теми же рисовальщиками, что в забеге; раскладка у каждого вида своя.
+  // TRAIL_LOOK[k] = [цвета, второй цвет, частицы [x, y, прозрачность, размер, поворот, u — сколько жизни осталось]];
+  // у дыма x, y — сдвиг от трубы (Art.anchor), у остальных — место в карточке 152 × 152 (облик стоит в (80, 141), масштаб 1,75)
+  const TRAIL_LOOK = {
+    tMoss: [['#5f8f82', '#8fc0b0', '#3f6a60'], null, [[20, 130, 1, 7, 0.3, 0.9], [37, 118, 0.85, 5.2, -0.7, 0.9], [14, 108, 0.7, 4.6, 1.3, 0.9], [34, 140, 0.95, 5.8, 2.6, 0.9]]],
+    tRot: [['#6e5638', '#8a6e4c', '#4a3a2a', '#bff5d8', '#8a6e4c'], null, [[58, 141, 1, 4.6, 0.4, 0.9], [64, 129, 0.9, 3.6, 1.6, 0.9], [46, 133, 0.85, 4.2, 2.9, 0.9], [36, 143, 0.8, 3.2, 0.9, 0.9], [52, 119, 0.85, 3.8, 2.2, 0.9]]],
+    tDew: [['#e6eeff'], null, [[46, 92, 0.55, 4, 0, 0.9], [36, 108, 0.7, 4.4, 0, 0.9], [26, 124, 0.85, 4, 0, 0.9], [17, 140, 1, 3.6, 0, 0.9]]],
+    tWool: [['#f1e2b8', '#e3cb94', '#f1e2b8'], '#bf9f62', [[20, 120, 1, 10, 0.4, 0.9], [38, 139, 0.85, 6.6, 2, 0.9], [14, 95, 0.7, 6, 4.1, 0.9]]],
+    tBark: [['#ecebe6'], '#d9844e', [[22, 126, 1, 9, 0.4, 0.9], [40, 106, 0.8, 7.6, 2.2, 0.9], [16, 92, 0.65, 6.6, 4, 0.9]]],
+    tGrit: [['#9c8a74', '#75644f', '#b9a88f', '#b897ee', '#b9a88f'], null, [[22, 137, 1, 4.4, 0.3, 0.9], [36, 125, 0.9, 3.6, 1.9, 0.9], [14, 119, 0.8, 3.2, 2.8, 0.9], [26, 104, 0.85, 5.4, 0.5, 0.9], [44, 141, 0.85, 3.8, 4, 0.9]]],
+    tRipple: [['#dfe6ff'], null, [[28, 112, 0.42, 14, 0, 0.55], [42, 124, 0.5, 16, 0, 0.55], [56, 136, 0.58, 18, 0, 0.55]]],
+    tClod: [['#23285a'], null, [[34, 102, 0.8, 7.4, 0.6, 0.9], [20, 120, 0.9, 8.6, 2.2, 0.9], [30, 139, 1, 7, 3.9, 0.9]]],
+    tPaper: [['#c8433a', '#ecebe6', '#d6a24a'], null, [[22, 110, 0.9, 7, 0.5, 0.9], [36, 133, 1, 6, 2.1, 0.9], [14, 90, 0.75, 5.4, 3.3, 0.9]]],
+    tScale: [['#c0642c', '#d98a4a', '#c0642c', '#d98a4a'], null, [[24, 127, 1, 5, 0.3, 0.9], [38, 112, 0.85, 4.4, 1.2, 0.9], [16, 104, 0.7, 4, 2.4, 0.9], [42, 139, 0.9, 4.6, 0.8, 0.9]]],
+    tSmoke: [['#a59cc0'], '#c6bfdc', [[1, -7, 0.75, 6, 0.2, 0.85], [-3, -19, 0.6, 8, -0.3, 0.6], [2, -33, 0.45, 10, 0.5, 0.35]]],
+  };
   function trailBits(x, sk) {
-    const k = sk.trail.k;
-    if (k === 'dash') { const pts = []; for (let i = 0; i <= 36; i++) { const u = i / 36; pts.push([12 + u * 58, 132 - u * 74 + Math.sin(u * 5.5) * 9, u * 150, 0.2 + u * 0.8]); } Art.glowDash(x, pts, 2.4); return; }
-    const [size, cols] = TRAIL_LOOK[k];
-    const SPOT = k === 'tPaw' ? [[56, 132, -0.5], [44, 112, -0.4], [52, 92, -0.6], [38, 72, -0.5]]
-      : k === 'tEcho' ? [[36, 104, 0.75], [26, 66, 0.5]]
-      : [[22, 122, 0.6], [44, 100, 0.85], [18, 80, 0.55], [52, 134, 0.95], [36, 60, 0.45]];
-    SPOT.forEach(([px, py, al], i) => {
-      x.globalAlpha = k === 'tPaw' ? 1 : al;
-      const q = { k, size: size * (0.8 + 0.25 * hash(i * 2.3)), rot: k === 'tPaw' ? al : k === 'tEcho' ? 0.85 : hash(i * 4.1) * TAU, col: cols[i % cols.length], col2: cols[(i + 1) % cols.length], v: i % 3 };
-      Art.bit(x, q, px, py, k === 'tPaw' ? 0.7 + i * 0.07 : k === 'tEcho' ? 0.55 : k === 'tWind' ? 0.45 : k === 'tMist' ? 0.75 : 0.9, i * 0.7);
+    const k = sk.trail.k, at = Art.anchor(sk, { t: 0.873, wing: 1, face: 1 }), ax = 80 + 1.75 * at[0], ay = 141 - 1.75 * at[1];   // точка следа в карточке
+    if (k === 'dash') {             // леска — дугой снизу слева к грибку
+      const pts = []; for (let i = 0; i <= 40; i++) { const u = i / 40, bx = lerp(10, ax, u), by = lerp(140, ay, u); pts.push([bx - Math.sin(u * Math.PI) * 18, by + Math.sin(u * Math.PI) * 10, u * 170, 0.25 + u * 0.75]); }
+      Art.glowDash(x, pts, 2.4, sk.trail.col); return;
+    }
+    const [cols, col2, SPOT] = TRAIL_LOOK[k];
+    SPOT.forEach(([px, py, al, size, rot, u], i) => {
+      x.globalAlpha = al;
+      const q = { k, size, rot, col: cols[i % cols.length], col2: k === 'tMoss' ? ({ '#5f8f82': '#8fc0b0', '#3f6a60': '#5f8f82', '#8fc0b0': '#b9dccf' })[cols[i % cols.length]] : col2,
+        v: i % 3, shard: k === 'tGrit' && i === 3, vy: k === 'tDew' ? -60 : 0 };
+      Art.bit(x, q, k === 'tSmoke' ? ax + px : px, k === 'tSmoke' ? ay + py : py, u, i * 0.7);
     });
     x.globalAlpha = 1;
   }
@@ -4915,7 +4398,7 @@ function start(data) {
 }
 
 window.__tl = {
-  game, P, ctl, view, ZONES, SKINS, UPS, MDEF, Art, Snd, UI, migrateV1, applySave, exportCode, importCode, SKIN_ART: Art.SKIN_ART,
+  game, P, ctl, view, ZONES, SKINS, UPS, MDEF, Art, Snd, UI, migrateV1, migrateV2, SKIN_MAP_V3, applySave, exportCode, importCode, SKIN_ART: Art.SKIN_ART, TRAIL_SPAWN, artToWorld, playerPose,
   get run() { return run; }, get save() { return save; },
   startRun, endRun, toMenu, flap, land, update, render, resize, resetWorld, genUpTo, persist, fillMissions, takeItem, startFly, die, zoneMix,
   makeBeast, pickBeast, stepBeasts, BEAST_FROM, get beasts() { return game.beasts; },

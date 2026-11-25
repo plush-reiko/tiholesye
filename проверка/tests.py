@@ -1,9 +1,9 @@
-"""Автопроверки «Тихолесья» (раздел 13.2 ТЗ 21.11).
+"""Автопроверки «Тихолесья» (раздел 13.2 ТЗ 21.11 и раздел 9 ТЗ 24.11).
 
 Запуск: python3 -m http.server 8765 --bind 127.0.0.1 --directory <папка репозитория>   # в отдельном окне
         python3 tests.py [только_эти_разделы через запятую]
 Разделы: gift coins ghost leaf beasts migration skins texts bot lite speed offline.
-Для speed и части migration нужна старая версия (index.html из коммита 23571e5), раздайте её на другом порту
+Для speed и части migration нужна старая версия (index.html из коммита 8fd511c), раздайте её на другом порту
 и передайте адрес: TL_OLD_URL=http://127.0.0.1:8766/index.html python3 tests.py speed
 Нужен Playwright: pip install playwright && python3 -m playwright install chromium
 Каждая проверка печатает «ок» или «ОШИБКА» с пояснением; в конце — итог. Ошибки консоли браузера считаются провалом.
@@ -12,7 +12,7 @@ import asyncio, base64, json, os, sys
 from playwright.async_api import async_playwright
 
 URL = os.environ.get('TL_URL', 'http://127.0.0.1:8765/index.html')
-OLD_URL = os.environ.get('TL_OLD_URL', '')           # старая версия игры (для кода переноса v1), если раздаётся
+OLD_URL = os.environ.get('TL_OLD_URL', '')           # старая версия игры (8fd511c: облики 21.11, схема v2), если раздаётся
 ONLY = set(sys.argv[1].split(',')) if len(sys.argv) > 1 else None
 RES = []
 
@@ -264,6 +264,17 @@ async def t_beasts(b):
 OLD_CODE = "TL1.eyJ2IjoxLCJjb2lucyI6MTAwMCwiYmVzdCI6NTAwLCJiZXN0WmVuIjowLCJydW5zIjo3LCJ0b3RhbENvaW5zIjoyNDAwLCJ0b3RhbEhlaWdodCI6MCwic2tpbiI6ImtvdCIsInRyYWlsIjoiYXVyb3JhIiwic2tpbnMiOlsic3ZldGlrIiwiZ3JpYm9rIiwia290IiwienZlemRhIl0sInRyYWlscyI6WyJub25lIiwic3BhcmtzIiwiYXVyb3JhIl0sInVwIjp7IndpbmdzIjoyLCJkYW5kZWxpb24iOjAsImNvbWV0IjowLCJtYWduZXQiOjAsImx1Y2siOjAsImJ1YmJsZSI6MH0sIm1pc3Npb25zIjpbeyJ0eXBlIjoiaGVpZ2h0IiwibiI6MzAwLCJydyI6NTAsInAiOjAsImRvbmUiOmZhbHNlfSx7InR5cGUiOiJjb2luc1J1biIsIm4iOjIwLCJydyI6MzUsInAiOjAsImRvbmUiOmZhbHNlfSx7InR5cGUiOiJ3aW5ncyIsIm4iOjUsInJ3IjozNSwicCI6MCwiZG9uZSI6ZmFsc2V9XSwibVRpZXIiOnt9LCJtRG9uZSI6NSwic3RhdHMiOnsic3RvbXBzIjowLCJib3VuY3kiOjAsInB1ZmZzIjowLCJmbGlnaHRzIjowLCJ3aW5ncyI6MCwibWF4TXVsdCI6MX0sInNldCI6eyJtdXNpYyI6ZmFsc2UsInNmeCI6dHJ1ZSwiY29udHJvbCI6InNpZGVzIiwiZngiOiJoaWdoIiwibXVzaWNWb2wiOjEsInNmeFZvbCI6MX0sInR1dCI6ZmFsc2UsInplbiI6ZmFsc2UsImdpZnQiOiIyMDI2LTExLTIxIiwibXVsdFRpcCI6ZmFsc2UsInJlY2VudCI6W10sInBsYXlUaW1lIjowfQ=="
 OLD_JSON = "{\"v\":1,\"coins\":1000,\"best\":500,\"bestZen\":0,\"runs\":7,\"totalCoins\":2400,\"totalHeight\":0,\"skin\":\"kot\",\"trail\":\"aurora\",\"skins\":[\"svetik\",\"gribok\",\"kot\",\"zvezda\"],\"trails\":[\"none\",\"sparks\",\"aurora\"],\"up\":{\"wings\":2,\"dandelion\":0,\"comet\":0,\"magnet\":0,\"luck\":0,\"bubble\":0},\"missions\":[{\"type\":\"height\",\"n\":300,\"rw\":50,\"p\":0,\"done\":false},{\"type\":\"coinsRun\",\"n\":20,\"rw\":35,\"p\":0,\"done\":false},{\"type\":\"wings\",\"n\":5,\"rw\":35,\"p\":0,\"done\":false}],\"mTier\":{},\"mDone\":5,\"stats\":{\"stomps\":0,\"bouncy\":0,\"puffs\":0,\"flights\":0,\"wings\":0,\"maxMult\":1},\"set\":{\"music\":false,\"sfx\":true,\"control\":\"sides\",\"fx\":\"high\",\"musicVol\":1,\"sfxVol\":1},\"tut\":false,\"zen\":false,\"gift\":\"2026-11-21\",\"multTip\":false,\"recent\":[],\"playTime\":0}"
 OLD_REFUND = 6550
+# Сохранение v2 (облики 21.11, версия 8fd511c): 500 светлячков, рекорд 3 100 м, 4 задания, облики ёжик, лис, сова, шмель, рысь, надет шмель.
+# Перенос в v3 по таблице 7.1 ТЗ 24.11: облики на той же ступени лавки, светлячки не меняются, один тост «Облики теперь новые…»
+V2_JSON = json.dumps({'v': 2, 'coins': 500, 'best': 3100, 'bestZen': 0, 'runs': 12, 'totalCoins': 1900, 'totalHeight': 21000, 'skin': 'shmel',
+    'skins': ['ezhik', 'lis', 'sova', 'shmel', 'rys'], 'refund': 0, 'up': {'wings': 2, 'dandelion': 1, 'comet': 0, 'magnet': 0, 'luck': 1, 'bubble': 0},
+    'missions': [{'type': 'height', 'n': 800, 'rw': 70, 'p': 0, 'done': False}], 'mTier': {'height': 2}, 'mDone': 4,
+    'stats': {'stomps': 3, 'bouncy': 9, 'puffs': 4, 'flights': 1, 'wings': 20, 'maxMult': 3},
+    'set': {'music': False, 'sfx': True, 'control': 'sides', 'fx': 'high', 'musicVol': 0.8, 'sfxVol': 1},
+    'tut': True, 'zen': False, 'gift': '2026-11-23', 'multTip': True, 'recent': [3100, 900], 'playTime': 1200})
+V2_SKINS = ['tihohodka', 'rosyanka', 'baranets', 'rybaluna', 'aspid']
+RENEW = 'Облики теперь новые'
+SKIN_IDS = ['tihohodka', 'opyata', 'rosyanka', 'baranets', 'beresten', 'zheoda', 'udilshchik', 'rybaluna', 'zvezdoryl', 'zmey', 'aspid', 'izbushka']
 
 
 async def menu(pg):
@@ -279,78 +290,134 @@ def digits(s):
 
 
 async def t_migration(b):
-    print('Миграция сохранений v1 → v2')
+    print('Миграция сохранений v1 → v2 → v3')
     old = json.loads(OLD_JSON)
-    # 1. старое сохранение в хранилище
+    # 1. сохранение v1 в хранилище: облики v1 → v2 → v3, возврат светлячков за убранные облики и следы
     ctx, pg = await page(b, storage=OLD_JSON)
     s = await pg.evaluate('() => window.__tl.save')
     tt = await toasts(pg)
-    check('после загрузки: облики ezhik и mukhomor, надет ezhik', s['skins'] == ['ezhik', 'mukhomor'] and s['skin'] == 'ezhik', f"{s['skins']} / {s['skin']}")
-    check('светлячков больше на 6 550', s['coins'] == old['coins'] + OLD_REFUND, f"было {old['coins']}, стало {s['coins']}")
-    check('тост о возврате с суммой', 'Облики обновились' in tt and '6550' in digits(tt), tt)
-    check('схема v2, без следов, refund обнулён, прочее на месте', s['v'] == 2 and 'trail' not in s and 'trails' not in s and s['refund'] == 0
+    check('v1 из хранилища: облики tihohodka и opyata, надета tihohodka', s['skins'] == ['tihohodka', 'opyata'] and s['skin'] == 'tihohodka', f"{s['skins']} / {s['skin']}")
+    check('v1: светлячков больше на 6 550', s['coins'] == old['coins'] + OLD_REFUND, f"было {old['coins']}, стало {s['coins']}")
+    check('v1: тост о возврате с суммой, тоста «Облики теперь новые» нет', 'Облики обновились' in tt and '6550' in digits(tt) and RENEW not in tt, tt)
+    check('v1: схема v3, refund 0, renew false, без следов, прочее на месте', s['v'] == 3 and s['refund'] == 0 and s['renew'] is False and 'trail' not in s and 'trails' not in s
           and s['best'] == old['best'] and s['mDone'] == old['mDone'] and s['up']['wings'] == 2 and s['set']['music'] is False and s['set']['control'] == 'sides',
-          json.dumps({k: s.get(k) for k in ['v', 'refund', 'best', 'mDone']}))
+          json.dumps({k: s.get(k) for k in ['v', 'refund', 'renew', 'best', 'mDone']}))
     stored = await pg.evaluate('() => JSON.parse(localStorage.getItem("tiholesye.save.v1"))')
-    check('в хранилище уже v2 с refund 0', stored['v'] == 2 and stored['refund'] == 0 and stored['coins'] == s['coins'])
+    check('v1: в хранилище уже v3 (refund 0, renew false)', stored['v'] == 3 and stored['refund'] == 0 and stored['renew'] is False and stored['coins'] == s['coins'])
     await pg.reload(); await menu(pg)
     s2 = await pg.evaluate('() => window.__tl.save'); tt2 = await toasts(pg)
-    check('повторная загрузка не начисляет и не показывает тост', s2['coins'] == s['coins'] and 'Облики обновились' not in tt2, f"{s2['coins']} {tt2}")
+    check('v1: повторная загрузка — без тостов и начислений', s2['coins'] == s['coins'] and 'Облики обновились' not in tt2 and RENEW not in tt2, f"{s2['coins']} {tt2}")
     errs = list(pg.errors); await ctx.close()
-    # 2. код переноса из старой версии — в новую, через поле в настройках
+    # 2. код переноса v1 — через поле в настройках
     ctx, pg = await page(b)
     await pg.evaluate('() => document.getElementById("bSet").click()'); await pg.wait_for_timeout(150)
     await pg.evaluate('(code) => { document.getElementById("saveIn").value = code; }', OLD_CODE)
     await pg.evaluate('() => document.getElementById("bImport").click()'); await pg.wait_for_timeout(400)
     s3 = await pg.evaluate('() => window.__tl.save'); tt3 = await toasts(pg)
-    check('код TL1. старой версии загружается: облики, светлячки с возвратом, тост', s3['skins'] == ['ezhik', 'mukhomor'] and s3['coins'] == old['coins'] + OLD_REFUND and 'Облики обновились' in tt3,
-          f"{s3['skins']} {s3['coins']} | {tt3}")
+    check('код v1 через поле настроек: облики, светлячки с возвратом, тост возврата', s3['skins'] == ['tihohodka', 'opyata'] and s3['skin'] == 'tihohodka'
+          and s3['coins'] == old['coins'] + OLD_REFUND and 'Облики обновились' in tt3 and RENEW not in tt3 and s3['renew'] is False, f"{s3['skins']} {s3['coins']} | {tt3}")
     code2 = await pg.evaluate('() => window.__tl.exportCode()')
     data2 = await pg.evaluate('(c) => JSON.parse(decodeURIComponent(escape(atob(c.slice(4)))))', code2)
-    check('новый код: префикс TL1. и v 2', code2.startswith('TL1.') and data2['v'] == 2)
+    check('новый код: префикс TL1. и v 3', code2.startswith('TL1.') and data2['v'] == 3)
     ok = await pg.evaluate('(c) => window.__tl.importCode(c)', code2)
     s4 = await pg.evaluate('() => window.__tl.save')
-    check('код v2 загружается обратно без второго возврата', ok and s4['coins'] == s3['coins'] and s4['skins'] == s3['skins'], f"{s4['coins']}")
+    check('код v3 загружается обратно без второго возврата', ok and s4['coins'] == s3['coins'] and s4['skins'] == s3['skins'], f"{s4['coins']}")
     errs += pg.errors; await ctx.close()
-    # 3. рекорд 3 200 м и 12 заданий: рысь и светлячок сразу после загрузки
+    # 3. сохранение v2 в хранилище: облики один к одному на той же ступени, светлячки не меняются
+    v2 = json.loads(V2_JSON)
+    ctx, pg = await page(b, storage=V2_JSON)
+    s5 = await pg.evaluate('() => window.__tl.save'); tt5 = await toasts(pg)
+    check('v2 из хранилища: облики по таблице 7.1, надета Рыба-луна', s5['skins'] == V2_SKINS and s5['skin'] == 'rybaluna', f"{s5['skins']} / {s5['skin']}")
+    check('v2: ровно 500 светлячков; рекорд, задания, улучшения, статистика, настройки и подарок прежние', s5['coins'] == 500 and s5['best'] == 3100 and s5['mDone'] == 4
+          and s5['up'] == v2['up'] and s5['stats'] == v2['stats'] and s5['set']['control'] == 'sides' and s5['set']['music'] is False and s5['gift'] == '2026-11-23',
+          json.dumps({k: s5.get(k) for k in ['coins', 'best', 'mDone', 'up', 'gift']}))
+    check('v2: один тост «Облики теперь новые…», тоста возврата и «Новый облик» нет', tt5.count(RENEW) == 1 and 'Облики обновились' not in tt5 and 'Новый облик' not in tt5, tt5)
+    stored = await pg.evaluate('() => JSON.parse(localStorage.getItem("tiholesye.save.v1"))')
+    check('v2: схема v3, renew false — и в хранилище', s5['v'] == 3 and s5['renew'] is False and stored['v'] == 3 and stored['renew'] is False and stored['skins'] == V2_SKINS)
+    await pg.reload(); await menu(pg)
+    s6 = await pg.evaluate('() => window.__tl.save'); tt6 = await toasts(pg)
+    check('v2: после перезагрузки тостов нет', RENEW not in tt6 and 'Облики обновились' not in tt6 and s6['coins'] == 500 and s6['skins'] == V2_SKINS, f"{s6['coins']} {tt6}")
+    errs += pg.errors; await ctx.close()
+    # 4. код v2 (собран в странице так же, как exportCode) — через поле в настройках
+    ctx, pg = await page(b)
+    code_v2 = await pg.evaluate('(j) => "TL1." + btoa(unescape(encodeURIComponent(j)))', V2_JSON)
+    await pg.evaluate('() => document.getElementById("bSet").click()'); await pg.wait_for_timeout(150)
+    await pg.evaluate('(code) => { document.getElementById("saveIn").value = code; }', code_v2)
+    await pg.evaluate('() => document.getElementById("bImport").click()'); await pg.wait_for_timeout(400)
+    s7 = await pg.evaluate('() => window.__tl.save'); tt7 = await toasts(pg)
+    check('код v2 через поле настроек: облики по таблице, 500 светлячков, тосты «Сохранение загружено» и «Облики теперь новые…»',
+          s7['skins'] == V2_SKINS and s7['skin'] == 'rybaluna' and s7['coins'] == 500 and s7['best'] == 3100 and 'Сохранение загружено' in tt7 and RENEW in tt7 and 'Облики обновились' not in tt7,
+          f"{s7['skins']} {s7['coins']} | {tt7}")
+    errs += pg.errors; await ctx.close()
+    # 5. рекорд 3 200 м и 12 заданий до обновления: Аспид и Избушка сразу после загрузки
     rich = dict(old, best=3200, mDone=12)
     ctx, pg = await page(b, storage=json.dumps(rich))
-    s5 = await pg.evaluate('() => window.__tl.save'); tt5 = await toasts(pg)
-    check('рекорд 3 200 м: рысь сразу; 12 заданий: светлячок сразу', 'rys' in s5['skins'] and 'svetlyachok' in s5['skins'] and 'Рысь' in tt5, f"{s5['skins']} | {tt5}")
-    # 4. сброс прогресса: чистое v2, настройки и отметка подарка остаются
+    s8 = await pg.evaluate('() => window.__tl.save'); tt8 = await toasts(pg)
+    check('рекорд 3 200 м: Аспид сразу; 12 заданий: Избушка сразу; тост «Новый облик: Аспид»', 'aspid' in s8['skins'] and 'izbushka' in s8['skins'] and 'Аспид' in tt8, f"{s8['skins']} | {tt8}")
+    # 6. сброс прогресса: чистое v3 с одной Тихоходкой, настройки и отметка подарка остаются
     await pg.evaluate('() => { const s = window.__tl.save; s.gift = "2026-11-21"; s.set.sfx = false; window.__tl.persist(); }')
     await pg.evaluate('() => document.getElementById("bSet").click()'); await pg.wait_for_timeout(150)
     await pg.evaluate('() => { const b = document.getElementById("bReset"); b.click(); b.click(); }'); await pg.wait_for_timeout(300)
-    s6 = await pg.evaluate('() => window.__tl.save')
-    check('«Сбросить прогресс»: v2, только ёжик, 0 светлячков; настройки и подарок на месте', s6['v'] == 2 and s6['skins'] == ['ezhik'] and s6['coins'] == 0
-          and s6['set']['sfx'] is False and s6['set']['music'] is False and s6['gift'] == '2026-11-21', json.dumps({k: s6.get(k) for k in ['v', 'skins', 'coins', 'gift']}))
+    s9 = await pg.evaluate('() => window.__tl.save')
+    check('«Сбросить прогресс»: v3, только Тихоходка, 0 светлячков, renew false; настройки и подарок на месте', s9['v'] == 3 and s9['skins'] == ['tihohodka'] and s9['skin'] == 'tihohodka'
+          and s9['coins'] == 0 and s9['renew'] is False and s9['set']['sfx'] is False and s9['set']['music'] is False and s9['gift'] == '2026-11-21',
+          json.dumps({k: s9.get(k) for k in ['v', 'skins', 'coins', 'renew', 'gift']}))
     errs += pg.errors; await ctx.close()
-    # 5. если раздаётся старая версия (TL_OLD_URL): свежий код прямо из неё
+    # 7. если раздаётся версия 8fd511c (TL_OLD_URL): свежий код прямо из неё
     if OLD_URL:
         ctx = await b.new_context(viewport={'width': 440, 'height': 956}, device_scale_factor=3, is_mobile=True, has_touch=True)
         po = await ctx.new_page(); await po.goto(OLD_URL); await po.wait_for_function('window.__tl && window.__tl.game.state === "menu"')
-        code_old = await po.evaluate('''() => { const s = window.__tl.save; s.coins = 77; s.skins = ['svetik', 'lis', 'sova', 'kaplya', 'kometa']; s.skin = 'sova'; s.trails = ['none', 'notes']; s.trail = 'notes';
+        code_old = await po.evaluate('''() => { const s = window.__tl.save; s.coins = 77; s.skins = ['ezhik', 'lis', 'sova', 'shmel', 'rys']; s.skin = 'shmel';
           return 'TL1.' + btoa(unescape(encodeURIComponent(JSON.stringify(s)))); }''')
         await ctx.close()
         ctx, pg = await page(b)
         ok = await pg.evaluate('(c) => window.__tl.importCode(c)', code_old)
         await pg.evaluate('() => window.__tl.afterLoad()')
-        s7 = await pg.evaluate('() => window.__tl.save')
-        check('свежий код из старой версии: лис и совёнок остались, капля → 300, ноты → 800, за комету 0',
-              ok and s7['skins'] == ['ezhik', 'lis', 'sova'] and s7['skin'] == 'sova' and s7['coins'] == 77 + 300 + 800, f"{s7['skins']} {s7['skin']} {s7['coins']}")
+        s10 = await pg.evaluate('() => window.__tl.save')
+        check('свежий код из версии 8fd511c: облики по таблице 7.1, надета Рыба-луна, ровно 77 светлячков',
+              ok and s10['skins'] == V2_SKINS and s10['skin'] == 'rybaluna' and s10['coins'] == 77, f"{s10['skins']} {s10['skin']} {s10['coins']}")
         errs += pg.errors; await ctx.close()
     check('ошибок в консоли нет', not errs, '; '.join(errs[:3]))
 
 
+# рисунок облика на отдельном холсте: позы против покоя, рамка 3.7, силуэты попарно (раздел 9.2 ТЗ 24.11)
+DRAWN = r"""() => { const T = window.__tl, A = T.Art, W = 300, H = 300, OX = 150, OY = 200, S = 2;
+  const cv = document.createElement('canvas'); cv.width = W; cv.height = H; const x = cv.getContext('2d', { willReadFrequently: true });
+  const shot = (sk, a) => { x.setTransform(1, 0, 0, 1, 0, 0); x.clearRect(0, 0, W, H); x.setTransform(S, 0, 0, S, OX, OY); A.char(x, sk, a); x.setTransform(1, 0, 0, 1, 0, 0); return x.getImageData(0, 0, W, H).data; };
+  // доля отличающихся пикселей от площади объединения: непрозрачен только в одном или |ΔR|+|ΔG|+|ΔB| > 60
+  const diff = (p, q) => { let uni = 0, d = 0; for (let i = 0; i < p.length; i += 4) { const ap = p[i + 3] > 127, aq = q[i + 3] > 127; if (!ap && !aq) continue; uni++;
+    if (ap !== aq || Math.abs(p[i] - q[i]) + Math.abs(p[i + 1] - q[i + 1]) + Math.abs(p[i + 2] - q[i + 2]) > 60) d++; } return uni ? d / uni : 0; };
+  const grow = (bx, d) => { for (let py = 0; py < H; py++) for (let px = 0; px < W; px++) if (d[(py * W + px) * 4 + 3] > 127) {
+    const ux = (px + 0.5 - OX) / S, uy = (py + 0.5 - OY) / S; if (ux < bx[0]) bx[0] = ux; if (ux > bx[1]) bx[1] = ux; if (uy < bx[2]) bx[2] = uy; if (uy > bx[3]) bx[3] = uy; } };
+  const out = {}, masks = {};
+  for (const sk of T.SKINS) {
+    const rest = shot(sk, { t: 0.873, wing: 1 });
+    const m = new Uint8Array(W * H); for (let i = 0; i < m.length; i++) m[i] = rest[i * 4 + 3] > 127 ? 1 : 0; masks[sk.id] = m;
+    const r = { rise: diff(rest, shot(sk, { t: 0.873, wing: 1, ly: -1, ear: -1 })), fall: diff(rest, shot(sk, { t: 0.873, wing: 1, ly: 1, ear: 1 })),
+      flap: diff(rest, shot(sk, { t: 0.873, wing: 1, flap: 0.6 })), empty: diff(rest, shot(sk, { t: 0.873, wing: 0 })) };
+    const bRest = [1e9, -1e9, 1e9, -1e9], bFly = [1e9, -1e9, 1e9, -1e9];
+    for (let i = 0; i <= 60; i++) for (const w of [1, 0]) grow(bRest, shot(sk, { t: i / 10, wing: w }));
+    for (const ly of [-1, 1]) for (const f of [0, 0.25, 0.5, 0.75, 1]) grow(bFly, shot(sk, { t: 0.873, wing: 1, ly, ear: ly, flap: f }));
+    r.rest = bRest.map((v) => Math.round(v * 10) / 10); r.fly = bFly.map((v) => Math.round(v * 10) / 10);
+    for (const k of ['rise', 'fall', 'flap', 'empty']) r[k] = Math.round(r[k] * 1000) / 1000;
+    out[sk.id] = r;
+  }
+  const ids = T.SKINS.map((s) => s.id), iou = [];
+  for (let i = 0; i < ids.length; i++) for (let j = i + 1; j < ids.length; j++) { const a = masks[ids[i]], b = masks[ids[j]]; let n = 0, u = 0;
+    for (let k = 0; k < a.length; k++) { if (a[k] && b[k]) n++; if (a[k] || b[k]) u++; } iou.push([ids[i], ids[j], Math.round(n / (u || 1) * 1000) / 1000]); }
+  return { out, iou };
+}"""
+
+
 async def t_skins(b):
-    print('Облики, взмахи, следы, лавка')
+    print('Облики, взмахи, следы, лавка, позы, рамка, силуэты')
     ctx, pg = await page(b)
     sh = await pg.evaluate('''() => { document.getElementById('bShop').click();
       const tabs = [...document.querySelectorAll('#shopTabs button')].map((x) => x.textContent.trim());
       const cards = document.querySelectorAll('#shopBody .card').length, trail = document.getElementById('bbTrail').textContent;
       return { tabs, cards, trail, cur: window.__tl.save.skin }; }''')
-    check('пустое сохранение: надет Ёжик; в лавке вкладки «Облики» и «Усиления», 12 карточек, «След: листики»',
-          sh['cur'] == 'ezhik' and sh['tabs'] == ['Облики', 'Усиления'] and sh['cards'] == 12 and sh['trail'] == 'След: листики', str(sh))
+    check('пустое сохранение: надета Тихоходка; в лавке вкладки «Облики» и «Усиления», 12 карточек, «След: мох»',
+          sh['cur'] == 'tihohodka' and sh['tabs'] == ['Облики', 'Усиления'] and sh['cards'] == 12 and sh['trail'] == 'След: мох', str(sh))
     # каждый покупается (или открывается) и надевается через лавку
     bought = await pg.evaluate('''() => { const T = window.__tl, s = T.save, out = [];
       s.coins = 99999;
@@ -364,10 +431,10 @@ async def t_skins(b):
       }
       return out; }''')
     bad = [x for x in bought if not (x[1] and x[2] and x[3] == 'След: ' + x[4])]
-    check('каждый облик покупается/открывается и надевается, у каждого строка «След: …»', not bad, str(bad or [x[3] for x in bought]))
+    check('каждый облик покупается/открывается и надевается, у каждого строка «След: …» = trailName', not bad, str(bad or [x[3] for x in bought]))
     spent = await pg.evaluate('() => 99999 - window.__tl.save.coins')
-    check('потрачено ровно по ценам таблицы 10.3', spent == 150 + 400 + 700 + 1000 + 1300 + 1700 + 2100 + 2600 + 3200, str(spent))
-    # 10 с забега на каждом: взмахи, след не больше 40 частиц
+    check('потрачено ровно 13 150 (цены таблицы раздела 4)', spent == 150 + 400 + 700 + 1000 + 1300 + 1700 + 2100 + 2600 + 3200, str(spent))
+    # 10 с забега на каждом: взмахи, след и всплески вместе — не больше 40 частиц
     r = await pg.evaluate('''() => { const T = window.__tl, g = T.game, P = T.P, s = T.save, out = {};
       document.getElementById('shop').hidden = true;
       for (const sk of T.SKINS) {
@@ -375,7 +442,7 @@ async def t_skins(b):
         let maxTrail = 0, flapSeen = 0, emitted = 0; const seen = new Set();
         for (let i = 0; i < 600; i++) {
           if (P.vy < -150 && P.y < T.run.maxY - 60) P.vy = 850;                // бот-пружина: не даём упасть
-          if (i % 90 === 10) { s.up.wings = 3; P.wing = 1; T.flap(); }
+          if (i % 90 === 10) { s.up.wings = 3; P.charges = Math.max(P.charges, 1); T.flap(); }
           T.update(1 / 60); if (i % 2 === 0) T.render();
           let n = 0; for (const q of g.parts) if (q.trail) { n++; if (!seen.has(q)) { seen.add(q); emitted++; } }
           maxTrail = Math.max(maxTrail, n); if (P.flap > 0) flapSeen++;
@@ -385,31 +452,46 @@ async def t_skins(b):
       return out; }''')
     over = {k: v for k, v in r.items() if v['maxTrail'] > 40}
     check('10 с забега на каждом облике без ошибок', not pg.errors, '; '.join(pg.errors[:3]))
-    check('след вылетает у каждого (у Светлячка — путь для пунктира)', all((v['emitted'] > 5) if v['dash'] < 0 else v['dash'] > 10 for v in r.values()),
+    check('след вылетает у каждого (у Удильщика — путь лески: P.hist больше 10 точек)', all((v['emitted'] > 5) if v['dash'] < 0 else v['dash'] > 10 for v in r.values()),
           str({k: (v['emitted'], v['dash']) for k, v in r.items()}))
-    check('живых частиц следа не больше 40', not over, str(over or {k: v['maxTrail'] for k, v in r.items()}))
+    check('живых частиц следа вместе со всплесками не больше 40', not over, str(over or {k: v['maxTrail'] for k, v in r.items()}))
     check('взмах проигрывается у каждого', all(v['flapSeen'] > 4 for v in r.values()), str({k: v['flapSeen'] for k, v in r.items()}))
-    # нагрузка: выпуск следа без пауз упирается в 40
-    st = await pg.evaluate('''() => { const T = window.__tl, g = T.game; T.save.skin = 'mukhomor'; T.startRun(true); g.parts.length = 0;
-      for (let i = 0; i < 200; i++) T.emitTrail(0.5); return g.parts.filter((q) => q.trail).length; }''')
-    check('при сплошном выпуске частиц следа не больше 40', st <= 40, str(st))
+    # нагрузка: Росянка (самый большой всплеск) — сплошной выпуск следа и 20 взмахов подряд упираются в 40
+    st = await pg.evaluate('''() => { const T = window.__tl, g = T.game, P = T.P; T.save.skin = 'rosyanka'; g.zen = true; T.startRun(true); g.parts.length = 0; let mx = 0;
+      for (let i = 0; i < 200; i++) { T.emitTrail(0.5); if (i % 10 === 0) { P.charges = 3; P.vy = 0; P.fly = null; T.flap(); }
+        let n = 0; for (const q of g.parts) if (q.trail) n++; mx = Math.max(mx, n); }
+      return mx; }''')
+    check('Росянка: 200 выпусков следа и 20 взмахов подряд — частиц следа не больше 40', st <= 40, str(st))
     fk = await pg.evaluate('() => window.__tl.SKINS.map((s) => s.flapK)')
-    check('длительность взмаха задана у каждого облика и не одна на всех', all(isinstance(x, (int, float)) and x > 0 for x in fk) and len(set(fk)) >= 6, str(fk))
+    check('длительность взмаха задана у каждого облика, разных значений не меньше 6', all(isinstance(x, (int, float)) and x > 0 for x in fk) and len(set(fk)) >= 6, str(fk))
     # разворот: смена направления за ~0,1 с
-    fc = await pg.evaluate('''() => { const T = window.__tl, g = T.game, P = T.P, c = T.ctl; T.save.skin = 'lis'; g.zen = true; T.startRun(true);
+    fc = await pg.evaluate('''() => { const T = window.__tl, g = T.game, P = T.P, c = T.ctl; T.save.skin = 'rosyanka'; g.zen = true; T.startRun(true);
       const f = []; c.keyL = true; for (let i = 0; i < 12; i++) { if (P.vy < -150) P.vy = 850; T.update(1 / 60); f.push(+P.face.toFixed(2)); }
       c.keyL = false; c.keyR = true; for (let i = 0; i < 12; i++) { if (P.vy < -150) P.vy = 850; T.update(1 / 60); f.push(+P.face.toFixed(2)); }
       c.keyR = false; return f; }''')
     check('при смене направления облик разворачивается за ~0,1 с', min(fc[:12]) <= -0.99 and fc[23] >= 0.99, str(fc))
+    # рисунок: позы полёта, «без заряда» и взмах отличаются от покоя; рамка 3.7; силуэты не похожи друг на друга
+    d = await pg.evaluate(DRAWN)
+    o = d['out']
+    for key, lim, name in [('rise', 0.06, 'подъём'), ('fall', 0.06, 'спуск'), ('flap', 0.05, 'взмах'), ('empty', 0.02, 'без заряда')]:
+        low = {k: v[key] for k, v in o.items() if v[key] < lim}
+        check(f'поза «{name}» отличается от покоя (доля пикселей ≥ {lim})', not low, str(low or {k: v[key] for k, v in o.items()}))
+    out_rest = {k: v['rest'] for k, v in o.items() if not (v['rest'][0] >= -32.5 and v['rest'][1] <= 32.5 and v['rest'][2] >= -62.5 and v['rest'][3] <= 4.5)}
+    check('рамка в покое (t 0…6 с, с зарядом и без): x ∈ [−32; 32], y ∈ [−62; 4]', not out_rest, str(out_rest or {k: v['rest'] for k, v in o.items()}))
+    out_fly = {k: v['fly'] for k, v in o.items() if not (v['fly'][0] >= -34.5 and v['fly'][1] <= 34.5 and v['fly'][2] >= -66.5 and v['fly'][3] <= 28.5)}
+    check('рамка в полёте (подъём и спуск, кадры взмаха): x ∈ [−34; 34], y ∈ [−66; 28]', not out_fly, str(out_fly or {k: v['fly'] for k, v in o.items()}))
+    close = [x for x in d['iou'] if x[2] >= 0.7]
+    check('силуэты различаются: пересечение / объединение < 0,7 для всех 66 пар', len(d['iou']) == 66 and not close,
+          str(close or sorted(d['iou'], key=lambda x: -x[2])[:4]))
     check('ошибок в консоли нет', not pg.errors, '; '.join(pg.errors[:3]))
     await ctx.close()
-
 
 
 TEXTS_SRC = [      # строки раздела 12, которые видны только в забеге (подсказки) или после миграции
     '×2 — теперь каждый пойманный светлячок считается за двух. Новые кочки подряд разгонят множитель до ×5',
     'Прыгай на новые кочки подряд — растёт множитель светлячков, до ×5. Снова на ту же кочку — он падает',
     'Облики обновились: вернули светлячков за прежние облики и следы',
+    'Облики теперь новые. Вместо каждого купленного — новый, и он уже твой',
 ]
 TEXTS_HELP = [     # памятка: название и описание
     ('Сухой лист', 'Лёгкий и ломкий. Выдержит один прыжок, потом сорвётся и улетит'),
@@ -422,7 +504,8 @@ TEXTS_HELP = [     # памятка: название и описание
     ('Крылья', 'Запасной прыжок в воздухе. Заряд восстанавливается сам. У каждого облика свой взмах'),
     ('Множитель светлячков', 'Новые кочки подряд разгоняют его до ×5 — он горит рядом со счётчиком светлячков. Каждый пойманный светлячок считается за столько. На высоту не влияет. Прыжок на ту же кочку снижает множитель, удар ворчуна сбрасывает'),
 ]
-OLD_WORDS = ['Следы', 'ветк', 'стайк', 'Светик', 'Грибок', 'Капля', 'Лягух', 'Лунный кот', 'Дух-лис', 'Зайка-призрак', 'Желейка', 'Мотылёк', 'Кристаллик', 'Звездочёт', 'Хранитель']
+OLD_WORDS = ['Следы', 'ветк', 'стайк', 'Светик', 'Грибок', 'Капля', 'Лягух', 'Лунный кот', 'Дух-лис', 'Зайка-призрак', 'Желейка', 'Мотылёк', 'Кристаллик', 'Звездочёт', 'Хранитель',
+             'Ёжик', 'Мухомор', 'Лисёнок', 'Совёнок', 'Сорока', 'Заяц-беляк', 'Снегирь', 'Шмель', 'Белка-летяга', 'Летучая мышка', 'Рысь']
 
 
 async def t_texts(b):
@@ -537,10 +620,13 @@ async def speed_of(b, url, cases):
 async def t_speed(b):
     print('Скорость (процессор ×4 медленнее)')
     if not OLD_URL:
-        check('скорость: нужна старая версия (TL_OLD_URL)', False, 'раздай index.html из коммита 23571e5 и передай адрес в TL_OLD_URL'); return
-    # «до»: самый тяжёлый старый след (сияние-лента) и звездочёт; «после»: светлячок (пунктир и своё свечение) и мухомор (больше всего частиц)
-    old, e1 = await speed_of(b, OLD_URL, {'поляна': ['svetik', 'aurora', 350, 120], 'кроны': ['svetik', 'aurora', 3600, 120], 'высь': ['svetik', 'aurora', 5600, 120], 'высь2': ['zvezda', 'stardust', 5600, 120]})
-    new, e2 = await speed_of(b, URL, {'поляна': ['ezhik', None, 350, 120], 'кроны, листва': ['shmel', None, 3600, 120], 'высь, медузы, светлячок': ['svetlyachok', None, 5600, 120], 'высь, медузы, мухомор': ['mukhomor', None, 5600, 120]})
+        check('скорость: нужна старая версия (TL_OLD_URL)', False, 'раздай index.html из коммита 8fd511c и передай адрес в TL_OLD_URL'); return
+    # «до» (облики 21.11): ёжик на поляне, шмель в кронах, светлячок (пунктир и своё свечение) и мухомор (больше всего частиц) в выси;
+    # «после»: Тихоходка на поляне, Рыба-луна в кронах и все 12 обликов в выси — каждый сравнивается с худшим из двух «до»
+    old, e1 = await speed_of(b, OLD_URL, {'поляна': ['ezhik', None, 350, 120], 'кроны': ['shmel', None, 3600, 120], 'высь': ['svetlyachok', None, 5600, 120], 'высь2': ['mukhomor', None, 5600, 120]})
+    cases = {'поляна': ['tihohodka', None, 350, 120], 'кроны': ['rybaluna', None, 3600, 120]}
+    for sid in SKIN_IDS: cases[f'высь, {sid}'] = [sid, None, 5600, 120]
+    new, e2 = await speed_of(b, URL, cases)
     print('    до:', old, '\n    после:', new)
     for k, v in new.items():
         ref = old['поляна'] if k == 'поляна' else old['кроны'] if k.startswith('кроны') else max(old['высь'], old['высь2'])
@@ -561,20 +647,27 @@ async def t_lite(b):
         out.push(mx - mn);
       }
       A.halo = h0;
-      // свое свечение светлячка: с «Экономно» его нет
-      const sk = T.SKINS.find((q) => q.id === 'svetlyachok'), px = (lite) => { A.setLite(lite); const c2 = document.createElement('canvas'); c2.width = c2.height = 120; const y = c2.getContext('2d');
-        y.fillStyle = '#000'; y.fillRect(0, 0, 120, 120); y.translate(60, 100); y.scale(2, 2); A.char(y, sk, { t: 1, wing: 1 }); const d = y.getImageData(0, 0, 120, 120).data; let sum = 0; for (let i = 0; i < d.length; i += 4) sum += d[i + 1]; return sum; };
-      const lit = px(false), lite = px(true); A.setLite(false); s.set.fx = 'high';
-      return { halos, spread: out, lit, lite }; }""")
+      // своё свечение: в «Экономно» гаснет у пяти (у Жеоды — во взмахе, когда створка раскрыта больше чем наполовину); у семи остальных рисунок прежний
+      const GLOW = { tihohodka: { t: 1, wing: 1 }, opyata: { t: 1, wing: 1 }, udilshchik: { t: 1, wing: 1 }, izbushka: { t: 1, wing: 1 }, zheoda: { t: 1, wing: 1, flap: 0.5 } };
+      const px = (sk, a, lite) => { A.setLite(lite); const c2 = document.createElement('canvas'); c2.width = c2.height = 160; const y = c2.getContext('2d');
+        y.fillStyle = '#000'; y.fillRect(0, 0, 160, 160); y.translate(80, 140); y.scale(2, 2); A.char(y, sk, a); const d = y.getImageData(0, 0, 160, 160).data; let sum = 0; for (let i = 0; i < d.length; i += 4) sum += d[i + 1]; return sum; };
+      const own = {}, same = {};
+      for (const sk of T.SKINS) { const a = GLOW[sk.id] || { t: 1, wing: 1 }; (GLOW[sk.id] ? own : same)[sk.id] = [px(sk, a, true), px(sk, a, false)]; }
+      A.setLite(false); s.set.fx = 'high';
+      return { halos, spread: out, own, same }; }""")
     check('в «Экономно» всё рисуется (кадр не пустой во всех зонах и в меню)', all(v > 60 for v in r['spread']), str(r['spread']))
     check('в «Экономно» ореолов нет (Art.halo не вызывается)', r['halos'] == 0, str(r['halos']))
-    check('в «Экономно» у Светлячка нет своего свечения', r['lite'] < r['lit'] * 0.97, f"{r['lite']} против {r['lit']}")
+    bad = {k: v for k, v in r['own'].items() if not v[0] < v[1] * 0.97}
+    check('в «Экономно» своё свечение гаснет у пяти: Тихоходка, Опята, Жеода, Удильщик, Избушка', len(r['own']) == 5 and not bad,
+          str(bad or {k: round(v[0] / v[1], 3) for k, v in r['own'].items()}))
+    diff = {k: v for k, v in r['same'].items() if v[0] != v[1]}
+    check('у семи остальных «Экономно» рисунок облика не меняет', len(r['same']) == 7 and not diff, str(diff))
     tr = await pg.evaluate(r"""() => { const T = window.__tl, g = T.game, P = T.P, s = T.save, n = {};
-      for (const fx of ['high', 'low']) { s.set.fx = fx; s.skin = 'shmel'; g.zen = true; T.startRun(true); g.parts.length = 0; let made = 0; const seen = new Set();
+      for (const fx of ['high', 'low']) { s.set.fx = fx; s.skin = 'zheoda'; g.zen = true; T.startRun(true); g.parts.length = 0; let made = 0; const seen = new Set();
         for (let i = 0; i < 240; i++) { if (P.vy < -150) P.vy = 850; T.update(1 / 60); T.render(); for (const q of g.parts) if (q.trail && !seen.has(q)) { seen.add(q); made++; } }
         n[fx] = made; }
       s.set.fx = 'high'; return n; }""")
-    check('в «Экономно» след выпускается примерно вдвое реже', tr['low'] <= tr['high'] * 0.62, str(tr))
+    check('в «Экономно» след выпускается примерно вдвое реже (Жеода)', tr['low'] <= tr['high'] * 0.62, str(tr))
     check('ошибок в консоли нет', not pg.errors, '; '.join(pg.errors[:3]))
     await ctx.close()
 

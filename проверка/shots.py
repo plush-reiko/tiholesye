@@ -3,7 +3,7 @@
 Запуск:
   python3 -m http.server 8765 --bind 127.0.0.1 --directory <папка репозитория>   # в отдельном окне
   python3 shots.py <папка для снимков> [URL]
-Лист «до/после» обликов: раздай старую версию (index.html из git, например коммит 23571e5) на другом порту
+Лист «до/после» обликов: раздай старую версию (index.html из git, коммит 8fd511c — облики 21.11) на другом порту
 и передай её адрес в TL_OLD_URL, например TL_OLD_URL=http://127.0.0.1:8766/index.html.
 
 Что получится: 01–03 — меню, лавка, памятка (окно 956), 04–06 — то же в окне высотой 700;
@@ -29,15 +29,16 @@ SHEET = r"""({what, scale}) => {
       y.translate(cw / 2, ch - 22 * scale); y.scale(scale * 1.2, scale * 1.2); A.char(y, sk, { t: 0.873, wing: 1 });
       if (!dark) { y.setTransform(1, 0, 0, 1, 0, 0); y.globalCompositeOperation = 'source-in'; y.fillStyle = '#000'; y.fillRect(0, 0, cw, ch); }
       const ox = (i % cols) * cw, oy = Math.floor(i / cols) * ch;
-      x.drawImage(c2, ox, oy); label(sk.name, ox + cw / 2, oy + ch - 6 * scale, dark ? '#eef0ff' : '#000');
+      x.drawImage(c2, ox, oy); label(dark ? sk.name : String(i + 1), ox + cw / 2, oy + ch - 6 * scale, dark ? '#eef0ff' : '#000');   // силуэты — номерами: имя подсказало бы ответ
     });
   }
   if (what === 'states') {
-    const S = [['покой', { t: 0.873, wing: 1 }], ['моргает', { t: 0.873, wing: 1, blink: true }], ['взмах', { t: 0.873, wing: 1, flap: 0.6 }], ['без заряда', { t: 0.873, wing: 0 }]];
-    const cw = 110 * scale, ch = 110 * scale;
+    const S = [['покой', { t: 0.873, wing: 1 }], ['моргает', { t: 0.873, wing: 1, blink: true }], ['взмах', { t: 0.873, wing: 1, flap: 0.6 }], ['без заряда', { t: 0.873, wing: 0 }],
+      ['подъём', { t: 0.873, wing: 1, ly: -1, ear: -1 }], ['спуск', { t: 0.873, wing: 1, ly: 1, ear: 1 }]];
+    const cw = 110 * scale, ch = 136 * scale;          // ячейка выше: в полёте свисающее (хвост змея, стебель баранца) уходит до +26
     cv.width = cw * S.length; cv.height = ch * T.SKINS.length; x.fillStyle = '#141a52'; x.fillRect(0, 0, cv.width, cv.height);
     T.SKINS.forEach((sk, r) => S.forEach(([nm, a], k) => {
-      x.save(); x.translate(k * cw + cw / 2, r * ch + ch - 22 * scale); x.scale(scale * 1.2, scale * 1.2); A.char(x, sk, a); x.restore();
+      x.save(); x.translate(k * cw + cw / 2, r * ch + ch - 46 * scale); x.scale(scale * 1.2, scale * 1.2); A.char(x, sk, a); x.restore();
       label(`${sk.name} · ${nm}`, k * cw + cw / 2, r * ch + ch - 6 * scale, '#eef0ff');
     }));
   }
@@ -72,7 +73,7 @@ SHEET = r"""({what, scale}) => {
     const b = A.bubble(); x.drawImage(b.c, it.length * cw + 4 * scale, ch / 2 - 36 * scale, 72 * scale, 72 * scale);
   }
   if (what === 'zones') {                      // каждый облик на небе каждой из пяти зон (с мягким ореолом, как в забеге)
-    const n = T.SKINS.length, cw = 54 * scale, ch = 62 * scale;
+    const n = T.SKINS.length, cw = 70 * scale, ch = 74 * scale;          // выступы до −62 и ±32 не обрезаются и не наезжают на соседа
     cv.width = cw * n; cv.height = ch * T.ZONES.length;
     T.ZONES.forEach((z, r) => {
       x.fillStyle = z.sky[1]; x.fillRect(0, r * ch, cv.width, ch); x.fillStyle = z.sky[0]; x.fillRect(0, r * ch, cv.width, ch * 0.22);
@@ -86,9 +87,9 @@ SHEET = r"""({what, scale}) => {
   return cv.toDataURL('image/png');
 }"""
 
-# облики старой версии (14) — для листа «до/после»; у старой игры тот же Art.char(c, sk, a)
+# облики старой версии — для листа «до/после»; у старой игры тот же Art.char(c, sk, a)
 OLD_SHEET = r"""(scale) => {
-  const T = window.__tl, A = T.Art, cw = 62 * scale, ch = 66 * scale, n = T.SKINS.length;
+  const T = window.__tl, A = T.Art, cw = 68 * scale, ch = 72 * scale, n = T.SKINS.length;
   const cv = document.createElement('canvas'); cv.width = cw * n; cv.height = ch; const x = cv.getContext('2d');
   x.fillStyle = '#141a52'; x.fillRect(0, 0, cv.width, cv.height);
   T.SKINS.forEach((sk, i) => { x.save(); x.translate(i * cw + cw / 2, ch - 6 * scale); x.scale(scale, scale); A.char(x, sk, { t: 0.873, wing: 1 }); x.restore(); });
@@ -149,8 +150,8 @@ async def main():
               const A = await load(a), C = await load(c), pad = 120, W = Math.max(A.width, C.width);
               const cv = document.createElement('canvas'); cv.width = W; cv.height = A.height + C.height + pad * 2; const x = cv.getContext('2d');
               x.fillStyle = '#0c0f3a'; x.fillRect(0, 0, cv.width, cv.height); x.fillStyle = '#eef0ff'; x.font = '600 54px sans-serif';
-              x.fillText('До: 14 обликов (19.11)', 30, 80); x.drawImage(A, (W - A.width) / 2, pad);
-              x.fillText('После: 12 обликов (21.11)', 30, pad + A.height + 80); x.drawImage(C, (W - C.width) / 2, pad * 2 + A.height);
+              x.fillText('До: облики 21.11', 30, 80); x.drawImage(A, (W - A.width) / 2, pad);
+              x.fillText('После: бестиарий 24.11', 30, pad + A.height + 80); x.drawImage(C, (W - C.width) / 2, pad * 2 + A.height);
               return cv.toDataURL('image/png'); }''', [old, new])
             open(os.path.join(OUT, '11-before-after.png'), 'wb').write(base64.b64decode(both.split(',')[1]))
         print('ошибок в консоли:', len(errors)); [print(' ', e) for e in errors[:20]]
