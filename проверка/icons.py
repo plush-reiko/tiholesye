@@ -1,5 +1,5 @@
 """Иконки «Тихолесья» функциями самой игры (canvas → PNG): python3 icons.py <папка-репозитория>
-Ёжик на вершине пня, стволы ночного леса, светящиеся трутовики и светлячки. Всё важное — в центральных 80 % (maskable)."""
+Тихоходка на вершине пня, стволы ночного леса, светящиеся трутовики и светлячки. Всё важное — в центральных 80 % (maskable)."""
 import asyncio, base64, os, sys
 from playwright.async_api import async_playwright
 REPO = sys.argv[1]
@@ -37,10 +37,10 @@ JS = r"""(S) => {
   A.setScale(k);
   const sp = A.plat('home', 66, 0, 1);
   c.save(); c.setTransform(1, 0, 0, 1, 0, 0); c.drawImage(sp.c, (58 - sp.ox) * k, (73 - sp.oy) * k, sp.w * k, sp.h * k); c.restore();
-  // Ёжик смотрит вправо: мягкий ореол облика и сам облик крупно
-  const sk = T.SKINS.find((s) => s.id === 'ezhik');
-  c.globalCompositeOperation = 'lighter'; c.globalAlpha = 0.16; c.drawImage(A.glow(sk.glow), 60 - 24, 72 - 42, 48, 48); c.globalCompositeOperation = 'source-over'; c.globalAlpha = 1;
-  c.save(); c.translate(60, 72.8); c.scale(0.84, 0.84); A.char(c, sk, { t: 0.873, wing: 1, face: 1 }); c.restore();
+  // Тихоходка смотрит вправо: мягкий ореол облика и сам облик крупно
+  const sk = T.SKINS.find((s) => s.id === 'tihohodka');
+  c.globalCompositeOperation = 'lighter'; c.globalAlpha = 0.16; c.drawImage(A.glow(sk.glow), 57 - 24, 72 - 42, 48, 48); c.globalCompositeOperation = 'source-over'; c.globalAlpha = 1;
+  c.save(); c.translate(57, 72.8); c.scale(0.9, 0.9); A.char(c, sk, { t: 0.873, wing: 1, face: 1 }); c.restore();
   // бумажное зерно, как у интерфейса
   c.setTransform(1, 0, 0, 1, 0, 0);
   const id = c.getImageData(0, 0, S, S), d = id.data; let s = 12345;

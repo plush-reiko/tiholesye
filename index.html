@@ -4911,8 +4911,8 @@ const UI = (() => {
   };
   function trailBits(x, sk) {
     const k = sk.trail.k, at = Art.anchor(sk, { t: 0.873, wing: 1, face: 1 }), ax = 80 + 1.75 * at[0], ay = 141 - 1.75 * at[1];   // точка следа в карточке
-    if (k === 'dash') {             // леска — дугой снизу слева к грибку
-      const pts = []; for (let i = 0; i <= 40; i++) { const u = i / 40, bx = lerp(10, ax, u), by = lerp(140, ay, u); pts.push([bx - Math.sin(u * Math.PI) * 18, by + Math.sin(u * Math.PI) * 10, u * 170, 0.25 + u * 0.75]); }
+    if (k === 'dash') {             // леска — дугой снизу слева, над спиной рыбы, к грибку (не поперёк тела)
+      const pts = []; for (let i = 0; i <= 40; i++) { const u = i / 40, bx = lerp(12, ax, u), by = lerp(138, ay, u); pts.push([bx - Math.sin(u * Math.PI) * 30, by - Math.sin(u * Math.PI) * 40, u * 220, 0.25 + u * 0.75]); }
       Art.glowDash(x, pts, 2.4, sk.trail.col); return;
     }
     const [cols, col2, SPOT] = TRAIL_LOOK[k];
