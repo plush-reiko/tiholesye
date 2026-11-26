@@ -2035,6 +2035,7 @@ const Art = (() => {
   // общее для бестиария: кусочек из нескольких контуров (когти, крапины) — один Path2D в кэше; сужающийся штрих в кэше;
   // своё свечение — ореол поверх рисунка (гаснет в «Экономно»); точка в системе, повёрнутой на угол
   const MP = (key, polys) => { let p = SKP.get(key); if (!p) { p = new Path2D(); for (const q of polys) polyTo(p, q); SKP.set(key, p); } return p; };
+  const MPc = (key, polys) => { let p = SKP.get(key); if (!p) { p = new Path2D(); for (const q of polys) cutTo(p, q); SKP.set(key, p); } return p; };   // то же, но края плавные (пятна, моря)
   const TP = (key, pts, w0, w1) => { let p = SKP.get(key); if (!p) { p = polyPath(taperPts(pts, w0, w1)); SKP.set(key, p); } return p; };
   const ownGlow = (c, x, y, w, h, col, al) => {
     if (LITE_ART || al <= 0.01) return;
@@ -2150,7 +2151,7 @@ const Art = (() => {
     taper(c, [sa, [sa[0] - 0.4, sa[1] - 3.2], ta], 0.8, 0.55);
     taper(c, [sb, [sb[0] + 0.2, sb[1] - 2.6], [sb[0] + 1.7, sb[1] - 3.2], tb], 0.75, 0.5);
     c.fillStyle = rd ? S.tip : S.dim; dot(c, ta[0], ta[1] - 0.5, 1.1); dot(c, tb[0] + 0.1, tb[1] + 0.5, 0.95);
-    ownGlow(c, ta[0], ta[1] - 0.5, 10, 10, S.tip, 0.5 * tipA); ownGlow(c, tb[0] + 0.1, tb[1] + 0.5, 10, 10, S.tip, 0.5 * tipA);
+    ownGlow(c, ta[0], ta[1] - 0.5, 14, 14, S.tip, 0.55 * tipA); ownGlow(c, tb[0] + 0.1, tb[1] + 0.5, 14, 14, S.tip, 0.55 * tipA);
     const moss = P2('th|moss', TH_MOSS, TH_MOSS_CN);
     pcs(c, moss, S.moss, S.mossD);
     inside(c, moss, () => fillPts(c, TH_MOSS_L, S.mossL));
@@ -2266,29 +2267,35 @@ const Art = (() => {
     [bw * 0.44, -bl * 0.74], [bw * 0.5, -bl * 0.42], [bw * 0.32, -bl * 0.12], [0.9, 0.4]];
   const roStalk = (L, bend) => [[0, 0], [bend * L * 0.3, -L * 0.35], [bend * L * 0.75, -L * 0.7], [bend * L, -L]];
   // бахрома по краю пластинки: 13 волосков с каплями; k — загиб к середине листа (0…1), dry — высохла: короче, поникли, без капель
-  function roFringe(i, bl, bw, k, dry) {
-    const key = `ro|fr${i}|${dry ? 'd' : Math.round(k * 5)}`; let p = SKP.get(key), q = SKP.get(key + 'd');
-    if (p) return [p, q];
-    p = new Path2D(); q = new Path2D();
-    const cx = 0, cy = -bl * 0.5, rx = bw * 0.5, ry = bl * 0.52, kk = dry ? 1.25 : 0.2 + 0.7 * Math.round(k * 5) / 5;
-    for (let j = 0; j < 13; j++) {
-      const v = -2.15 + j / 12 * 4.3, ex = cx + Math.sin(v) * rx, ey = cy - Math.cos(v) * ry;
-      let nx = Math.sin(v) / rx, ny = -Math.cos(v) / ry; const nl = Math.hypot(nx, ny); nx /= nl; ny /= nl;
-      const ix = cx - ex, iy = cy - ey, il = Math.hypot(ix, iy) || 1;
-      let dx = nx + kk * ix / il, dy = ny + kk * iy / il; const dl = Math.hypot(dx, dy); dx /= dl; dy /= dl;
-      const len = (2.3 + 1.5 * hash(j * 3.7 + bl * 1.3)) * (dry ? 0.6 : 1), mx = ex + nx * len * 0.5, my = ey + ny * len * 0.5, tx = mx + dx * len * 0.55, ty = my + dy * len * 0.55;
-      polyTo(p, taperPts([[ex - nx * 0.5, ey - ny * 0.5], [mx, my], [tx, ty]], 0.6, 0.3));
-      if (!dry) { const r = 0.6 + 0.4 * hash(j * 1.9 + bl); q.moveTo(tx + r, ty); q.arc(tx, ty, r, 0, TAU); }
-    }
-    SKP.set(key, p); SKP.set(key + 'd', q); return [p, q];
+  // один волосок j: ось и капля на конце; kk — загиб к середине листа
+  function roHair(j, bl, bw, kk, dry) {
+    const cy = -bl * 0.5, rx = bw * 0.5, ry = bl * 0.52, v = -2.15 + j / 12 * 4.3, ex = Math.sin(v) * rx, ey = cy - Math.cos(v) * ry;
+    let nx = Math.sin(v) / rx, ny = -Math.cos(v) / ry; const nl = Math.hypot(nx, ny); nx /= nl; ny /= nl;
+    const ix = -ex, iy = cy - ey, il = Math.hypot(ix, iy) || 1;
+    let dx = nx + kk * ix / il, dy = ny + kk * iy / il; const dl = Math.hypot(dx, dy); dx /= dl; dy /= dl;
+    const len = (2.3 + 1.5 * hash(j * 3.7 + bl * 1.3)) * (dry ? 0.6 : 1), mx = ex + nx * len * 0.5, my = ey + ny * len * 0.5, tx = mx + dx * len * 0.55, ty = my + dy * len * 0.55;
+    return { axis: [[ex - nx * 0.5, ey - ny * 0.5], [mx, my], [tx, ty]], tip: [tx, ty], r: 0.6 + 0.4 * hash(j * 1.9 + bl) };
   }
+  const roKK = (k, dry) => (dry ? 1.25 : 0.2 + 0.7 * Math.round(k * 5) / 5);
+  function roFringe(i, bl, bw, k, dry) {
+    const key = `ro|fr${i}|${dry ? 'd' : Math.round(k * 5)}`; let p = SKP.get(key), q = SKP.get(key + 'd'), h = SKP.get(key + 'h');
+    if (p) return [p, q, h];
+    p = new Path2D(); q = new Path2D(); h = new Path2D();
+    for (let j = 0; j < 13; j++) {
+      const w = roHair(j, bl, bw, roKK(k, dry), dry);
+      polyTo(p, taperPts(w.axis, 0.6, 0.3));
+      if (!dry) { const [tx, ty] = w.tip, r = w.r; q.moveTo(tx + r, ty); q.arc(tx, ty, r, 0, TAU); if (j % 3 === 1) { h.moveTo(tx - 0.2 + 0.3, ty - 0.25); h.arc(tx - 0.2, ty - 0.25, 0.3, 0, TAU); } }   // у части капель — точка-блик
+    }
+    SKP.set(key, p); SKP.set(key + 'd', q); SKP.set(key + 'h', h); return [p, q, h];
+  }
+  const RO_GNAT = [[[-0.7, 0], [0, -0.7], [0.8, -0.1], [0, 0.6]], [[-0.2, -0.4], [-1.4, -1.6], [-0.4, -1.2]], [[0.3, -0.5], [1.2, -1.8], [0.8, -0.6]]];
   function rosyanka(c, a) {
     const S = RO, t = a.t || 0, rd = isReady(a), [rise, fall] = poseK(a), u = flapU(a);
     // корешки-ножки и середина розетки
     c.fillStyle = S.root;
     for (const q of [[[-1.6, -6], [-3.6, -2.6], [-5.4, -0.2]], [[-0.4, -6], [-1.2, -2.8], [-1.8, 0]], [[0.8, -6], [1.8, -3], [2.4, 0]], [[1.8, -6.4], [4, -3.4], [5.6, -0.6]]]) taper(c, q, 1.3, 0.7);
     // взмах: листья сжимаются в кулак и раскрываются шире обычного
-    const fist = u > 0 ? (u < 0.4 ? ez(u / 0.4) : -0.45 * Math.sin((u - 0.4) / 0.6 * Math.PI)) : 0;
+    const fist = u <= 0 ? 0 : u < 0.3 ? ez(u / 0.3) : u < 0.45 ? 1 : u < 0.72 ? lerp(1, -0.45, ez((u - 0.45) / 0.27)) : lerp(-0.45, 0, ez((u - 0.72) / 0.28));
     const spread = 1 - 0.75 * rise + 0.45 * fall - fist * 0.85;
     // стрелка с бутонами — за листьями, клонится вперёд; моргание — вздрагивает
     const jit = a.blink ? 0.12 : 0;
@@ -2297,7 +2304,8 @@ const Art = (() => {
     c.fillStyle = S.bud; cut(c, [[8.2, -50.4], [9.8, -49.6], [9.8, -47.6], [8.4, -47], [7.4, -48.4]]); c.fill(); cut(c, [[5.2, -56.2], [6.8, -57.8], [8.2, -56.8], [7.6, -55.2]]); c.fill();
     c.restore();
     pc(c, P2('ro|mid', [[-4, -6], [-3.6, -9.6], [-1.2, -11.2], [1.6, -11], [3.8, -9.2], [4, -6.2], [1.6, -5.2], [-1.6, -5.4]]), S.mid);
-    // листья: у каждого свой угол, длина и фаза волосков; лист с добычей загнут внутрь
+    // листья: у каждого свой угол, длина и фаза волосков; лист с добычей загнут внутрь; капли по очереди вспыхивают белым (раз в 0,7 с на 0,2 с)
+    const fi = Math.floor(t / 0.7), flashLeaf = mod(t, 0.7) < 0.2 ? fi % 6 : -1, flashJ = (fi * 5) % 13;
     RO_LEAVES.forEach(([ang, L, bl, bw, bend, ph, br], i) => {
       const g = (ang - 0.06) * spread + 0.06 + (rd ? 0 : ang * 0.22 + 0.04);
       const k = 0.5 + 0.5 * Math.sin(TAU * t / (2 + i * 0.13) + ph);
@@ -2305,10 +2313,14 @@ const Art = (() => {
       const st = roStalk(L, bend), tip = st[3];
       pc(c, TP('ro|st' + i, st, 1.5, 1.1), S.petiole);
       c.translate(tip[0], tip[1]); c.rotate(br + (rd ? 0 : 0.3 * Math.sign(br || ang)));
-      const [hair, drops] = roFringe(i, bl, bw, k, !rd);
+      const [hair, drops, hl] = roFringe(i, bl, bw, k, !rd);
       pc(c, hair, S.hair);
-      pc(c, P2('ro|bl' + i, roBlade(bl, bw)), S.blade);
-      if (rd) pc(c, drops, S.drop);
+      const blade = P2('ro|bl' + i, roBlade(bl, bw));
+      pc(c, blade, S.blade);
+      inside(c, blade, () => fillPts(c, [[-bw, 1], [0.2, 1], [0.7, -bl * 0.5], [-0.2, -bl * 1.1], [-bw, -bl * 1.1]], S.bladeL));     // светлая сторона пластинки
+      if (rd) { pc(c, drops, S.drop); pc(c, hl, '#ffffff'); }
+      if (i === 6) { c.save(); c.translate(0.6, -bl * 0.56); c.scale(1.1, 1.1); pc(c, MP('ro|gnat', RO_GNAT), S.gnat); c.restore(); }   // пойманный комарик
+      if (rd && flashLeaf === i) { const w = roHair(flashJ, bl, bw, roKK(k, false), false); c.fillStyle = '#ffffff'; dot(c, w.tip[0], w.tip[1], w.r + 0.25); }
       c.restore();
     });
   }
@@ -2429,17 +2441,76 @@ const Art = (() => {
   // воротник: верхний край слева отогнут наружу и назад — свиток в полтора витка; длинная полоска справа отслаивается и завивается стружкой
   const BE_COLLAR = [[-6.4, -46.8], [-9, -49.8], [-13, -50.6], [-16.4, -48.6], [-17.4, -44.6], [-15.6, -41.2], [-12.2, -40.6], [-10.2, -42.8], [-10.6, -46], [-12.8, -47.2], [-14.6, -46], [-14.4, -43.8], [-12.8, -43.4]];
   const BE_STRIP = [[9, -28], [11.4, -27], [13.2, -24.4], [13.8, -21], [12.8, -18.4], [11, -18.8], [11.4, -20.6], [12.6, -20.4]];
+  // береста: чёрные чечевички — короткие горизонтальные штрихи разной длины с неровным шагом; внизу — тёмные шершавые пятна
+  const BE_LENT = [[-5.8, -42, 4.2], [0.8, -40.4, 2.6], [-3.6, -37.2, 5.4], [5.6, -35.8, 2.2], [-6.4, -32.4, 2.8], [-1.4, -30.6, 4.6], [-4.6, -26.2, 2.4], [1.2, -24.2, 3.4],
+    [-6.2, -20.8, 4], [-0.2, -18.6, 2.2], [-4, -15.2, 3.2], [5.4, -27.4, 1.8]].map(([x, y, l], i) => taperPts([[x, y], [x + l * 0.5, y - 0.15 + 0.3 * hash(i)], [x + l, y + 0.1]], 0.9 - 0.15 * (i % 3), 0.5));
+  const BE_LOW = [[[-7.8, -13.6], [-5.4, -14.4], [-4.2, -12.4], [-5.8, -10.6], [-7.6, -11]], [[-2.6, -12.2], [0.4, -13], [1.6, -11.4], [-0.6, -10.2]], [[5.4, -15.2], [7.8, -15.8], [8.6, -13.6], [6.4, -12.6]]];
+  // береста слегка «дышит»; юбка на подъёме и парус на спуске — те же точки, раздвинутые книзу и кверху
+  const beSkirt = (pts) => pts.map(([x, y]) => [x * (1 + 0.55 * clamp((y + 22) / 13, 0, 1)), y]);
+  const beSail = (pts) => pts.map(([x, y]) => [x * (1 + 0.45 * clamp((-34 - y) / 13, 0, 1)) + (y < -40 ? -1 : 0), y + (y < -40 ? 1.4 : 0)]);
+  const BE_TUBE_K = [BE_TUBE, beSkirt(BE_TUBE), beSail(BE_TUBE)], BE_SLIT_K = [BE_SLIT, beSkirt(BE_SLIT), beSail(BE_SLIT)];
+  // взмах: береста разворачивается в широкий плоский лист, как плащ, — видна рыжая изнанка, в центре тёмный обитатель, только глаза.
+  // Четыре ключевых рисунка: свёрнута, полураскрыта, раскрыта, снова полураскрыта
+  const BE_HALF = [[-8, -45], [-12.4, -47.6], [-16.4, -45.4], [-15, -41.6], [-12, -40.4], [-11.6, -30], [-12.2, -18], [-13, -9.6], [-9.6, -8.8], [-5.4, -9.8], [-1, -9],
+    [3.2, -9.8], [8.4, -9.2], [13.4, -10.4], [17.6, -9.2], [16.4, -18], [15.8, -30], [16.8, -42], [18.6, -46.4], [14.4, -47], [10.6, -45.4], [6.4, -46.8], [1.4, -46.4], [-3.4, -47.2]];
+  const BE_HALF_IN = [[-1.6, -44.4], [3.2, -45], [8.6, -44], [13.2, -44.8], [14.2, -30], [14.6, -12.4], [9.2, -11.4], [4, -12.2], [-1.2, -11.6], [-3.6, -30]];
+  // раскрытый лист — как плащ или крылья: края подняты и завёрнуты, книзу сужается; изнанкой к нам, белое — только по завернувшимся краям
+  const BE_OPEN = [[-3, -42.6], [-8.6, -44.6], [-14.6, -46.8], [-20.4, -48.6], [-24.6, -47.6], [-25.8, -44.4], [-23.6, -40.8], [-22.4, -34.6], [-20.6, -27.6], [-18.2, -20.6], [-15.6, -14.6],
+    [-13.8, -10.2], [-9.6, -11.2], [-5.4, -9.8], [-1, -11], [3.4, -9.8], [7.8, -11], [12, -9.8], [14.2, -10.6], [16.4, -15.2], [19, -21.4], [21.6, -28.4], [23.2, -35.4], [24.4, -41.2],
+    [26.2, -44.6], [25, -47.8], [20.8, -48.6], [15, -46.6], [9, -44.4], [3, -42.4]];
+  const BE_OPEN_IN = [[-2.4, -40.4], [-8.2, -42.2], [-14.2, -44.2], [-19.8, -45.6], [-21.4, -41], [-19.8, -33.8], [-17.6, -26.6], [-15, -19.6], [-12.4, -13.4], [-6, -12.6], [0, -13.2],
+    [6, -12.4], [11.8, -12.8], [14.4, -18.8], [17, -25.8], [19.2, -33], [20.6, -40], [19.8, -45.4], [14.6, -44], [8.6, -42], [2.6, -40.2]];
+  const BE_DWELLER = [[-3.8, -9.4], [-5.2, -14], [-5.6, -21], [-4.8, -27.4], [-2.4, -31.2], [0.8, -32], [3.6, -30.4], [5.2, -26], [5.4, -19], [4.8, -12.6], [3.6, -9.2]];
   function beresten(c, a) {
     const S = BE, t = a.t || 0, rd = isReady(a), [rise, fall] = poseK(a), u = flapU(a);
+    const stage = u <= 0 ? 0 : u < 0.16 ? 1 : u < 0.62 ? 2 : u < 0.88 ? 3 : 0;          // 0 свёрнута, 1 и 3 полураскрыта, 2 раскрыта
+    if (stage) {        // развернулась листом: ножки обитателя, лист изнанкой к нам, тёмный обитатель с одними глазами
+      c.fillStyle = S.leg; taper(c, [[-2.6, -9.4], [-3, -5], [-3.6, -1]], 1.6, 1.1); taper(c, [[2.6, -9.4], [3.4, -5], [2.8, -1]], 1.6, 1.1);
+      for (const [x, d] of [[-3.6, -1], [2.8, 1]]) { taper(c, [[x, -1.2], [x - 2.6 * d, -0.1]], 1, 0.4); taper(c, [[x, -1.2], [x + 0.2, 0.3]], 1, 0.4); taper(c, [[x, -1.2], [x + 2.4 * d, -0.1]], 1, 0.4); }
+      const open = stage === 2, sheet = open ? P2('be|open', BE_OPEN, [4, 11, 13, 15, 17, 24]) : P2('be|half', BE_HALF, [7, 14]);
+      pcs(c, sheet, S.bark, S.barkD);
+      inside(c, sheet, () => { pc(c, MP('be|lentO', BE_LENT.map((p) => p.map(([x, y]) => [x * (open ? 3 : 2) - (open ? 4 : 1), y]))), S.lent); });
+      pc(c, P2(open ? 'be|openIn' : 'be|halfIn', open ? BE_OPEN_IN : BE_HALF_IN), S.inner);
+      inside(c, P2(open ? 'be|openIn' : 'be|halfIn', open ? BE_OPEN_IN : BE_HALF_IN), () => fillPts(c, [[4, -50], [30, -50], [30, 0], [6, 0]], S.innerD));
+      pc(c, P2('be|dweller', BE_DWELLER), S.hole);
+      c.fillStyle = S.eye; for (const [x, s] of [[-1.6, 1], [2.4, 0.8]]) { c.save(); c.translate(x, -25.6); c.scale(s, s); cut(c, [[-1.1, 0], [0, -0.7], [1.1, 0], [0, 0.6]], [0, 2]); c.fill(); c.restore(); }
+      c.fillStyle = S.pupil; dot(c, -1.3, -25.6, 0.45); dot(c, 2.6, -25.6, 0.38);
+      return;
+    }
     // ножки-веточки: одна прямая, другая согнута в колене; по три пальца-сучка
-    c.fillStyle = S.leg;      // ножки-веточки: кривые, с сучком; пальцы — три тонкие развилки
-    taper(c, [[-4, -9], [-3.6, -6], [-4.8, -3.6], [-4.6, -1.2]], 1.6, 1.1); taper(c, [[-3.8, -6.2], [-2, -5.4]], 0.8, 0.4);
-    taper(c, [[4.6, -9], [7, -5.6], [6.2, -3.6], [4.8, -1.2]], 1.6, 1.1);
-    for (const [x, d] of [[-4.6, -1], [4.8, 1]]) { taper(c, [[x, -1.3], [x - 2.8 * d, -0.2]], 1, 0.4); taper(c, [[x, -1.3], [x - 0.2 * d, 0.3]], 1, 0.4); taper(c, [[x, -1.3], [x + 2.4 * d, -0.1]], 1, 0.4); }
-    const tube = P2('be|tube', BE_TUBE, BE_TUBE_CN);
+    // ножки-веточки: кривые, с сучком; пальцы — три тонкие развилки; на подъёме свисают
+    c.save(); c.translate(0, rise * 1.4);
+    c.fillStyle = S.leg;
+    taper(c, [[-4, -9], [-3.6, -6], [-4.8 + rise, -3.6], [-4.6 + rise * 1.6, -1.2]], 1.6, 1.1); taper(c, [[-3.8, -6.2], [-2, -5.4]], 0.8, 0.4);
+    taper(c, [[4.6, -9], [7 - rise * 1.4, -5.6], [6.2 - rise, -3.6], [4.8, -1.2]], 1.6, 1.1);
+    for (const [x, d] of [[-4.6 + rise * 1.6, -1], [4.8, 1]]) { taper(c, [[x, -1.3], [x - 2.8 * d, -0.2]], 1, 0.4); taper(c, [[x, -1.3], [x - 0.2 * d, 0.3]], 1, 0.4); taper(c, [[x, -1.3], [x + 2.4 * d, -0.1]], 1, 0.4); }
+    c.restore();
+    // трубка: береста «дышит» раз в 2,8 с; юбка — на подъёме, парус — на спуске
+    const br = rd ? 1 - 0.03 * blip(t, 2.8, 0.9) : 1;
+    const kSk = rise, kSa = fall, B = kSk > kSa ? 1 : 2, kk = Math.max(kSk, kSa);
+    const tube = kk > 0.02 ? keyPath('be|tube' + B, [BE_TUBE_K[0], BE_TUBE_K[B]], kk, 6, BE_TUBE_CN) : P2('be|tube', BE_TUBE, BE_TUBE_CN);
+    const slit = kk > 0.02 ? keyPath('be|slit' + B, [BE_SLIT_K[0], BE_SLIT_K[B]], kk, 6, [1, 2, 9]) : P2('be|slit', BE_SLIT, [1, 2, 9]);
+    c.save(); c.translate(1, 0); c.scale(br, 1); c.translate(-1, 0);
     pcs(c, tube, S.bark, S.barkD);
-    pc(c, P2('be|slit', BE_SLIT, [1, 2, 9]), S.hole);
-    c.fillStyle = S.bark; taper(c, BE_COLLAR, 3, 1.3); taper(c, BE_STRIP, 1.8, 1);
+    inside(c, tube, () => {
+      fillPts(c, [[5, -50], [16, -50], [16, 0], [6.4, 0]], S.barkD);                       // правая сторона трубки — в тени
+      pc(c, MP('be|lent', BE_LENT), S.lent); pc(c, MPc('be|low', BE_LOW), S.low);
+    });
+    pc(c, slit, S.hole);
+    fillPts(c, [[3, -36], [3.6, -36], [3.9, -15.8], [3.3, -15.8]], S.inner);               // рыжая изнанка по краю щели
+    // глаза в темноте щели: бледные, миндалевидные, дальний — частью за краем; смотрят туда, куда движется
+    const lx = clamp(a.lx || 0, -1, 1), lid = a.blink ? 0.85 : rd ? 0 : 0.5;
+    for (const [x, y, w, h] of [[7, -33.6, 2.2, 1.3], [4.2, -33.4, 1.7, 1.1]]) {
+      c.save(); c.translate(x, y); c.scale(1, 1 - lid);
+      c.fillStyle = S.eye; cut(c, [[-w / 2, 0], [0, -h / 2], [w / 2, 0], [0, h / 2]], [0, 2]); c.fill();
+      c.fillStyle = S.pupil; dot(c, lx * w * 0.22, 0.05, h * 0.3);
+      c.restore();
+    }
+    fillPts(c, [[2.6, -36], [3.4, -36], [3.6, -31], [2.8, -31]], S.hole);                  // край щели перекрывает дальний глаз
+    // воротник-завиток слева сверху (без заряда обвис) и полоска справа — снаружи белые, изнутри видна рыжая изнанка; полоска трепещет
+    piv(c, -7.4, -45.6, rd ? 0 : 0.45, 1, 1, () => { c.fillStyle = S.bark; taper(c, BE_COLLAR, 3, 1.3); c.fillStyle = S.inner; taper(c, BE_COLLAR.slice(5), 1.4, 0.8); });
+    piv(c, 9, -28, rd ? Math.sin(t * 9.4) * 0.07 : 0.25, 1, 1, () => { c.fillStyle = S.bark; taper(c, BE_STRIP, 1.8, 1); c.fillStyle = S.inner; taper(c, BE_STRIP.slice(4), 0.9, 0.6); });
+    c.restore();
     // край внешнего слоя у шва отошёл от трубки тонким листом и завернулся наружу — видно, что это свёрнутый лист бересты, а не полено
   }
 
@@ -2536,14 +2607,14 @@ const Art = (() => {
   const UD_FIN = [[1.6, -14.2], [4.4, -9.4], [6.2, -5], [7.4, -1.2], [5.6, 0.2], [3.8, -0.8], [2.4, 0], [0.8, -1], [-0.8, -0.2], [-1.2, -3.6], [-1.8, -8.6], [-1.2, -13.4]];
   const UD_FIN_RAYS = [taperPts([[1, -13], [3.8, -2]], 0.4, 0.25), taperPts([[0.4, -12.6], [1.2, -1.4]], 0.4, 0.25), taperPts([[1.6, -13.4], [5.6, -3.4]], 0.4, 0.25)];
   // удилище с надломом-коленцем и грибок на конце; удилище пружинит вокруг основания
-  const UD_ROD = [[7.6, -37.4], [9.4, -42.2], [12.4, -45.8], [13.8, -46.2], [17.8, -48.4], [22.2, -49.4], [25, -49.2]];
-  const UD_ROD_B = UD_ROD[0], UD_LURE = [27.6, -50.8], UD_C = [2, -24];
+  const UD_ROD = [[7.6, -37.4], [9.4, -42.2], [12.4, -45.8], [13.8, -46.2], [17.4, -48.4], [21, -49.4], [23.6, -49.2]];
+  const UD_ROD_B = UD_ROD[0], UD_LURE = [26.2, -50.8], UD_C = [2, -24];
   // поза: наклон тела, удар хвоста, поворот удилища, пасть; lure — середина шляпки грибка в системе облика (её же берёт Art.anchor)
   function udPose(a) {
     const t = a.t || 0, rd = isReady(a), [rise, fall] = poseK(a), u = flapU(a);
     const whip = u > 0 ? Math.sin(u * TAU) : 0;
     const tilt = -0.2 * rise + 0.05 * fall - whip * 0.1;
-    const rod = Math.sin(TAU * t / 1.9) * 0.05 + Math.sin(TAU * (t - 0.25) / 1.9) * 0.03 - 0.18 * fall + 0.12 * rise + (u > 0 ? Math.sin(u * 3 * Math.PI) * 0.4 : 0);
+    const rod = Math.sin(TAU * t / 1.9) * 0.05 + Math.sin(TAU * (t - 0.25) / 1.9) * 0.03 - 0.18 * fall + 0.12 * rise + (u > 0 ? Math.sin(u * 3 * Math.PI) * 0.26 : 0);
     const yawn = rd ? blip(t, 4.2, 1.1, 0.6) : 0, snap = u > 0 ? Math.abs(Math.cos(u * Math.PI)) : 1;
     const jaw = rd ? (0.08 + 0.26 * yawn + 0.22 * fall) * snap : -0.04;
     const lp = rotP(UD_LURE[0], UD_LURE[1], UD_ROD_B[0], UD_ROD_B[1], rod), lure = rotP(lp[0], lp[1], UD_C[0], UD_C[1], tilt);
@@ -2612,11 +2683,48 @@ const Art = (() => {
   // плавники — узкие серпы, отведены назад (не хохолок): спинной длиннее, анальный короче, рыба стоит на его кончике
   const RY_DORSAL = [[-5.4, -43.8], [-2.4, -46], [-3.6, -50.6], [-6, -55.8], [-9.4, -60.2], [-12, -62], [-11.4, -59.4], [-10.6, -55.4], [-10.2, -50.4], [-9.8, -45.6]];
   const RY_ANAL = [[6.8, -16.2], [3.4, -14.6], [0.6, -14.2], [-0.4, -9.8], [-0.9, -5.2], [-0.6, -1.4], [0.2, 0], [1, -1.2], [2.2, -5.2], [4, -10.4]];
+  // лунные моря: большое тёмное сзади слева, цепочка поменьше посередине, маленькое у края — как на карте луны; бледные разводы
+  const RY_SEAS_D = [[-10.4, -36.6], [-7.4, -39.8], [-3.6, -39.6], [-2.6, -35.8], [-4.8, -31.8], [-8.6, -30.6], [-10.8, -33]];
+  const RY_SEAS = [[[0.4, -33.6], [2.6, -35.2], [4.6, -34], [4, -31.6], [1.4, -31.2]], [[3.6, -28.6], [5.8, -29.6], [7.2, -27.8], [5.6, -26.2], [3.8, -26.8]],
+    [[-1.6, -27.2], [0.4, -28.4], [1.4, -26.6], [-0.2, -25.4]], [[10.2, -38.4], [11.8, -39.2], [12.6, -37.6], [11.2, -36.8]]];
+  const RY_SWIRL = [taperPts([[-6.4, -26.2], [-3.4, -23.4], [0.6, -22.6], [3.4, -23.6]], 0.6, 0.3), taperPts([[1.2, -42], [4.4, -41.6], [7, -39.8]], 0.55, 0.3)];
+  const RY_GILL = [taperPts([[9.4, -29.6], [8.8, -27.4], [9.2, -25.2]], 0.5, 0.3), taperPts([[10.6, -30.4], [10.2, -28.2], [10.6, -26.4]], 0.45, 0.3), taperPts([[8, -28.8], [7.6, -27], [7.9, -25.6]], 0.4, 0.25)];
+  const RY_RAYS_D = [taperPts([[-5.2, -45], [-8, -53], [-10.6, -59.4]], 0.45, 0.25), taperPts([[-7.4, -45.2], [-9.6, -52.6], [-11.4, -58.2]], 0.4, 0.25)];
+  const RY_RAYS_A = [taperPts([[3, -15], [1.6, -9], [0.4, -3]], 0.45, 0.25), taperPts([[5.4, -15.4], [3.6, -9.4], [1.4, -3.6]], 0.4, 0.25)];
+  const RY_PEC = [[8.6, -26.6], [6.2, -29], [4.4, -28.4], [5, -26.4], [4.2, -24.6], [6.4, -24.4]];
+  const RY_TEAR = [[-3.2, -50.2], [-4.6, -50.8], [-3.8, -49]];                          // надрыв на краю спинного плавника
   function rybaluna(c, a) {
     const S = RY, t = a.t || 0, rd = isReady(a), [rise, fall] = poseK(a), u = flapU(a);
-    pc(c, P2('ry|dorsal', RY_DORSAL, [5]), S.fin);
-    pc(c, P2('ry|anal', RY_ANAL, [6]), S.fin);
-    pcs(c, P2('ry|body', RY_BODY, RY_BODY_CN), S.body, mixh(S.body, '#1a1640', 0.3));
+    // «лунные ванны»: раз в 8 с медленно ложится на бок (до −25° за 3 с), лежит и возвращается; в полёте — нет
+    const ph = mod(t, 8), bath = (rd ? 1 : 0) * (1 - Math.max(rise, fall)) * (ph < 3 ? ez(ph / 3) : ph < 5 ? 1 : ph < 8 ? 1 - ez((ph - 5) / 3) : 0);
+    const roll = -0.44 * bath + 0.12 * fall;
+    // гребок: оба длинных плавника разом, как крыло, — спинной вперёд-вниз, анальный вперёд-вверх и обратно
+    const stroke = u > 0 ? Math.sin(u * Math.PI) : 0, idle = Math.sin(TAU * t / 1.8);
+    const dor = 0.7 * stroke - 0.34 * rise + 0.3 * fall + (rd ? idle * 0.05 : -0.42);
+    const ana = -0.7 * stroke + 0.34 * rise - 0.4 * fall + (rd ? -idle * 0.05 : 0.3);
+    c.save(); c.translate(2, -30); c.rotate(roll); c.translate(-2, 30 - 2 * stroke);
+    piv(c, -6, -44, dor, 1, 1, () => { const d = P2('ry|dorsal', RY_DORSAL, [5]); pc(c, d, S.fin); pc(c, MP('ry|raysD', RY_RAYS_D), S.ray); pc(c, H2('ry|tear', RY_TEAR), S.ray); });
+    piv(c, 3.6, -14.8, ana, 1, 1, () => { pc(c, P2('ry|anal', RY_ANAL, [6]), S.fin); pc(c, MP('ry|raysA', RY_RAYS_A), S.ray); });
+    const body = P2('ry|body', RY_BODY, RY_BODY_CN);
+    pcs(c, body, S.body, mixh(S.body, '#1a1640', 0.3));
+    inside(c, body, () => {
+      fillPts(c, [[-9, -18], [-2, -16], [6, -17], [12, -21], [16, -25], [22, -25], [22, -10], [-10, -10]], S.belly);           // брюшко
+      fillPts(c, [[-16, -46], [-9.6, -46], [-10.4, -40], [-10.6, -30], [-10, -20], [-9.4, -12], [-16, -12]], S.frill);          // оборка сзади светлее
+      pc(c, P2('ry|seaD', RY_SEAS_D, [2]), S.seaD); pc(c, MPc('ry|seas', RY_SEAS), S.sea); pc(c, MP('ry|swirl', RY_SWIRL), S.swirl);
+      pc(c, MP('ry|gill', RY_GILL), S.ray);
+    });
+    // грудной плавник машет; рот-«клювик» открывается и закрывается; глаз большой, веко-чёрточкой — чуть озабоченный
+    piv(c, 8.4, -26.6, rd ? Math.sin(TAU * t / 1.1) * 0.25 : 0.4, 1, 1, () => pc(c, P2('ry|pec', RY_PEC, [2, 4]), S.fin));
+    const mo = rd ? 0.5 + 0.5 * Math.sin(TAU * t / 2.3) : 0.2;
+    fillPts(c, [[16.8, -30.6], [18.4, -29.8], [19.2, -28.8], [18.2, -27.6], [16.8, -27.2], [17.4, -28.8]], S.lip);
+    fillPts(c, [[17.6, -29.4], [18.7, -28.9 + 0.2 * (1 - mo)], [17.8, -28.1 - 0.2 * (1 - mo)], [17.2, -28.6]], S.pupil);
+    c.fillStyle = S.rim; dot(c, 11.8, -34, 2.8);
+    const lx = clamp(a.lx || 0, -1, 1) * 0.5;
+    c.fillStyle = S.pupil; dot(c, 12.2 + lx, -33.8, 1.4); c.fillStyle = '#ffffff'; dot(c, 11.6 + lx, -34.4, 0.4);
+    const lid = a.blink ? 0.55 : rd ? 0.12 : 0.5;          // веко: моргает — до середины глаза, без заряда — полуприкрыт
+    fillPts(c, [[8.6, -37.4], [15, -37.4], [15, -36.8 + 5.6 * lid], [8.6, -36.8 + 5.6 * lid]].map(([x, y]) => [x, Math.max(y, -37.4)]), S.body);
+    c.fillStyle = S.lid; taper(c, [[9.4, -37.2 + 5.6 * lid], [11.8, -36.9 + 5.6 * lid], [14.2, -36.2 + 5.6 * lid]], 0.6, 0.45);
+    c.restore();
   }
 
   /* 9. Звездорыл: крот, который роет ходы в ночном небе. Пухлое бархатное тело, огромные розовые лапы-лопаты ладонью наружу
@@ -2632,24 +2740,51 @@ const Art = (() => {
   // лапа-лопата в своей системе: запястье в (0, 0), ладонь вниз-вперёд, пять длинных когтей
   const ZV_PAW = [[-2.6, -1.2], [0.4, -2.8], [3.8, -2.6], [6.6, -1], [8, 1.6], [7.6, 4.4], [5.6, 6.4], [2.6, 7.2], [-0.4, 6.4], [-2.4, 4], [-3.2, 1.4]];
   const ZV_CLAWS = [[[7.4, 0.2], [10.8, 0.6], [7.8, 1.6]], [[7.9, 2], [11.4, 3.2], [7.8, 3.4]], [[7.4, 3.8], [10.8, 5.6], [7, 5.2]], [[5.8, 5.6], [8, 8.2], [5, 6.8]], [[3.6, 6.6], [4.2, 8.6], [2.4, 7.2]]];
+  // у ближней лапы один коготь обломан (короче и тупой)
+  const ZV_CLAWS_N = ZV_CLAWS.map((cl, i) => (i === 2 ? [[7.4, 3.8], [9.2, 4.6], [8.8, 5.4], [7, 5.2]] : cl));
+  const ZV_RIM = [[-18.8, -13.4], [-17.4, -18.6], [-13.2, -22.6], [-8, -24.4], [-8.6, -23.4], [-12.8, -21.6], [-16.4, -17.8], [-17.6, -13.4]];   // холодная кромка — только на крупе, к луне
+  const ZV_DUST = [[-8.4, -19.6, 0.7], [-2, -21.4, 0.6], [5.2, -18.4, 0.55], [-12.6, -15, 0.6]].map(([x, y, r]) => [[x - r, y], [x - 0.2 * r, y - r], [x + r, y - 0.3 * r], [x + 0.3 * r, y + 0.9 * r]]);
+  const ZV_RAY_L = Array.from({ length: 20 }, (_, i) => 2.6 + 2.2 * hash(i * 5.3));
+  // нос-звёздочка: волна бежит по кольцу (лучик на миг короче на 30 %); fold — лучики подогнуты внутрь (без заряда, «моргание»);
+  // ступени волны и сжатия кэшируются
+  function zvNose(w, fold) {
+    const key = `zv|nose|${w}|${fold}`; let p = SKP.get(key); if (p) return p;
+    p = new Path2D();
+    for (let i = 0; i < 20; i++) {
+      const g = i / 20 * TAU + 0.1, d = w < 0 ? 9 : Math.min(Math.abs(i - w), 20 - Math.abs(i - w)), k = (1 - 0.3 * Math.max(0, 1 - d / 1.5)) * (1 - 0.45 * fold / 4);
+      const e = 2.2 + ZV_RAY_L[i] * k, gg = g * (1 - 0.15 * fold / 4);
+      polyTo(p, taperPts([[Math.cos(gg) * 1.8, Math.sin(gg) * 1.8], [Math.cos(gg) * e * 0.6, Math.sin(gg) * e * 0.6], [Math.cos(gg) * e, Math.sin(gg) * e]], 1.7, 0.45));
+    }
+    SKP.set(key, p); return p;
+  }
   function zvezdoryl(c, a) {
     const S = ZV, t = a.t || 0, rd = isReady(a), [rise, fall] = poseK(a), u = flapU(a);
+    // гребок брассом: лапы-лопаты от «вперёд-вверх» к «назад-вниз», тело рывком подаётся вперёд-вверх
+    const sw = u > 0 ? ez(u) : 0, lunge = u > 0 ? Math.sin(u * Math.PI) : 0, dig = rd ? Math.sin(TAU * t / 0.7) * 0.08 : 0;
+    const pawN = (u > 0 ? lerp(-1.1, 0.9, sw) : 0) + dig + 1.0 * rise - 0.9 * fall + (rd ? 0 : 0.45);
+    const pawF = (u > 0 ? lerp(-0.9, 1, sw) : 0) - dig + 0.9 * rise + 1.2 * fall + (rd ? 0 : 0.4);
+    c.save(); c.translate(2 * lunge, -2 * lunge); c.rotate(-0.12 * rise); c.scale(1 + 0.05 * rise, 1);
     // хвост в кольцах, задние лапки, дальняя лапа-лопата
     // хвост — толстый у основания, в кольцах, сужается к кончику и торчит вверх-назад: сразу видно, где хвост, а где нос
     c.fillStyle = S.tail; taper(c, [[-17.6, -11.6], [-20.8, -13.2], [-23.2, -15.8], [-24.4, -19]], 3.8, 0.9);
     c.fillStyle = mixh(S.tail, '#1a1640', 0.3); for (const [x, y, g] of [[-19.8, -12.6, 0.4], [-21.8, -14.2, 0.7], [-23.4, -16.6, 1]]) { c.save(); c.translate(x, y); c.rotate(g); poly(c, [[-0.4, -1.5], [0.4, -1.5], [0.3, 1.4], [-0.5, 1.4]]); c.fill(); c.restore(); }
     c.fillStyle = S.pawD; cut(c, [[-7.6, -6.4], [-9.2, -2.6], [-10.4, -0.4], [-6.8, 0], [-5, -1.4], [-4.4, -5.4]]); c.fill();
     c.fillStyle = S.paw; cut(c, [[-13, -7], [-14.4, -3], [-15.4, -0.4], [-11.6, 0], [-10.2, -1.6], [-9.6, -6]]); c.fill();
-    c.save(); c.translate(3.6, -6.8); c.rotate(0.5); c.scale(0.84, 0.84); pc(c, P2('zv|paw', ZV_PAW), S.pawD); pc(c, MP('zv|claws', ZV_CLAWS), S.claw); c.restore();
-    pcs(c, P2('zv|body', ZV_BODY), S.fur, S.furD);
-    // нос-звёздочка: мясистое кольцо из 22 лучиков разной длины, в повороте 3/4 — сплющено
-    c.save(); c.translate(25.4, -13.6); c.scale(0.86, 1.3);       // нос — главная черта: крупная мясистая звёздочка на конце тонкой морды
-    c.fillStyle = S.nose;
-    for (let i = 0; i < 20; i++) { const g = i / 20 * TAU + 0.1, L = 2.6 + 2.2 * hash(i * 5.3), e = 2.2 + L; taper(c, [[Math.cos(g) * 1.8, Math.sin(g) * 1.8], [Math.cos(g) * e * 0.6, Math.sin(g) * e * 0.6], [Math.cos(g) * e, Math.sin(g) * e]], 1.7, 0.45); }   // лучики сужаются: кольцо острых пальчиков, а не помпон
-    c.fillStyle = S.noseC; dot(c, 0, 0, 2.4);
+    c.save(); c.translate(3.6, -6.8); c.rotate(0.5 + pawF); c.scale(0.84, 0.84); pc(c, P2('zv|paw', ZV_PAW), S.pawD); pc(c, MP('zv|claws', ZV_CLAWS), S.claw); c.restore();
+    // тело: тёмный бархат, снизу тень, по спине — холодная кромка; в шерсти застряли бледные крупинки звёздной пыли
+    const body = P2('zv|body', ZV_BODY);
+    pcs(c, body, S.fur, S.furD);
+    inside(c, body, () => { fillPts(c, [[-22, -9.6], [-8, -8.4], [6, -9.6], [16, -12.4], [26, -14], [26, 0], [-22, 0]], S.furD); fillPts(c, ZV_RIM, S.rim); });
+    pc(c, MP('zv|dust', ZV_DUST), S.dust);
+    // нос-звёздочка: кольцо из 20 мясистых лучиков разной длины; по кольцу бежит волна, моргание — сжался в кулачок; без заряда — подогнуты
+    const wave = rd && !a.blink ? Math.floor(mod(t / 0.5, 1) * 20) : -1, fold = a.blink ? 4 : rd ? 0 : 3;
+    c.save(); c.translate(25.4, -13.6); c.scale(0.86, 1.3);
+    pc(c, zvNose(wave, fold), S.nose); c.fillStyle = S.noseC; dot(c, 0, 0, 2.4);
+    fillPts(c, [[-0.8, -1.4], [0.6, -2], [1.4, -0.8], [0, -0.2]], S.clod);            // на носу — комочек небесной «земли»
     c.restore();
-    // ближняя лапа-лопата — большая, вынесена вперёд, поднята: копает
-    c.save(); c.translate(10.6, -7.8); c.rotate(0.24); c.scale(1.16, 1.16); pc(c, P2('zv|paw', ZV_PAW), S.paw); pc(c, MP('zv|claws', ZV_CLAWS), S.claw); c.restore();   // ближняя: большая, вынесена вперёд под мордой, когти вперёд
+    // ближняя лапа-лопата — большая, вынесена вперёд под мордой, когти вперёд; один коготь обломан
+    c.save(); c.translate(10.6, -7.8); c.rotate(0.24 + pawN); c.scale(1.16, 1.16); pc(c, P2('zv|paw', ZV_PAW), S.paw); pc(c, MP('zv|clawsN', ZV_CLAWS_N), S.claw); c.restore();
+    c.restore();
   }
 
   /* 10. Воздушный змей: бумажный змей оборвал нитку и улетел — уверен, что он дракон (на нём нарисована драконья морда).
