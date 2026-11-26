@@ -2316,7 +2316,7 @@ const Art = (() => {
       const [hair, drops, hl] = roFringe(i, bl, bw, k, !rd);
       pc(c, hair, S.hair);
       const blade = P2('ro|bl' + i, roBlade(bl, bw));
-      pc(c, blade, S.blade);
+      if (i === 3) pcs(c, blade, S.blade, '#5e2030'); else pc(c, blade, S.blade);       // жёсткая тень — у самого высокого листа
       inside(c, blade, () => fillPts(c, [[-bw, 1], [0.2, 1], [0.7, -bl * 0.5], [-0.2, -bl * 1.1], [-bw, -bl * 1.1]], S.bladeL));     // светлая сторона пластинки
       if (rd) { pc(c, drops, S.drop); pc(c, hl, '#ffffff'); }
       if (i === 6) { c.save(); c.translate(0.6, -bl * 0.56); c.scale(1.1, 1.1); pc(c, MP('ro|gnat', RO_GNAT), S.gnat); c.restore(); }   // пойманный комарик
@@ -2636,7 +2636,7 @@ const Art = (() => {
     piv(c, 0, -22, -q.whip * 0.06, 1, 1, () => {
       const body = P2('ud|body', UD_BODY, [7, 9]);
       pc(c, P2('ud|dors', UD_DORS, [1, 3, 5]), S.fin);
-      pc(c, body, S.body);
+      pcs(c, body, S.body, '#160f15');
       inside(c, body, () => {
         fillPts(c, [[-15, -24.4], [-11, -29.6], [-6, -33.4], [0, -36.2], [4.6, -37.6], [4.2, -36], [-0.4, -34.6], [-5.6, -31.8], [-10.4, -28], [-14, -23.2]], S.rim);   // холодная кромка по спине
         if (rd) fillPts(c, [[4.6, -37.4], [8.4, -38.4], [12.2, -37.6], [15.6, -34.8], [17.8, -32.2], [15.2, -32.2], [12.4, -33.6], [8.6, -35.2], [5.2, -35.6]], S.lit);   // лоб освещён грибком
@@ -2695,8 +2695,8 @@ const Art = (() => {
   const RY_TEAR = [[-3.2, -50.2], [-4.6, -50.8], [-3.8, -49]];                          // надрыв на краю спинного плавника
   function rybaluna(c, a) {
     const S = RY, t = a.t || 0, rd = isReady(a), [rise, fall] = poseK(a), u = flapU(a);
-    // «лунные ванны»: раз в 8 с медленно ложится на бок (до −25° за 3 с), лежит и возвращается; в полёте — нет
-    const ph = mod(t, 8), bath = (rd ? 1 : 0) * (1 - Math.max(rise, fall)) * (ph < 3 ? ez(ph / 3) : ph < 5 ? 1 : ph < 8 ? 1 - ez((ph - 5) / 3) : 0);
+    // «лунные ванны»: раз в 10 с медленно ложится на бок (до −25° за 3 с), лежит и возвращается; первые 2 с цикла — ровно; в полёте — нет
+    const ph = mod(t, 10) - 2, bath = (rd ? 1 : 0) * (1 - Math.max(rise, fall)) * (ph < 0 ? 0 : ph < 3 ? ez(ph / 3) : ph < 5 ? 1 : 1 - ez(Math.min(1, (ph - 5) / 3)));
     const roll = -0.44 * bath + 0.12 * fall;
     // гребок: оба длинных плавника разом, как крыло, — спинной вперёд-вниз, анальный вперёд-вверх и обратно
     const stroke = u > 0 ? Math.sin(u * Math.PI) : 0, idle = Math.sin(TAU * t / 1.8);
@@ -2918,7 +2918,7 @@ const Art = (() => {
     c.save(); c.translate(head[0], head[1]); piv(c, 7, -42, (rd ? 0 : 0.3) - rise * 0.2, 1, 1, () => {
       c.fillStyle = S.wing; taper(c, [[5.4, -49.6], [2, -51], [-1, -50.6]], 2.4, 0.4); taper(c, [[4.2, -48.2], [1.2, -48.4], [-1.4, -47]], 2, 0.4);
       const hd = P2('as|head', AS_HEAD);
-      pcs(c, hd, S.cu, S.cuD);
+      pc(c, hd, S.cu);
       inside(c, hd, () => fillPts(c, [[2, -44], [8, -41.6], [14, -44.6], [14, -40], [2, -40]], S.cuD));
       const sw = rd ? Math.sin(TAU * (t - 0.3) / 1.6) : 0.4, sw2 = rd ? Math.sin(TAU * (t - 0.5) / 1.4) : 0.4;
       c.fillStyle = S.trunk; taper(c, [[13.2, -45.8], [14 + sw * 0.6, -42.6], [13.2 + sw * 1.4, -39.6], [11.8 + sw * 1.8, -38.6]], 1, 0.45); taper(c, [[12.2, -45.2], [12.2 + sw2 * 0.6, -42.2], [11.2 + sw2 * 1.2, -40]], 0.9, 0.4);
